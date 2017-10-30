@@ -6,9 +6,9 @@ use amethyst::ecs::World;
 use amethyst::core::{LocalTransform, Transform};
 use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefaults, Mesh, PosTex,
                          VirtualKeyCode, WindowEvent};
-use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3};
+use amethyst::core::cgmath::{Array, One, Quaternion, Vector3, Basis2, Point2};
 use amethyst::utils::fps_counter::FPSCounter;
-use rhusics::ecs::collide::prelude3d::{BodyPose3, CollisionMode, CollisionStrategy, Cuboid};
+use rhusics::ecs::collide::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Rectangle};
 
 use resources::{Emitter, Graphics, ObjectType, Shape};
 
@@ -122,11 +122,11 @@ fn initialise_walls(world: &mut World) {
             scale: Vector3::new(0.1, 1.0, 1.0),
         })
         .with(ObjectType::Wall)
-        .with(BodyPose3::new(Point3::new(-0.9, 0., 0.), Quaternion::one()))
+        .with(BodyPose2::new(Point2::new(-0.9, 0.), Basis2::one()))
         .with(Shape::new_simple(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
-            Cuboid::new(0.2, 2.0, 2.0).into(),
+            Rectangle::new(0.2, 2.0).into(),
         ))
         .build();
 
@@ -141,11 +141,11 @@ fn initialise_walls(world: &mut World) {
             scale: Vector3::new(0.1, 1.0, 1.0),
         })
         .with(ObjectType::Wall)
-        .with(BodyPose3::new(Point3::new(0.9, 0., 0.), Quaternion::one()))
+        .with(BodyPose2::new(Point2::new(0.9, 0.), Basis2::one()))
         .with(Shape::new_simple(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
-            Cuboid::new(0.2, 2.0, 2.0).into(),
+            Rectangle::new(0.2, 2.0).into(),
         ))
         .build();
 
@@ -160,11 +160,11 @@ fn initialise_walls(world: &mut World) {
             scale: Vector3::new(0.9, 0.1, 1.0),
         })
         .with(ObjectType::Wall)
-        .with(BodyPose3::new(Point3::new(0., -0.9, 0.), Quaternion::one()))
+        .with(BodyPose2::new(Point2::new(0., -0.9), Basis2::one()))
         .with(Shape::new_simple(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
-            Cuboid::new(1.8, 0.2, 2.0).into(),
+            Rectangle::new(1.8, 0.2).into(),
         ))
         .build();
 
@@ -179,11 +179,11 @@ fn initialise_walls(world: &mut World) {
             scale: Vector3::new(0.9, 0.1, 1.0),
         })
         .with(ObjectType::Wall)
-        .with(BodyPose3::new(Point3::new(0., 0.9, 0.), Quaternion::one()))
+        .with(BodyPose2::new(Point2::new(0., 0.9), Basis2::one()))
         .with(Shape::new_simple(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
-            Cuboid::new(1.8, 0.2, 2.0).into(),
+            Rectangle::new(1.8, 0.2).into(),
         ))
         .build();
 }

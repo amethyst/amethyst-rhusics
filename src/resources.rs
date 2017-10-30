@@ -2,11 +2,11 @@ use std::time::{Duration, Instant};
 
 use amethyst::assets::Handle;
 use amethyst::ecs::{Component, DenseVecStorage, VecStorage};
-use amethyst::core::cgmath::Vector3;
+use amethyst::core::cgmath::Vector2;
 use amethyst::renderer::{Material, Mesh};
-use rhusics::ecs::collide::prelude3d::{BodyPose3, CollisionShape3};
+use rhusics::ecs::collide::prelude2d::{BodyPose2, CollisionShape2};
 
-pub type Shape = CollisionShape3<BodyPose3>;
+pub type Shape = CollisionShape2<BodyPose2>;
 
 #[repr(u8)]
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
@@ -30,7 +30,7 @@ impl Component for Emitter {
 }
 
 pub struct Velocity {
-    pub linear: Vector3<f32>,
+    pub linear: Vector2<f32>,
 }
 
 impl Component for Velocity {

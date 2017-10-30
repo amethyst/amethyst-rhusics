@@ -1,9 +1,9 @@
 use amethyst::ecs::{Entities, Fetch, Join, ReadStorage, System, WriteStorage};
-use amethyst::core::cgmath::{EuclideanSpace, InnerSpace};
+use amethyst::core::cgmath::{InnerSpace, Vector3};
 use amethyst::core::{LocalTransform, Time};
 use amethyst::shrev::{EventChannel, ReaderId};
 use rhusics::NextFrame;
-use rhusics::ecs::collide::prelude3d::{BodyPose3, ContactEvent3};
+use rhusics::ecs::collide::prelude2d::{BodyPose2, ContactEvent2};
 
 use resources::{ObjectType, Velocity};
 
@@ -21,10 +21,10 @@ impl<'a> System<'a> for MovementSystem {
     type SystemData = (
         Entities<'a>,
         Fetch<'a, Time>,
-        Fetch<'a, EventChannel<ContactEvent3>>,
+        Fetch<'a, EventChannel<ContactEvent2>>,
         WriteStorage<'a, Velocity>,
-        WriteStorage<'a, NextFrame<BodyPose3>>,
-        WriteStorage<'a, BodyPose3>,
+        WriteStorage<'a, NextFrame<BodyPose2>>,
+        WriteStorage<'a, BodyPose2>,
         WriteStorage<'a, LocalTransform>,
         ReadStorage<'a, ObjectType>,
     );
@@ -76,14 +76,14 @@ impl<'a> System<'a> for MovementSystem {
         for (next, pose, transform) in (&next, &mut poses, &mut transforms).join() {
             *pose = next.value.clone();
             *transform = LocalTransform {
-                translation: pose.position().clone().to_vec(),
-                rotation: pose.rotation().clone(),
+                translation: Vector3::new(pose.position().x, pose.position().y, 0.),
+                rotation: transform.rotation,
                 scale: transform.scale,
             }
         }
 
         for (velocity, pose, next) in (&velocity, &poses, &mut next).join() {
-            next.value = BodyPose3::new(
+            next.value = BodyPose2::new(
                 pose.position() + velocity.linear * time.delta_seconds(),
                 pose.rotation().clone(),
             );

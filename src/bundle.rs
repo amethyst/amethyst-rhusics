@@ -2,8 +2,8 @@ use amethyst::core::{ECSBundle, Result};
 use amethyst::utils::fps_counter::{FPSCounterSystem, FPSCounter};
 use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
-use rhusics::ecs::collide::prelude3d::{world_register, BasicCollisionSystem3, BodyPose3,
-                                       ContactEvent3, GJK3, SweepAndPrune3};
+use rhusics::ecs::collide::prelude2d::{world_register, BasicCollisionSystem2, BodyPose2,
+                                       ContactEvent2, GJK2, SweepAndPrune2};
 
 use resources::{Emitter, ObjectType, Velocity};
 use systems::{EmissionSystem, MovementSystem};
@@ -16,13 +16,13 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        world_register::<BodyPose3>(world);
+        world_register::<BodyPose2>(world);
 
         world.register::<Emitter>();
         world.register::<Velocity>();
         world.register::<ObjectType>();
 
-        let contacts = EventChannel::<ContactEvent3>::new();
+        let contacts = EventChannel::<ContactEvent2>::new();
         let reader = contacts.register_reader();
         world.add_resource(contacts);
         world.add_resource(FPSCounter::new(20));
@@ -37,9 +37,9 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
                     &["emission_system"],
                 )
                 .add(
-                    BasicCollisionSystem3::<BodyPose3>::new()
-                        .with_broad_phase(SweepAndPrune3::new())
-                        .with_narrow_phase(GJK3::new()),
+                    BasicCollisionSystem2::<BodyPose2>::new()
+                        .with_broad_phase(SweepAndPrune2::new())
+                        .with_narrow_phase(GJK2::new()),
                     "basic_collision_system",
                     &["movement_system"],
                 ),

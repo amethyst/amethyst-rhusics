@@ -2,10 +2,10 @@ use std::time::Instant;
 
 use amethyst::assets::Handle;
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
-use amethyst::core::cgmath::{Array, EuclideanSpace, One, Point3, Quaternion, Vector3};
+use amethyst::core::cgmath::{Array, One, Quaternion, Vector3, Vector2, Point2};
 use amethyst::core::{LocalTransform, Transform};
 use amethyst::renderer::{Material, Mesh};
-use rhusics::ecs::collide::prelude3d::{BodyPose3, CollisionMode, CollisionStrategy, Cuboid};
+use rhusics::ecs::collide::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Rectangle};
 use rhusics::NextFrame;
 
 use resources::{Emitter, Graphics, ObjectType, Shape, Velocity};
@@ -47,16 +47,16 @@ fn emit_box(
     use std;
     use rand;
     use rand::Rng;
-    use amethyst::core::cgmath::{Rotation3, Rad, Rotation};
+    use amethyst::core::cgmath::{Rad, Rotation, Rotation2, Basis2};
 
     let angle = rand::thread_rng().gen_range(0., std::f32::consts::PI * 2.);
-    let rot = Quaternion::from_angle_z(Rad(angle));
-    let offset = rot.rotate_vector(Vector3::new(0.1, 0., 0.));
+    let rot : Basis2<f32> = Rotation2::from_angle(Rad(angle));
+    let offset = rot.rotate_vector(Vector2::new(0.1, 0.));
     let speed = rand::thread_rng().gen_range(0.,5.) * 2.;
 
     // TODO: offset position
     // TODO: randomize velocity
-    let position = Point3::new(emitter.location.0, emitter.location.1, 0.) + offset;
+    let position = Point2::new(emitter.location.0, emitter.location.1) + offset;
     lazy.insert(entity, ObjectType::Box);
     lazy.insert(entity, mesh);
     lazy.insert(entity, material);
@@ -70,12 +70,12 @@ fn emit_box(
     lazy.insert(
         entity,
         LocalTransform {
-            translation: position.to_vec(),
+            translation: Vector3::new(position.x, position.y, 0.),
             rotation: Quaternion::one(),
             scale: Vector3::from_value(0.05),
         },
     );
-    let pose = BodyPose3::new(position, Quaternion::one());
+    let pose = BodyPose2::new(position, Basis2::one());
     lazy.insert(entity, pose.clone());
     lazy.insert(entity, NextFrame { value: pose });
     lazy.insert(
@@ -83,7 +83,7 @@ fn emit_box(
         Shape::new_simple(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
-            Cuboid::new(0.1, 0.1, 0.1).into(),
+            Rectangle::new(0.1, 0.1).into(),
         ),
     );
 }
