@@ -1,4 +1,5 @@
 use amethyst::core::{ECSBundle, Result};
+use amethyst::utils::fps_counter::{FPSCounterSystem, FPSCounter};
 use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
 use rhusics::ecs::collide::prelude3d::{world_register, BasicCollisionSystem3, BodyPose3,
@@ -24,9 +25,11 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
         let contacts = EventChannel::<ContactEvent3>::new();
         let reader = contacts.register_reader();
         world.add_resource(contacts);
+        world.add_resource(FPSCounter::new(20));
 
         Ok(
             dispatcher
+                .add(FPSCounterSystem, "", &[])
                 .add(EmissionSystem, "emission_system", &[])
                 .add(
                     MovementSystem::new(reader),

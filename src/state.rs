@@ -7,6 +7,7 @@ use amethyst::core::{LocalTransform, Transform};
 use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefaults, Mesh, PosTex,
                          VirtualKeyCode, WindowEvent};
 use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3};
+use amethyst::utils::fps_counter::FPSCounter;
 use rhusics::ecs::collide::prelude3d::{BodyPose3, CollisionMode, CollisionStrategy, Cuboid};
 
 use resources::{Emitter, Graphics, ObjectType, Shape};
@@ -23,6 +24,11 @@ impl State for Emitting {
         engine.world.add_resource(g);
         initialise_walls(&mut engine.world);
         initialise_emitters(&mut engine.world);
+    }
+
+    fn update(&mut self, engine: &mut Engine) -> Trans {
+        println!("FPS: {}", engine.world.read_resource::<FPSCounter>().sampled_fps());
+        Trans::None
     }
 
     fn handle_event(&mut self, _: &mut Engine, event: Event) -> Trans {
