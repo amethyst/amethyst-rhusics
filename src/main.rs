@@ -3,8 +3,8 @@ extern crate genmesh;
 extern crate rand;
 extern crate rhusics;
 
-use amethyst::prelude::*;
 use amethyst::core::TransformBundle;
+use amethyst::prelude::*;
 use amethyst::renderer::{DisplayConfig, DrawFlat, Pipeline, PosTex, RenderBundle, RenderSystem,
                          Stage};
 

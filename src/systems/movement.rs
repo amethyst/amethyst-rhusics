@@ -1,6 +1,6 @@
-use amethyst::ecs::{Entities, Fetch, Join, ReadStorage, System, WriteStorage};
-use amethyst::core::cgmath::{InnerSpace, Vector3};
 use amethyst::core::{LocalTransform, Time};
+use amethyst::core::cgmath::{InnerSpace, Vector3};
+use amethyst::ecs::{Entities, Fetch, Join, ReadStorage, System, WriteStorage};
 use amethyst::shrev::{EventChannel, ReaderId};
 use rhusics::NextFrame;
 use rhusics::ecs::collide::prelude2d::{BodyPose2, ContactEvent2};
@@ -63,7 +63,8 @@ impl<'a> System<'a> for MovementSystem {
                                 };
                             }
                             let pose = next.get_mut(box_entity).unwrap();
-                            let new_pos = pose.value.position() + normal * (contact.contact.penetration_depth + 0.001);
+                            let new_pos = pose.value.position()
+                                + normal * (contact.contact.penetration_depth + 0.001);
                             pose.value.set_position(new_pos);
                         }
                     }

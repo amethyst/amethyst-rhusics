@@ -1,12 +1,12 @@
 use std::time::{Duration, Instant};
 
-use amethyst::prelude::{Engine, State, Trans};
 use amethyst::assets::{Handle, Loader};
-use amethyst::ecs::World;
 use amethyst::core::{LocalTransform, Transform};
+use amethyst::core::cgmath::{Array, Basis2, One, Point2, Quaternion, Vector3};
+use amethyst::ecs::World;
+use amethyst::prelude::{Engine, State, Trans};
 use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefaults, Mesh, PosTex,
                          VirtualKeyCode, WindowEvent};
-use amethyst::core::cgmath::{Array, One, Quaternion, Vector3, Basis2, Point2};
 use amethyst::utils::fps_counter::FPSCounter;
 use rhusics::ecs::collide::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Rectangle};
 
@@ -27,7 +27,10 @@ impl State for Emitting {
     }
 
     fn update(&mut self, engine: &mut Engine) -> Trans {
-        println!("FPS: {}", engine.world.read_resource::<FPSCounter>().sampled_fps());
+        println!(
+            "FPS: {}",
+            engine.world.read_resource::<FPSCounter>().sampled_fps()
+        );
         Trans::None
     }
 
@@ -63,8 +66,8 @@ fn initialise_camera(world: &mut World) {
 }
 
 fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
-    use genmesh::generators::Cube;
     use genmesh::{MapToVertices, Triangulate, Vertices};
+    use genmesh::generators::Cube;
     let vertices = Cube::new()
         .vertex(|v| {
             PosTex {

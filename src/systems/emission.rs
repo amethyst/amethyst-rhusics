@@ -1,12 +1,12 @@
 use std::time::Instant;
 
 use amethyst::assets::Handle;
-use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
-use amethyst::core::cgmath::{Array, One, Quaternion, Vector3, Vector2, Point2};
 use amethyst::core::{LocalTransform, Transform};
+use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector2, Vector3};
+use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
-use rhusics::ecs::collide::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Rectangle};
 use rhusics::NextFrame;
+use rhusics::ecs::collide::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Rectangle};
 
 use resources::{Emitter, Graphics, ObjectType, Shape, Velocity};
 
@@ -44,15 +44,15 @@ fn emit_box(
     material: Material,
     emitter: &Emitter,
 ) {
-    use std;
+    use amethyst::core::cgmath::{Basis2, Rad, Rotation, Rotation2};
     use rand;
     use rand::Rng;
-    use amethyst::core::cgmath::{Rad, Rotation, Rotation2, Basis2};
+    use std;
 
     let angle = rand::thread_rng().gen_range(0., std::f32::consts::PI * 2.);
-    let rot : Basis2<f32> = Rotation2::from_angle(Rad(angle));
+    let rot: Basis2<f32> = Rotation2::from_angle(Rad(angle));
     let offset = rot.rotate_vector(Vector2::new(0.1, 0.));
-    let speed = rand::thread_rng().gen_range(0.,5.) * 2.;
+    let speed = rand::thread_rng().gen_range(0., 5.) * 2.;
 
     // TODO: offset position
     // TODO: randomize velocity

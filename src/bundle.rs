@@ -1,7 +1,7 @@
 use amethyst::core::{ECSBundle, Result};
-use amethyst::utils::fps_counter::{FPSCounterSystem, FPSCounter};
 use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
+use amethyst::utils::fps_counter::{FPSCounter, FPSCounterSystem};
 use rhusics::ecs::collide::prelude2d::{world_register, BasicCollisionSystem2, BodyPose2,
                                        ContactEvent2, GJK2, SweepAndPrune2};
 
