@@ -1,0 +1,10 @@
+[package]
+name = "amethyst-rhusics"
+version = "0.1.0"
+authors = []
+
+[dependencies]
+amethyst = { git = "https://github.com/amethyst/amethyst", branch = "develop" }
+rhusics = { git = "https://github.com/Rhuagh/rhusics", features = ["ecs"] }
+genmesh = "*"
+rand = "*"
