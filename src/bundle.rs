@@ -7,9 +7,9 @@ use rhusics::ecs::collide::prelude3d::{world_register, BasicCollisionSystem3, Bo
 use resources::{Emitter, ObjectType, Velocity};
 use systems::{EmissionSystem, MovementSystem};
 
-pub struct GameBundle;
+pub struct SimulationBundle;
 
-impl<'a, 'b> ECSBundle<'a, 'b> for GameBundle {
+impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
     fn build(
         self,
         world: &mut World,

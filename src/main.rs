@@ -8,7 +8,7 @@ use amethyst::core::TransformBundle;
 use amethyst::renderer::{DisplayConfig, DrawFlat, Pipeline, PosTex, RenderBundle, RenderSystem,
                          Stage};
 
-use self::bundle::GameBundle;
+use self::bundle::SimulationBundle;
 
 mod systems;
 mod resources;
@@ -29,7 +29,7 @@ fn run() -> Result<(), amethyst::Error> {
     );
 
     let mut game = Application::build("./", self::state::Emitting)?
-        .with_bundle(GameBundle)?
+        .with_bundle(SimulationBundle)?
         .with_bundle(TransformBundle::new().with_dep(&["movement_system"]))?
         .with_bundle(RenderBundle::new())?
         .with_local(RenderSystem::build(pipe, Some(config))?)
