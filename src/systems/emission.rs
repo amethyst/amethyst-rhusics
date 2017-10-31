@@ -54,8 +54,6 @@ fn emit_box(
     let offset = rot.rotate_vector(Vector2::new(0.1, 0.));
     let speed = rand::thread_rng().gen_range(0., 5.) * 2.;
 
-    // TODO: offset position
-    // TODO: randomize velocity
     let position = Point2::new(emitter.location.0, emitter.location.1) + offset;
     lazy.insert(entity, ObjectType::Box);
     lazy.insert(entity, mesh);
