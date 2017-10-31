@@ -1,7 +1,6 @@
 use amethyst::core::{ECSBundle, Result};
 use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
-use amethyst::utils::fps_counter::{FPSCounter, FPSCounterSystem};
 use rhusics::ecs::physics::prelude2d::{world_physics_register, BasicCollisionSystem2, BodyPose2,
                                        ContactEvent2, GJK2, SweepAndPrune2, LinearContactSolverSystem2};
 
@@ -24,11 +23,9 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
         let contacts = EventChannel::<ContactEvent2>::new();
         let reader = contacts.register_reader();
         world.add_resource(contacts);
-        world.add_resource(FPSCounter::new(20));
 
         Ok(
             dispatcher
-                .add(FPSCounterSystem, "", &[])
                 .add(EmissionSystem, "emission_system", &[])
                 .add(LinearContactSolverSystem2::new(reader.clone()), "physics_solver_system", &["emission_system"])
                 .add(

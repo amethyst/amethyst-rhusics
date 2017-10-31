@@ -7,6 +7,7 @@ use amethyst::core::TransformBundle;
 use amethyst::prelude::*;
 use amethyst::renderer::{DisplayConfig, DrawFlat, Pipeline, PosTex, RenderBundle, RenderSystem,
                          Stage};
+use amethyst::utils::fps_counter::FPSCounterBundle;
 
 use self::bundle::SimulationBundle;
 
@@ -29,6 +30,7 @@ fn run() -> Result<(), amethyst::Error> {
     );
 
     let mut game = Application::build("./", self::state::Emitting)?
+        .with_bundle(FPSCounterBundle::default())?
         .with_bundle(SimulationBundle)?
         .with_bundle(TransformBundle::new().with_dep(&["movement_system"]))?
         .with_bundle(RenderBundle::new())?
