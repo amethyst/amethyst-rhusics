@@ -2,10 +2,10 @@ use amethyst::core::{ECSBundle, Result};
 use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
 use amethyst::utils::fps_counter::{FPSCounter, FPSCounterSystem};
-use rhusics::ecs::collide::prelude2d::{world_register, BasicCollisionSystem2, BodyPose2,
-                                       ContactEvent2, GJK2, SweepAndPrune2};
+use rhusics::ecs::physics::prelude2d::{world_physics_register, BasicCollisionSystem2, BodyPose2,
+                                       ContactEvent2, GJK2, SweepAndPrune2, LinearContactSolverSystem2};
 
-use resources::{Emitter, ObjectType, Velocity};
+use resources::{Emitter, ObjectType};
 use systems::{EmissionSystem, MovementSystem};
 
 pub struct SimulationBundle;
@@ -16,10 +16,9 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        world_register::<BodyPose2>(world);
+        world_physics_register(world);
 
         world.register::<Emitter>();
-        world.register::<Velocity>();
         world.register::<ObjectType>();
 
         let contacts = EventChannel::<ContactEvent2>::new();
@@ -31,17 +30,18 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
             dispatcher
                 .add(FPSCounterSystem, "", &[])
                 .add(EmissionSystem, "emission_system", &[])
-                .add(
-                    MovementSystem::new(reader),
-                    "movement_system",
-                    &["emission_system"],
-                )
+                .add(LinearContactSolverSystem2::new(reader.clone()), "physics_solver_system", &["emission_system"])
                 .add(
                     BasicCollisionSystem2::<BodyPose2>::new()
                         .with_broad_phase(SweepAndPrune2::new())
                         .with_narrow_phase(GJK2::new()),
                     "basic_collision_system",
-                    &["movement_system"],
+                    &["physics_solver_system"],
+                )
+                .add(
+                    MovementSystem::new(reader),
+                    "movement_system",
+                    &["basic_collision_system"],
                 ),
         )
     }

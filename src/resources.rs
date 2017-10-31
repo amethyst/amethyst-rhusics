@@ -1,7 +1,6 @@
 use std::time::{Duration, Instant};
 
 use amethyst::assets::Handle;
-use amethyst::core::cgmath::Vector2;
 use amethyst::ecs::{Component, DenseVecStorage, VecStorage};
 use amethyst::renderer::{Material, Mesh};
 use rhusics::ecs::collide::prelude2d::{BodyPose2, CollisionShape2};
@@ -26,14 +25,6 @@ pub struct Emitter {
 }
 
 impl Component for Emitter {
-    type Storage = DenseVecStorage<Self>;
-}
-
-pub struct Velocity {
-    pub linear: Vector2<f32>,
-}
-
-impl Component for Velocity {
     type Storage = DenseVecStorage<Self>;
 }
 

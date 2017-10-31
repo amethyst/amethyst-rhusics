@@ -1,14 +1,14 @@
 use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
-use amethyst::core::{LocalTransform, Transform};
+use amethyst::core::{LocalTransform, Transform, Time};
 use amethyst::core::cgmath::{Array, Basis2, One, Point2, Quaternion, Vector3};
 use amethyst::ecs::World;
 use amethyst::prelude::{Engine, State, Trans};
 use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefaults, Mesh, PosTex,
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::FPSCounter;
-use rhusics::ecs::collide::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Rectangle};
+use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Rectangle, DeltaTime};
 
 use resources::{Emitter, Graphics, ObjectType, Shape};
 
@@ -27,6 +27,9 @@ impl State for Emitting {
     }
 
     fn update(&mut self, engine: &mut Engine) -> Trans {
+        let mut delta = engine.world.write_resource::<DeltaTime>();
+        let time = engine.world.read_resource::<Time>();
+        delta.delta_seconds = time.delta_seconds();
         println!(
             "FPS: {}",
             engine.world.read_resource::<FPSCounter>().sampled_fps()
