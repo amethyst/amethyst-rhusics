@@ -52,7 +52,7 @@ fn emit_box(
     let angle = rand::thread_rng().gen_range(0., std::f32::consts::PI * 2.);
     let rot: Basis2<f32> = Rotation2::from_angle(Rad(angle));
     let offset = rot.rotate_vector(Vector2::new(0.1, 0.));
-    let speed = rand::thread_rng().gen_range(0., 5.) * 2.;
+    let speed = rand::thread_rng().gen_range(1., 5.) * 2.;
 
     let position = Point2::new(emitter.location.0, emitter.location.1) + offset;
     lazy.insert(entity, ObjectType::Box);
