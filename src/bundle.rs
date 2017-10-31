@@ -20,9 +20,7 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
         world.register::<Emitter>();
         world.register::<ObjectType>();
 
-        let contacts = EventChannel::<ContactEvent2>::new();
-        let reader = contacts.register_reader();
-        world.add_resource(contacts);
+        let reader = world.read_resource::<EventChannel<ContactEvent2>>().register_reader();
 
         Ok(
             dispatcher
