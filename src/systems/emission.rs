@@ -6,7 +6,8 @@ use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector2, Vector3};
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 use rhusics::NextFrame;
-use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Rectangle, Mass, Velocity2};
+use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass,
+                                       Rectangle, Velocity2};
 
 use resources::{Emitter, Graphics, ObjectType, Shape};
 
@@ -76,7 +77,14 @@ fn emit_box(
     let pose = BodyPose2::new(position, Basis2::one());
     lazy.insert(entity, pose.clone());
     lazy.insert(entity, NextFrame { value: pose });
-    lazy.insert(entity, NextFrame { value: Velocity2 { linear : offset * speed } });
+    lazy.insert(
+        entity,
+        NextFrame {
+            value: Velocity2 {
+                linear: offset * speed,
+            },
+        },
+    );
     lazy.insert(entity, Mass::new(1.));
     lazy.insert(
         entity,

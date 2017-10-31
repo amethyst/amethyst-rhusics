@@ -1,14 +1,15 @@
 use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
-use amethyst::core::{LocalTransform, Transform, Time};
+use amethyst::core::{LocalTransform, Time, Transform};
 use amethyst::core::cgmath::{Array, Basis2, One, Point2, Quaternion, Vector3};
 use amethyst::ecs::World;
 use amethyst::prelude::{Engine, State, Trans};
 use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefaults, Mesh, PosTex,
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::FPSCounter;
-use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Rectangle, DeltaTime};
+use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, DeltaTime,
+                                       Rectangle};
 
 use resources::{Emitter, Graphics, ObjectType, Shape};
 
