@@ -16,7 +16,7 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        world_physics_register(world);
+        world_physics_register::<ObjectType>(world);
 
         world.register::<Emitter>();
         world.register::<ObjectType>();
@@ -34,7 +34,7 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
                     &["emission_system"],
                 )
                 .add(
-                    BasicCollisionSystem2::<BodyPose2>::new()
+                    BasicCollisionSystem2::<BodyPose2, ObjectType>::new()
                         .with_broad_phase(SweepAndPrune2::new())
                         .with_narrow_phase(GJK2::new()),
                     "basic_collision_system",

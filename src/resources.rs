@@ -3,15 +3,27 @@ use std::time::{Duration, Instant};
 use amethyst::assets::Handle;
 use amethyst::ecs::{Component, DenseVecStorage, VecStorage};
 use amethyst::renderer::{Material, Mesh};
-use rhusics::ecs::collide::prelude2d::{BodyPose2, CollisionShape2};
+use rhusics::ecs::collide::prelude2d::{BodyPose2, CollisionShape2, Collider};
 
-pub type Shape = CollisionShape2<BodyPose2>;
+pub type Shape = CollisionShape2<BodyPose2, ObjectType>;
 
 #[repr(u8)]
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub enum ObjectType {
     Wall,
     Box,
+}
+
+impl Default for ObjectType {
+    fn default() -> Self {
+        ObjectType::Box
+    }
+}
+
+impl Collider for ObjectType {
+    fn should_generate_contacts(&self, other: &ObjectType) -> bool {
+        self != other || *self != ObjectType::Wall
+    }
 }
 
 impl Component for ObjectType {
