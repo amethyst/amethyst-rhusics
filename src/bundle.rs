@@ -2,7 +2,7 @@ use amethyst::core::{ECSBundle, Result};
 use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
 use rhusics::ecs::physics::prelude2d::{world_physics_register, BasicCollisionSystem2, BodyPose2,
-                                       ContactEvent2, GJK2, LinearContactSolverSystem2,
+                                       ContactEvent2, GJK2, LinearSolverSystem2,
                                        SweepAndPrune2};
 
 use resources::{Emitter, ObjectType};
@@ -29,7 +29,7 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
             dispatcher
                 .add(EmissionSystem, "emission_system", &[])
                 .add(
-                    LinearContactSolverSystem2::new(reader.clone()),
+                    LinearSolverSystem2::new(reader.clone()),
                     "physics_solver_system",
                     &["emission_system"],
                 )
