@@ -5,9 +5,12 @@ use amethyst::core::{LocalTransform, Transform};
 use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector2, Vector3};
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
+use rhusics::ecs::collide::prelude2d::*;
+use rhusics::collide::prelude2d::BodyPose2;
 use rhusics::NextFrame;
-use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass,
-                                       Rectangle, Velocity2};
+use rhusics::physics::prelude2d::{Mass2, Velocity2};
+use rhusics::physics::Material as PhysicsMaterial;
+use rhusics::ecs::physics::prelude2d::RigidBody;
 
 use resources::{Emitter, Graphics, ObjectType, Shape};
 
@@ -61,9 +64,7 @@ fn emit_box(
     lazy.insert(entity, material);
     lazy.insert(
         entity,
-        Velocity2 {
-            linear: offset * speed,
-        },
+        Velocity2::new(offset * speed, 0.),
     );
     lazy.insert(entity, Transform::default());
     lazy.insert(
@@ -80,18 +81,19 @@ fn emit_box(
     lazy.insert(
         entity,
         NextFrame {
-            value: Velocity2 {
-                linear: offset * speed,
-            },
+            value: Velocity2::new(offset * speed, 0.1),
         },
     );
-    lazy.insert(entity, Mass::new(1.));
+    lazy.insert(entity, Mass2::new(1.));
+    lazy.insert(entity, RigidBody::new(PhysicsMaterial::ROCK, 1.0));
     lazy.insert(
+
         entity,
         Shape::new_simple(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
             Rectangle::new(0.1, 0.1).into(),
+
         ),
     );
 }

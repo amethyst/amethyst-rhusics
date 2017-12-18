@@ -4,41 +4,42 @@ use amethyst::assets::{Handle, Loader};
 use amethyst::core::{LocalTransform, Time, Transform};
 use amethyst::core::cgmath::{Array, Basis2, One, Point2, Quaternion, Vector3};
 use amethyst::ecs::World;
-use amethyst::prelude::{Engine, State, Trans};
+use amethyst::prelude::{State, Trans};
 use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefaults, Mesh, PosTex,
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::FPSCounter;
+use rhusics::physics::Material as PhysicsMaterial;
 use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, DeltaTime,
-                                       Rectangle};
+                                       Rectangle, RigidBody, Mass2};
 
 use resources::{Emitter, Graphics, ObjectType, Shape};
 
 pub struct Emitting;
 
 impl State for Emitting {
-    fn on_start(&mut self, engine: &mut Engine) {
-        initialise_camera(&mut engine.world);
+    fn on_start(&mut self, world: &mut World) {
+        initialise_camera(world);
         let g = Graphics {
-            mesh: initialise_mesh(&mut engine.world),
-            material: initialise_material(&mut engine.world),
+            mesh: initialise_mesh(world),
+            material: initialise_material(world),
         };
-        engine.world.add_resource(g);
-        initialise_walls(&mut engine.world);
-        initialise_emitters(&mut engine.world);
+        world.add_resource(g);
+        initialise_walls(world);
+        initialise_emitters(world);
     }
 
-    fn update(&mut self, engine: &mut Engine) -> Trans {
-        let mut delta = engine.world.write_resource::<DeltaTime>();
-        let time = engine.world.read_resource::<Time>();
+    fn update(&mut self, world: &mut World) -> Trans {
+        let mut delta = world.write_resource::<DeltaTime>();
+        let time = world.read_resource::<Time>();
         delta.delta_seconds = time.delta_seconds();
         println!(
             "FPS: {}",
-            engine.world.read_resource::<FPSCounter>().sampled_fps()
+            world.read_resource::<FPSCounter>().sampled_fps()
         );
         Trans::None
     }
 
-    fn handle_event(&mut self, _: &mut Engine, event: Event) -> Trans {
+    fn handle_event(&mut self, _: &mut World, event: Event) -> Trans {
         match event {
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::KeyboardInput {
@@ -135,6 +136,8 @@ fn initialise_walls(world: &mut World) {
             CollisionMode::Discrete,
             Rectangle::new(0.2, 2.0).into(),
         ))
+        .with(RigidBody::new(PhysicsMaterial::ROCK, 1.0))
+        .with(Mass2::new(0.))
         .build();
 
     world
@@ -154,6 +157,8 @@ fn initialise_walls(world: &mut World) {
             CollisionMode::Discrete,
             Rectangle::new(0.2, 2.0).into(),
         ))
+        .with(Mass2::new(0.))
+        .with(RigidBody::new(PhysicsMaterial::ROCK, 1.0))
         .build();
 
     world
@@ -173,6 +178,8 @@ fn initialise_walls(world: &mut World) {
             CollisionMode::Discrete,
             Rectangle::new(1.8, 0.2).into(),
         ))
+        .with(Mass2::new(0.))
+        .with(RigidBody::new(PhysicsMaterial::ROCK, 1.0))
         .build();
 
     world
@@ -192,6 +199,8 @@ fn initialise_walls(world: &mut World) {
             CollisionMode::Discrete,
             Rectangle::new(1.8, 0.2).into(),
         ))
+        .with(Mass2::new(0.))
+        .with(RigidBody::new(PhysicsMaterial::ROCK, 1.0))
         .build();
 }
 
