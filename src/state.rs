@@ -4,7 +4,7 @@ use amethyst::assets::{Handle, Loader};
 use amethyst::core::{LocalTransform, Time, Transform};
 use amethyst::core::cgmath::{Array, Basis2, One, Point2, Quaternion, Vector3};
 use amethyst::ecs::World;
-use amethyst::prelude::{Engine, State, Trans};
+use amethyst::prelude::{State, Trans};
 use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefaults, Mesh, PosTex,
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::FPSCounter;
@@ -16,29 +16,26 @@ use resources::{Emitter, Graphics, ObjectType, Shape};
 pub struct Emitting;
 
 impl State for Emitting {
-    fn on_start(&mut self, engine: &mut Engine) {
-        initialise_camera(&mut engine.world);
+    fn on_start(&mut self, world: &mut World) {
+        initialise_camera(world);
         let g = Graphics {
-            mesh: initialise_mesh(&mut engine.world),
-            material: initialise_material(&mut engine.world),
+            mesh: initialise_mesh(world),
+            material: initialise_material(world),
         };
-        engine.world.add_resource(g);
-        initialise_walls(&mut engine.world);
-        initialise_emitters(&mut engine.world);
+        world.add_resource(g);
+        initialise_walls(world);
+        initialise_emitters(world);
     }
 
-    fn update(&mut self, engine: &mut Engine) -> Trans {
-        let mut delta = engine.world.write_resource::<DeltaTime>();
-        let time = engine.world.read_resource::<Time>();
+    fn update(&mut self, world: &mut World) -> Trans {
+        let mut delta = world.write_resource::<DeltaTime>();
+        let time = world.read_resource::<Time>();
         delta.delta_seconds = time.delta_seconds();
-        println!(
-            "FPS: {}",
-            engine.world.read_resource::<FPSCounter>().sampled_fps()
-        );
+        println!("FPS: {}", world.read_resource::<FPSCounter>().sampled_fps());
         Trans::None
     }
 
-    fn handle_event(&mut self, _: &mut Engine, event: Event) -> Trans {
+    fn handle_event(&mut self, _: &mut World, event: Event) -> Trans {
         match event {
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::KeyboardInput {
@@ -73,11 +70,9 @@ fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
     use genmesh::{MapToVertices, Triangulate, Vertices};
     use genmesh::generators::Cube;
     let vertices = Cube::new()
-        .vertex(|v| {
-            PosTex {
-                position: v.pos.into(),
-                tex_coord: [0.1, 0.1],
-            }
+        .vertex(|v| PosTex {
+            position: v.pos.into(),
+            tex_coord: [0.1, 0.1],
         })
         .triangulate()
         .vertices()
@@ -130,10 +125,11 @@ fn initialise_walls(world: &mut World) {
         })
         .with(ObjectType::Wall)
         .with(BodyPose2::new(Point2::new(-0.9, 0.), Basis2::one()))
-        .with(Shape::new_simple(
+        .with(Shape::new_simple_with_type(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
             Rectangle::new(0.2, 2.0).into(),
+            ObjectType::Wall,
         ))
         .build();
 
@@ -149,10 +145,11 @@ fn initialise_walls(world: &mut World) {
         })
         .with(ObjectType::Wall)
         .with(BodyPose2::new(Point2::new(0.9, 0.), Basis2::one()))
-        .with(Shape::new_simple(
+        .with(Shape::new_simple_with_type(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
             Rectangle::new(0.2, 2.0).into(),
+            ObjectType::Wall,
         ))
         .build();
 
@@ -168,10 +165,11 @@ fn initialise_walls(world: &mut World) {
         })
         .with(ObjectType::Wall)
         .with(BodyPose2::new(Point2::new(0., -0.9), Basis2::one()))
-        .with(Shape::new_simple(
+        .with(Shape::new_simple_with_type(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
             Rectangle::new(1.8, 0.2).into(),
+            ObjectType::Wall,
         ))
         .build();
 
@@ -187,10 +185,11 @@ fn initialise_walls(world: &mut World) {
         })
         .with(ObjectType::Wall)
         .with(BodyPose2::new(Point2::new(0., 0.9), Basis2::one()))
-        .with(Shape::new_simple(
+        .with(Shape::new_simple_with_type(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
             Rectangle::new(1.8, 0.2).into(),
+            ObjectType::Wall,
         ))
         .build();
 }
