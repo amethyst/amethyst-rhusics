@@ -1,5 +1,5 @@
 [package]
-name = "amethyst-rhusics"
+name = "amethyst_rhusics"
 version = "0.1.0"
 authors = []
 
@@ -9,3 +9,11 @@ rhusics = { git = "https://github.com/Rhuagh/rhusics", branch = "rigid-body-phys
 shrev = "0.6"
 genmesh = "0.5"
 rand = "0.3"
+
+[[example]]
+name = "boxes2d"
+path = "examples/boxes2d/main.rs"
+
+[[example]]
+name = "boxes3d"
+path = "examples/boxes3d/main.rs"

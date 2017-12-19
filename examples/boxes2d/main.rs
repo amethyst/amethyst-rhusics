@@ -2,6 +2,7 @@ extern crate amethyst;
 extern crate genmesh;
 extern crate rand;
 extern crate rhusics;
+extern crate amethyst_rhusics;
 
 use amethyst::core::TransformBundle;
 use amethyst::prelude::*;
@@ -11,7 +12,7 @@ use amethyst::utils::fps_counter::FPSCounterBundle;
 
 use self::bundle::SimulationBundle;
 
-mod systems;
+mod emission;
 mod resources;
 mod bundle;
 mod state;

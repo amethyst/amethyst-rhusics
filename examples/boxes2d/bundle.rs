@@ -4,9 +4,9 @@ use amethyst::shrev::EventChannel;
 use rhusics::ecs::physics::prelude2d::{world_physics_register, BasicCollisionSystem2, BodyPose2,
                                        ContactEvent2, GJK2, LinearSolverSystem2,
                                        SweepAndPrune2};
-
 use resources::{Emitter, ObjectType};
-use systems::{EmissionSystem, MovementSystem};
+use emission::EmissionSystem;
+use amethyst_rhusics::systems::MovementSystem;
 
 pub struct SimulationBundle;
 

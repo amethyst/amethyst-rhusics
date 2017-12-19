@@ -2,9 +2,7 @@ use amethyst::core::LocalTransform;
 use amethyst::core::cgmath::Vector3;
 use amethyst::ecs::{Entities, Fetch, Join, ReadStorage, System, WriteStorage};
 use amethyst::shrev::{EventChannel, ReaderId};
-use rhusics::ecs::collide::prelude2d::{BodyPose2, ContactEvent2};
-
-use resources::ObjectType;
+use rhusics::ecs::collide::prelude3d::{BodyPose3, ContactEvent3};
 
 pub struct MovementSystem {
     contact_reader: ReaderId,
@@ -19,14 +17,12 @@ impl MovementSystem {
 impl<'a> System<'a> for MovementSystem {
     type SystemData = (
         Entities<'a>,
-        Fetch<'a, EventChannel<ContactEvent2>>,
-        ReadStorage<'a, ObjectType>,
-        ReadStorage<'a, BodyPose2>,
+        ReadStorage<'a, BodyPose3>,
         WriteStorage<'a, LocalTransform>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (entities, contacts, objects, poses, mut transforms) = data;
+        let (entities, poses, mut transforms) = data;
 
         for (pose, transform) in (&poses, &mut transforms).join() {
             *transform = LocalTransform {

@@ -1,18 +1,19 @@
 use std::time::Instant;
+use rand::Rand;
 
 use amethyst::assets::Handle;
 use amethyst::core::{LocalTransform, Transform};
-use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector2, Vector3};
+use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3, InnerSpace};
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
-use rhusics::ecs::collide::prelude2d::*;
-use rhusics::collide::prelude2d::BodyPose2;
+use rhusics::ecs::collide::prelude3d::*;
+use rhusics::collide::prelude3d::BodyPose3;
 use rhusics::NextFrame;
-use rhusics::physics::prelude2d::{Mass2, Velocity2};
+use rhusics::physics::prelude3d::{Mass3, Velocity3};
 use rhusics::physics::Material as PhysicsMaterial;
-use rhusics::ecs::physics::prelude2d::RigidBody;
+use rhusics::ecs::physics::prelude3d::RigidBody;
 
-use resources::{Emitter, Graphics, ObjectType, Shape};
+use resources::{Emitter, Graphics, Shape, ObjectType};
 
 pub struct EmissionSystem;
 
@@ -31,8 +32,8 @@ impl<'a> System<'a> for EmissionSystem {
                 emit_box(
                     entities.create(),
                     &*lazy,
-                    graphics.mesh.clone(),
                     graphics.material.clone(),
+                    graphics.mesh.clone(),
                     &emitter,
                 );
                 emitter.last_emit = now.clone();
@@ -41,59 +42,55 @@ impl<'a> System<'a> for EmissionSystem {
     }
 }
 
-fn emit_box(
-    entity: Entity,
-    lazy: &LazyUpdate,
-    mesh: Handle<Mesh>,
-    material: Material,
-    emitter: &Emitter,
-) {
-    use amethyst::core::cgmath::{Basis2, Rad, Rotation, Rotation2};
+fn emit_box(entity: Entity, lazy: &LazyUpdate, material: Material, mesh: Handle<Mesh>, emitter: &Emitter) {
+    use amethyst::core::cgmath::{Basis3, Rad, Rotation, Rotation3, Vector3};
     use rand;
     use rand::Rng;
     use std;
 
-    let angle = rand::thread_rng().gen_range(0., std::f32::consts::PI * 2.);
-    let rot: Basis2<f32> = Rotation2::from_angle(Rad(angle));
-    let offset = rot.rotate_vector(Vector2::new(0.1, 0.));
+    let rot: Basis3<f32> = Rotation3::from_axis_angle(
+        Vector3::rand(&mut rand::thread_rng()).normalize(),
+        Rad(rand::thread_rng().gen_range(0., std::f32::consts::PI * 2.)),
+    );
+    let offset = rot.rotate_vector(Vector3::new(0.1, 0., 0.));
     let speed = rand::thread_rng().gen_range(1., 5.) * 2.;
 
-    let position = Point2::new(emitter.location.0, emitter.location.1) + offset;
+
+    let position = Point3::new(emitter.location.0, emitter.location.1, emitter.location.2) + offset;
+    println!("pos: {:?}", position);
     lazy.insert(entity, ObjectType::Box);
     lazy.insert(entity, mesh);
     lazy.insert(entity, material);
     lazy.insert(
         entity,
-        Velocity2::new(offset * speed, 0.),
+        Velocity3::new(offset * speed, Vector3::from_value(0.)),
     );
-    lazy.insert(entity, Transform::default());
     lazy.insert(
         entity,
         LocalTransform {
-            translation: Vector3::new(position.x, position.y, 0.),
+            translation: Vector3::new(position.x, position.y, position.z),
             rotation: Quaternion::one(),
-            scale: Vector3::from_value(0.05),
+            scale: Vector3::from_value(1.),
         },
     );
-    let pose = BodyPose2::new(position, Basis2::one());
+
+    let pose = BodyPose3::new(position, Quaternion::one());
     lazy.insert(entity, pose.clone());
     lazy.insert(entity, NextFrame { value: pose });
     lazy.insert(
         entity,
         NextFrame {
-            value: Velocity2::new(offset * speed, 0.1),
+            value: Velocity3::new(offset * speed, Vector3::from_value(0.1)),
         },
     );
-    lazy.insert(entity, Mass2::new(1.));
+    lazy.insert(entity, Mass3::new(1.));
     lazy.insert(entity, RigidBody::new(PhysicsMaterial::ROCK, 1.0));
     lazy.insert(
-
         entity,
         Shape::new_simple(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
-            Rectangle::new(0.1, 0.1).into(),
-
+            Cuboid::new(0.1, 0.1, 0.1).into(),
         ),
     );
 }
