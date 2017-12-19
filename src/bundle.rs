@@ -16,35 +16,35 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        world_physics_register(world);
+        world_physics_register::<ObjectType>(world);
 
         world.register::<Emitter>();
         world.register::<ObjectType>();
 
-        let reader = world
-            .read_resource::<EventChannel<ContactEvent2>>()
+        let reader_1 = world
+            .write_resource::<EventChannel<ContactEvent2>>()
             .register_reader();
-
-        Ok(
-            dispatcher
-                .add(EmissionSystem, "emission_system", &[])
-                .add(
-                    LinearContactSolverSystem2::new(reader.clone()),
-                    "physics_solver_system",
-                    &["emission_system"],
-                )
-                .add(
-                    BasicCollisionSystem2::<BodyPose2>::new()
-                        .with_broad_phase(SweepAndPrune2::new())
-                        .with_narrow_phase(GJK2::new()),
-                    "basic_collision_system",
-                    &["physics_solver_system"],
-                )
-                .add(
-                    MovementSystem::new(reader),
-                    "movement_system",
-                    &["basic_collision_system"],
-                ),
-        )
+        let reader_2 = world
+            .write_resource::<EventChannel<ContactEvent2>>()
+            .register_reader();
+        Ok(dispatcher
+            .add(EmissionSystem, "emission_system", &[])
+            .add(
+                LinearContactSolverSystem2::new(reader_1),
+                "physics_solver_system",
+                &["emission_system"],
+            )
+            .add(
+                BasicCollisionSystem2::<BodyPose2, ObjectType>::new()
+                    .with_broad_phase(SweepAndPrune2::new())
+                    .with_narrow_phase(GJK2::new()),
+                "basic_collision_system",
+                &["physics_solver_system"],
+            )
+            .add(
+                MovementSystem::new(reader_2),
+                "movement_system",
+                &["basic_collision_system"],
+            ))
     }
 }
