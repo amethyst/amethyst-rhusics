@@ -2,29 +2,28 @@ use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::{LocalTransform, Time, Transform};
-use amethyst::core::cgmath::{Array, Basis2, One, Point2, Quaternion, Vector3};
+use amethyst::core::cgmath::{Array, One, Quaternion, Vector3};
 use amethyst::ecs::World;
 use amethyst::prelude::{State, Trans};
 use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefaults, Mesh, PosTex,
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::FPSCounter;
-use rhusics::physics::Material as PhysicsMaterial;
-use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, DeltaTime,
-                                       Rectangle, RigidBody, Mass2};
+use rhusics::ecs::physics::prelude2d::DeltaTime;
 
-use resources::{Emitter, Graphics, ObjectType, Shape};
+use resources::{Emitter, Graphics};
 
 pub struct Emitting;
 
 impl State for Emitting {
     fn on_start(&mut self, world: &mut World) {
         initialise_camera(world);
+
         let g = Graphics {
             mesh: initialise_mesh(world),
             material: initialise_material(world),
         };
+
         world.add_resource(g);
-        initialise_walls(world);
         initialise_emitters(world);
     }
 
@@ -83,6 +82,7 @@ fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
         .triangulate()
         .vertices()
         .collect::<Vec<_>>();
+
     world
         .read_resource::<Loader>()
         .load_from_data(vertices.into(), (), &world.read_resource())
@@ -94,114 +94,11 @@ fn initialise_material(world: &mut World) -> Material {
         (),
         &world.read_resource(),
     );
+
     Material {
         albedo,
         ..world.read_resource::<MaterialDefaults>().0.clone()
     }
-}
-
-fn initialise_walls(world: &mut World) {
-    let (mesh, material) = {
-        let g = world.read_resource::<Graphics>();
-
-        let albedo = world.read_resource::<Loader>().load_from_data(
-            [0.3, 0.3, 0.3, 1.0].into(),
-            (),
-            &world.read_resource(),
-        );
-
-        (
-            g.mesh.clone(),
-            Material {
-                albedo,
-                ..world.read_resource::<MaterialDefaults>().0.clone()
-            },
-        )
-    };
-
-    world
-        .create_entity()
-        .with(mesh.clone())
-        .with(material.clone())
-        .with(Transform::default())
-        .with(LocalTransform {
-            translation: Vector3::new(-0.9, 0., 0.),
-            rotation: Quaternion::one(),
-            scale: Vector3::new(0.1, 1.0, 1.0),
-        })
-        .with(ObjectType::Wall)
-        .with(BodyPose2::new(Point2::new(-0.9, 0.), Basis2::one()))
-        .with(Shape::new_simple(
-            CollisionStrategy::FullResolution,
-            CollisionMode::Discrete,
-            Rectangle::new(0.2, 2.0).into(),
-        ))
-        .with(RigidBody::new(PhysicsMaterial::ROCK, 1.0))
-        .with(Mass2::new(0.))
-        .build();
-
-    world
-        .create_entity()
-        .with(mesh.clone())
-        .with(material.clone())
-        .with(Transform::default())
-        .with(LocalTransform {
-            translation: Vector3::new(0.9, 0., 0.),
-            rotation: Quaternion::one(),
-            scale: Vector3::new(0.1, 1.0, 1.0),
-        })
-        .with(ObjectType::Wall)
-        .with(BodyPose2::new(Point2::new(0.9, 0.), Basis2::one()))
-        .with(Shape::new_simple(
-            CollisionStrategy::FullResolution,
-            CollisionMode::Discrete,
-            Rectangle::new(0.2, 2.0).into(),
-        ))
-        .with(Mass2::new(0.))
-        .with(RigidBody::new(PhysicsMaterial::ROCK, 1.0))
-        .build();
-
-    world
-        .create_entity()
-        .with(mesh.clone())
-        .with(material.clone())
-        .with(Transform::default())
-        .with(LocalTransform {
-            translation: Vector3::new(0., -0.9, 0.),
-            rotation: Quaternion::one(),
-            scale: Vector3::new(0.9, 0.1, 1.0),
-        })
-        .with(ObjectType::Wall)
-        .with(BodyPose2::new(Point2::new(0., -0.9), Basis2::one()))
-        .with(Shape::new_simple(
-            CollisionStrategy::FullResolution,
-            CollisionMode::Discrete,
-            Rectangle::new(1.8, 0.2).into(),
-        ))
-        .with(Mass2::new(0.))
-        .with(RigidBody::new(PhysicsMaterial::ROCK, 1.0))
-        .build();
-
-    world
-        .create_entity()
-        .with(mesh.clone())
-        .with(material.clone())
-        .with(Transform::default())
-        .with(LocalTransform {
-            translation: Vector3::new(0., 0.9, 0.),
-            rotation: Quaternion::one(),
-            scale: Vector3::new(0.9, 0.1, 1.0),
-        })
-        .with(ObjectType::Wall)
-        .with(BodyPose2::new(Point2::new(0., 0.9), Basis2::one()))
-        .with(Shape::new_simple(
-            CollisionStrategy::FullResolution,
-            CollisionMode::Discrete,
-            Rectangle::new(1.8, 0.2).into(),
-        ))
-        .with(Mass2::new(0.))
-        .with(RigidBody::new(PhysicsMaterial::ROCK, 1.0))
-        .build();
 }
 
 fn initialise_emitters(world: &mut World) {

@@ -1,12 +1,11 @@
 use amethyst::core::{ECSBundle, Result};
 use amethyst::ecs::{DispatcherBuilder, World};
-use amethyst::shrev::EventChannel;
-use rhusics::ecs::physics::prelude2d::{world_physics_register, BasicCollisionSystem2, BodyPose2,
-                                       ContactEvent2, GJK2, LinearSolverSystem2,
-                                       SweepAndPrune2};
-use resources::{Emitter, ObjectType};
+use rhusics::ecs::physics::prelude2d::{world_physics_register_with_spatial, BasicCollisionSystem2,
+                                       BodyPose2, GJK2, SweepAndPrune2, ImpulseSolverSystem2,
+                                       NextFrameSetupSystem2};
+use resources::Emitter;
 use emission::EmissionSystem;
-use amethyst_rhusics::systems::MovementSystem;
+use amethyst_rhusics::systems::MovementSystem2;
 
 pub struct SimulationBundle;
 
@@ -16,32 +15,38 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        world_physics_register(world);
+        // Register physics systems and component types.
+        world_physics_register_with_spatial::<()>(world);
 
+        // Register simulation component types.
         world.register::<Emitter>();
-        world.register::<ObjectType>();
 
-        let reader = world
-            .read_resource::<EventChannel<ContactEvent2>>()
-            .register_reader();
-
+        // Register systems to handle the mission of physics objects,
+        // integrate physical properties over time, resolve collisions and
+        // transcribe the updated physical properties to existing transforms.
         Ok(
             dispatcher
                 .add(EmissionSystem, "emission_system", &[])
                 .add(
-                    LinearSolverSystem2::new(reader.clone()),
+                    ImpulseSolverSystem2::new(),
                     "physics_solver_system",
                     &["emission_system"],
                 )
                 .add(
+                    NextFrameSetupSystem2::new(),
+                    "next_frame_system",
+                    &["physics_solver_system"],
+                )
+                .add(
                     BasicCollisionSystem2::<BodyPose2>::new()
                         .with_broad_phase(SweepAndPrune2::new())
+
                         .with_narrow_phase(GJK2::new()),
                     "basic_collision_system",
                     &["physics_solver_system"],
                 )
                 .add(
-                    MovementSystem::new(reader),
+                    MovementSystem2::new(),
                     "movement_system",
                     &["basic_collision_system"],
                 ),

@@ -1,45 +1,61 @@
 use amethyst::core::{ECSBundle, Result};
 use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
-use rhusics::ecs::physics::prelude3d::{world_physics_register, BasicCollisionSystem3, BodyPose3,
-                                       ContactEvent3, GJK3, LinearSolverSystem3,
-                                       SweepAndPrune3};
-use resources::{Emitter, ObjectType};
+use rhusics::ecs::physics::prelude3d::{world_physics_register_with_spatial, SpatialCollisionSystem3,
+                                       BodyPose3, ContactEvent3, GJK3, ImpulseSolverSystem3,
+                                       SweepAndPrune3, NextFrameSetupSystem3, SpatialSortingSystem3,
+                                       ContactResolutionSystem3};
+use resources::Emitter;
 use emission::EmissionSystem;
-use amethyst_rhusics::systems::MovementSystem;
+use amethyst_rhusics::systems::MovementSystem3;
 
 pub struct SimulationBundle;
 
 impl <'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
     fn build(self, world: &mut World, dispatcher: DispatcherBuilder<'a, 'b>) -> Result<DispatcherBuilder<'a, 'b>> {
-        world_physics_register(world);
+        world_physics_register_with_spatial::<()>(world);
 
         world.register::<Emitter>();
-        world.register::<ObjectType>();
 
         let reader = world
-            .read_resource::<EventChannel<ContactEvent3>>()
+            .write_resource::<EventChannel<ContactEvent3>>()
             .register_reader();
 
         Ok(
             dispatcher
                 .add(EmissionSystem, "emission_system", &[])
                 .add(
-                    LinearSolverSystem3::new(reader.clone()),
-                    "physics_solver_system",
-                    &["emission_system"],
+                    SpatialSortingSystem3::<BodyPose3, ()>::new(),
+                    "sorting_system",
+                    &["emission_system"]
                 )
                 .add(
-                    BasicCollisionSystem3::<BodyPose3>::new()
+                    SpatialCollisionSystem3::<BodyPose3, ()>::new()
                         .with_broad_phase(SweepAndPrune3::new())
                         .with_narrow_phase(GJK3::new()),
-                    "basic_collision_system",
-                    &["physics_solver_system"],
+                    "collision_system",
+                    &["sorting_system"],
                 )
                 .add(
-                    MovementSystem::new(reader),
+                    ContactResolutionSystem3::new(reader),
+                    "contact_resolution_system",
+                    &["collision_system"],
+                )
+                .add(
+                    ImpulseSolverSystem3::new(),
+                    "physics_solver_system",
+                    &["contact_resolution_system"],
+                )
+                .add(
+                    NextFrameSetupSystem3::new(),
+                    "next_frame_system",
+                    &["contact_resolution_system"],
+                )
+
+                .add(
+                    MovementSystem3::new(),
                     "movement_system",
-                    &["basic_collision_system"],
+                    &["physics_solver_system"],
                 )
         )
     }

@@ -19,9 +19,10 @@ mod state;
 
 fn run() -> Result<(), amethyst::Error> {
     let path = format!(
-        "{}/resources/display_config.ron",
+        "{}/examples/boxes2d/resources/display_config.ron",
         env!("CARGO_MANIFEST_DIR")
     );
+
     let config = DisplayConfig::load(&path);
 
     let pipe = Pipeline::build().with_stage(

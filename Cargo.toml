@@ -5,7 +5,7 @@ authors = []
 
 [dependencies]
 amethyst = { git = "https://github.com/amethyst/amethyst", branch = "develop" }
-rhusics = { git = "https://github.com/Rhuagh/rhusics", branch = "rigid-body-physics", features = ["ecs"] }
+rhusics = { git = "https://github.com/dkushner/rhusics", branch = "rigid-body-physics", features = ["ecs"] }
 shrev = "0.6"
 genmesh = "0.5"
 rand = "0.3"

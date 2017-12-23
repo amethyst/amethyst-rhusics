@@ -3,7 +3,7 @@ use rand::Rand;
 
 use amethyst::assets::Handle;
 use amethyst::core::{LocalTransform, Transform};
-use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3, InnerSpace};
+use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3, InnerSpace, Zero, EuclideanSpace};
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 use rhusics::ecs::collide::prelude3d::*;
@@ -12,8 +12,9 @@ use rhusics::NextFrame;
 use rhusics::physics::prelude3d::{Mass3, Velocity3};
 use rhusics::physics::Material as PhysicsMaterial;
 use rhusics::ecs::physics::prelude3d::RigidBody;
+use rhusics::ecs::physics::WithLazyRigidBody;
 
-use resources::{Emitter, Graphics, Shape, ObjectType};
+use resources::{Emitter, Graphics, Shape};
 
 pub struct EmissionSystem;
 
@@ -48,23 +49,15 @@ fn emit_box(entity: Entity, lazy: &LazyUpdate, material: Material, mesh: Handle<
     use rand::Rng;
     use std;
 
-    let rot: Basis3<f32> = Rotation3::from_axis_angle(
-        Vector3::rand(&mut rand::thread_rng()).normalize(),
-        Rad(rand::thread_rng().gen_range(0., std::f32::consts::PI * 2.)),
-    );
-    let offset = rot.rotate_vector(Vector3::new(0.1, 0., 0.));
-    let speed = rand::thread_rng().gen_range(1., 5.) * 2.;
+    // Determine a target location within 0.5 units of the origin.
+    let target: Vector3<f32> = Vector3::rand(&mut rand::thread_rng()).normalize() * 0.5;
+    // Determine a randomized speed.
+    let speed = rand::thread_rng().gen_range(1., 2.) * 2.;
+    let position = Point3::new(emitter.location.0, emitter.location.1, emitter.location.2);
 
-
-    let position = Point3::new(emitter.location.0, emitter.location.1, emitter.location.2) + offset;
-    println!("pos: {:?}", position);
-    lazy.insert(entity, ObjectType::Box);
     lazy.insert(entity, mesh);
     lazy.insert(entity, material);
-    lazy.insert(
-        entity,
-        Velocity3::new(offset * speed, Vector3::from_value(0.)),
-    );
+    lazy.insert(entity,Transform::default());
     lazy.insert(
         entity,
         LocalTransform {
@@ -74,23 +67,19 @@ fn emit_box(entity: Entity, lazy: &LazyUpdate, material: Material, mesh: Handle<
         },
     );
 
-    let pose = BodyPose3::new(position, Quaternion::one());
-    lazy.insert(entity, pose.clone());
-    lazy.insert(entity, NextFrame { value: pose });
-    lazy.insert(
+    lazy.with_dynamic_rigid_body(
         entity,
-        NextFrame {
-            value: Velocity3::new(offset * speed, Vector3::from_value(0.1)),
-        },
-    );
-    lazy.insert(entity, Mass3::new(1.));
-    lazy.insert(entity, RigidBody::new(PhysicsMaterial::ROCK, 1.0));
-    lazy.insert(
-        entity,
-        Shape::new_simple(
+        CollisionShape3::<BodyPose3, ()>::new_simple(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
-            Cuboid::new(0.1, 0.1, 0.1).into(),
+            Cuboid::new(2.25, 2.25, 2.25).into(),
         ),
+        BodyPose3::new(position, Quaternion::one()),
+        Velocity3::new(
+            (target - position.to_vec()).normalize() * speed,
+            Vector3::zero(),
+        ),
+        RigidBody::new(PhysicsMaterial::ROCK, 1.),
+        Mass3::new(1.),
     );
 }

@@ -6,20 +6,22 @@ use amethyst::core::{LocalTransform, Time, Transform};
 use amethyst::core::cgmath::{Array, Basis3, One, Point3, Quaternion, Vector3, Vector4, Deg, Matrix4};
 use amethyst::ecs::World;
 use amethyst::prelude::{State, Trans};
-use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefaults, Mesh, PosTex,
-                         VirtualKeyCode, WindowEvent, Projection};
+use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefaults, Mesh, PosNormTex,
+                         VirtualKeyCode, WindowEvent, Projection, PointLight, Light, Rgba};
 use amethyst::utils::fps_counter::FPSCounter;
 use rhusics::physics::Material as PhysicsMaterial;
 use rhusics::ecs::physics::prelude3d::{BodyPose3, CollisionMode, CollisionStrategy, DeltaTime,
                                        Cuboid, RigidBody, Mass3};
 
-use resources::{Emitter, Graphics, ObjectType, Shape};
+use resources::{Emitter, Graphics};
 
 pub struct Emitting;
 
 impl State for Emitting {
     fn on_start(&mut self, world: &mut World) {
         initialize_camera(world);
+        initialize_lights(world);
+
         let g = Graphics {
             mesh: initialize_mesh(world),
             material: initialize_material(world),
@@ -58,15 +60,13 @@ impl State for Emitting {
 }
 
 fn initialize_camera(world: &mut World) {
+    let transform =
+        Matrix4::from_translation([0., -20., 10.].into()) * Matrix4::from_angle_x(Deg(75.96));
+
     world
         .create_entity()
         .with(Camera::from(Projection::perspective(1.0, Deg(60.0))))
-        .with(LocalTransform {
-            rotation: Quaternion::one(),
-            scale: Vector3::from_value(1.),
-            translation: Vector3::new(0., 0., -10.),
-        })
-        .with(Transform::default())
+        .with(Transform(transform.into()))
         .build();
 }
 
@@ -76,14 +76,17 @@ fn initialize_mesh(world: &mut World) -> Handle<Mesh> {
 
     let vertices = Cube::new()
         .vertex(|v| {
-            PosTex {
+            PosNormTex {
                 position: v.pos.into(),
+                normal: v.normal.into(),
                 tex_coord: [0.1, 0.1],
             }
         })
         .triangulate()
         .vertices()
         .collect::<Vec<_>>();
+
+    println!("{:?}", vertices);
 
     world
         .read_resource::<Loader>()
@@ -96,6 +99,7 @@ fn initialize_material(world: &mut World) -> Material {
         (),
         &world.read_resource(),
     );
+
     Material {
         albedo,
         ..world.read_resource::<MaterialDefaults>().0.clone()
@@ -106,25 +110,7 @@ fn initialize_emitters(world: &mut World) {
     world
         .create_entity()
         .with(Emitter {
-            location: (-1.0, 0., 1.0),
-            emission_interval: Duration::new(0, 500_000_000),
-            last_emit: Instant::now(),
-        })
-        .build();
-
-    world
-        .create_entity()
-        .with(Emitter {
-            location: (1.0, 0., -1.0),
-            emission_interval: Duration::new(0, 750_000_000),
-            last_emit: Instant::now(),
-        })
-        .build();
-
-    world
-        .create_entity()
-        .with(Emitter {
-            location: (0., -1.0, 1.0),
+            location: (-10., -10., 0.),
             emission_interval: Duration::new(1, 0),
             last_emit: Instant::now(),
         })
@@ -133,10 +119,40 @@ fn initialize_emitters(world: &mut World) {
     world
         .create_entity()
         .with(Emitter {
-            location: (0., -1.0, -1.0),
-            emission_interval: Duration::new(1, 250_000_000),
+            location: (10., 10., 0.),
+            emission_interval: Duration::new(2, 0),
             last_emit: Instant::now(),
         })
         .build();
+
+    world
+        .create_entity()
+        .with(Emitter {
+            location: (0., 0., 10.),
+            emission_interval: Duration::new(1, 500_000_000),
+            last_emit: Instant::now(),
+        })
+        .build();
+
+    world
+        .create_entity()
+        .with(Emitter {
+            location: (0., 0., -10.),
+            emission_interval: Duration::new(2, 500_000_000),
+            last_emit: Instant::now(),
+        })
+        .build();
+}
+
+fn initialize_lights(world: &mut World) {
+    let light: Light = PointLight {
+        center: [5.0, -20.0, 15.0].into(),
+        intensity: 100.0,
+        radius: 1.0,
+        color: Rgba::white(),
+        ..Default::default()
+    }.into();
+
+    world.create_entity().with(light).build();
 }
 
