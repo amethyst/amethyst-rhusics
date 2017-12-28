@@ -1,11 +1,8 @@
-use std::marker;
-
 use amethyst::core::LocalTransform;
 use amethyst::core::cgmath::{Vector3, Quaternion, Matrix2, Matrix3, Basis2};
-use amethyst::ecs::{Entities, Fetch, Join, ReadStorage, System, WriteStorage};
+use amethyst::ecs::{Join, ReadStorage, System, WriteStorage};
 use rhusics::collide::prelude3d::BodyPose3;
 use rhusics::collide::prelude2d::BodyPose2;
-use amethyst::shrev::{EventChannel, ReaderId};
 
 pub struct MovementSystem3;
 
@@ -17,13 +14,12 @@ impl MovementSystem3 {
 
 impl<'a> System<'a> for MovementSystem3 {
     type SystemData = (
-        Entities<'a>,
         ReadStorage<'a, BodyPose3>,
         WriteStorage<'a, LocalTransform>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (entities, poses, mut transforms) = data;
+        let (poses, mut transforms) = data;
 
         for (pose, transform) in (&poses, &mut transforms).join() {
             *transform = LocalTransform {
@@ -45,16 +41,14 @@ impl MovementSystem2 {
 
 impl<'a> System<'a> for MovementSystem2 {
     type SystemData = (
-        Entities<'a>,
         ReadStorage<'a, BodyPose2>,
         WriteStorage<'a, LocalTransform>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (entities, poses, mut transforms) = data;
+        let (poses, mut transforms) = data;
 
         for (pose, transform) in (&poses, &mut transforms).join() {
-            println!("{:?}", pose.position());
             let rot: Matrix3<f32> = Matrix2::<f32>::from(pose.rotation().clone() as Basis2<f32>)
                 .into();
 

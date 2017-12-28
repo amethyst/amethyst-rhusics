@@ -2,7 +2,8 @@ use std::time::Instant;
 
 use amethyst::assets::Handle;
 use amethyst::core::{LocalTransform, Transform};
-use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector2, Vector3};
+use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector2, Vector3, Zero, InnerSpace,
+                             EuclideanSpace};
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 
@@ -54,14 +55,13 @@ fn emit_box(
 ) {
     use amethyst::core::cgmath::{Basis2, Rad, Rotation, Rotation2};
     use rand;
+    use rand::Rand;
     use rand::Rng;
     use std;
 
-    let angle = rand::thread_rng().gen_range(0., std::f32::consts::PI * 2.);
-    let rot: Basis2<f32> = Rotation2::from_angle(Rad(angle));
-    let offset = rot.rotate_vector(Vector2::new(0.1, 0.));
-    let speed = rand::thread_rng().gen_range(1., 5.) * 2.;
-    let position = Point2::new(emitter.location.0, emitter.location.1) + offset;
+    let target: Vector2<f32> = Vector2::rand(&mut rand::thread_rng()).normalize() * 0.5;
+    let speed = rand::thread_rng().gen_range(1., 2.);
+    let position = Point2::new(emitter.location.0, emitter.location.1);
 
     lazy.insert(entity, mesh);
     lazy.insert(entity, material);
@@ -74,6 +74,8 @@ fn emit_box(
             scale: Vector3::from_value(0.05),
         },
     );
+
+    println!("{:?}", target);
     lazy.with_dynamic_rigid_body(
         entity,
         CollisionShape2::<BodyPose2, ()>::new_simple(
@@ -82,7 +84,10 @@ fn emit_box(
             Rectangle::new(0.1, 0.1).into(),
         ),
         BodyPose2::new(position, Basis2::one()),
-        Velocity2::new(offset * speed, 0.),
+        Velocity2::new(
+            (target - position.to_vec()).normalize() * speed,
+            0.
+        ),
         RigidBody::new(PhysicsMaterial::ROCK, 1.),
         Mass2::new(1.),
     );

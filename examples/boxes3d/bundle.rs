@@ -7,7 +7,7 @@ use rhusics::ecs::physics::prelude3d::{world_physics_register_with_spatial, Spat
                                        ContactResolutionSystem3};
 use resources::Emitter;
 use emission::EmissionSystem;
-use amethyst_rhusics::systems::MovementSystem3;
+use amethyst_rhusics::movement::prelude3d::*;
 
 pub struct SimulationBundle;
 

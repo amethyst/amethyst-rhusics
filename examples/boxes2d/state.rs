@@ -105,8 +105,8 @@ fn initialise_emitters(world: &mut World) {
     world
         .create_entity()
         .with(Emitter {
-            location: (-0.4, 0.),
-            emission_interval: Duration::new(0, 500_000_000),
+            location: (-1., 0.),
+            emission_interval: Duration::new(2, 750_000_000),
             last_emit: Instant::now(),
         })
         .build();
@@ -114,8 +114,8 @@ fn initialise_emitters(world: &mut World) {
     world
         .create_entity()
         .with(Emitter {
-            location: (0.4, 0.),
-            emission_interval: Duration::new(0, 750_000_000),
+            location: (1., 0.),
+            emission_interval: Duration::new(2, 500_000_000),
             last_emit: Instant::now(),
         })
         .build();
@@ -123,7 +123,7 @@ fn initialise_emitters(world: &mut World) {
     world
         .create_entity()
         .with(Emitter {
-            location: (0., -0.4),
+            location: (0., -1.),
             emission_interval: Duration::new(1, 0),
             last_emit: Instant::now(),
         })
@@ -132,7 +132,7 @@ fn initialise_emitters(world: &mut World) {
     world
         .create_entity()
         .with(Emitter {
-            location: (0., 0.4),
+            location: (0., 1.),
             emission_interval: Duration::new(1, 250_000_000),
             last_emit: Instant::now(),
         })
