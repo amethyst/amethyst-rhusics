@@ -27,19 +27,16 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
         let reader_2 = world
             .write_resource::<EventChannel<ContactEvent2>>()
             .register_reader();
-        let mut next_frame = NextFrameSetupSystem2::new();
-        //next_frame.with_linear_only();
-        let mut contact = ContactResolutionSystem2::new(reader_1);
-        //contact.with_linear_only();
         Ok(dispatcher
             .add(EmissionSystem, "emission_system", &[])
+            .add(ImpulseSolverSystem2::new(), "physics_solver_system", &[])
             .add(
-                ImpulseSolverSystem2::new(),
-                "physics_solver_system",
-                &["emission_system"],
+                MovementSystem::new(reader_2),
+                "movement_system",
+                &["physics_solver_system"],
             )
             .add(
-                next_frame,
+                NextFrameSetupSystem2::new(),
                 "next_frame_setup",
                 &["physics_solver_system"],
             )
@@ -51,14 +48,9 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
                 &["next_frame_setup"],
             )
             .add(
-                MovementSystem::new(reader_2),
-                "movement_system",
-                &["basic_collision_system"],
-            )
-            .add(
-                contact,
+                ContactResolutionSystem2::new(reader_1),
                 "contact_resolution",
-                &["movement_system"],
+                &["basic_collision_system"],
             ))
     }
 }
