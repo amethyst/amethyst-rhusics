@@ -75,13 +75,14 @@ fn emit_box(
         },
     );
 
-    println!("{:?}", target);
+    let volume = Rectangle::new(0.1, 0.1);
+
     lazy.with_dynamic_rigid_body(
         entity,
         CollisionShape2::<BodyPose2, ()>::new_simple(
             CollisionStrategy::FullResolution,
             CollisionMode::Discrete,
-            Rectangle::new(0.1, 0.1).into(),
+            volume.clone().into(),
         ),
         BodyPose2::new(position, Basis2::one()),
         Velocity2::new(
@@ -89,6 +90,6 @@ fn emit_box(
             0.
         ),
         RigidBody::new(PhysicsMaterial::ROCK, 1.),
-        Mass2::new(1.),
+        Mass2::from_volume_and_material(&volume, &PhysicsMaterial::ROCK),
     );
 }
