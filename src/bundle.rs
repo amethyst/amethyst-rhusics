@@ -1,7 +1,7 @@
 use amethyst::core::{ECSBundle, Result};
 use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
-use rhusics::ecs::physics::prelude2d::{world_physics_register, BasicCollisionSystem2, BodyPose2,
+use rhusics::ecs::physics::prelude2d::{register_physics, BasicCollisionSystem2, BodyPose2,
                                        ContactEvent2, ContactResolutionSystem2, GJK2,
                                        ImpulseSolverSystem2, NextFrameSetupSystem2, SweepAndPrune2};
 
@@ -16,7 +16,7 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        world_physics_register::<ObjectType>(world);
+        register_physics::<ObjectType>(world);
 
         world.register::<Emitter>();
         world.register::<ObjectType>();
