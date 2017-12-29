@@ -5,9 +5,8 @@ use amethyst::core::{LocalTransform, Transform};
 use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector2, Vector3};
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
-use rhusics::NextFrame;
-use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass,
-                                       Rectangle, Velocity2};
+use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass2,
+                                       Rectangle, RigidBody, Velocity2, WithLazyRigidBody};
 
 use resources::{Emitter, Graphics, ObjectType, Shape};
 
@@ -56,15 +55,21 @@ fn emit_box(
     let speed = rand::thread_rng().gen_range(1., 5.) * 2.;
 
     let position = Point2::new(emitter.location.0, emitter.location.1) + offset;
+    lazy.with_dynamic_rigid_body(
+        entity,
+        Shape::new_simple(
+            CollisionStrategy::FullResolution,
+            CollisionMode::Discrete,
+            Rectangle::new(0.1, 0.1).into(),
+        ),
+        BodyPose2::new(position, Basis2::one()),
+        Velocity2::from_linear(offset * speed),
+        RigidBody::default(),
+        Mass2::new(1.),
+    );
     lazy.insert(entity, ObjectType::Box);
     lazy.insert(entity, mesh);
     lazy.insert(entity, material);
-    lazy.insert(
-        entity,
-        Velocity2 {
-            linear: offset * speed,
-        },
-    );
     lazy.insert(entity, Transform::default());
     lazy.insert(
         entity,
@@ -73,25 +78,5 @@ fn emit_box(
             rotation: Quaternion::one(),
             scale: Vector3::from_value(0.05),
         },
-    );
-    let pose = BodyPose2::new(position, Basis2::one());
-    lazy.insert(entity, pose.clone());
-    lazy.insert(entity, NextFrame { value: pose });
-    lazy.insert(
-        entity,
-        NextFrame {
-            value: Velocity2 {
-                linear: offset * speed,
-            },
-        },
-    );
-    lazy.insert(entity, Mass::new(1.));
-    lazy.insert(
-        entity,
-        Shape::new_simple(
-            CollisionStrategy::FullResolution,
-            CollisionMode::Discrete,
-            Rectangle::new(0.1, 0.1).into(),
-        ),
     );
 }

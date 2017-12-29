@@ -30,9 +30,7 @@ impl<'a> System<'a> for MovementSystem {
         for contact in contacts.read(&mut self.contact_reader) {
             println!("{:?}", contact);
             match (objects.get(contact.bodies.0), objects.get(contact.bodies.1)) {
-                (Some(type_0), Some(type_1))
-                    if *type_0 == ObjectType::Box && *type_1 == ObjectType::Box =>
-                {
+                (Some(_), Some(_)) => {
                     match entities.delete(contact.bodies.0) {
                         Err(e) => println!("Error: {:?}", e),
                         _ => (),

@@ -9,7 +9,7 @@ use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefault
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::FPSCounter;
 use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, DeltaTime,
-                                       Rectangle};
+                                       Mass2, Rectangle, RigidBody, WithRigidBody};
 
 use resources::{Emitter, Graphics, ObjectType, Shape};
 
@@ -123,14 +123,17 @@ fn initialise_walls(world: &mut World) {
             rotation: Quaternion::one(),
             scale: Vector3::new(0.1, 1.0, 1.0),
         })
-        .with(ObjectType::Wall)
-        .with(BodyPose2::new(Point2::new(-0.9, 0.), Basis2::one()))
-        .with(Shape::new_simple_with_type(
-            CollisionStrategy::FullResolution,
-            CollisionMode::Discrete,
-            Rectangle::new(0.2, 2.0).into(),
-            ObjectType::Wall,
-        ))
+        .with_static_rigid_body(
+            Shape::new_simple_with_type(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                Rectangle::new(0.2, 2.0).into(),
+                ObjectType::Wall,
+            ),
+            BodyPose2::new(Point2::new(-0.9, 0.), Basis2::one()),
+            RigidBody::default(),
+            Mass2::infinite(),
+        )
         .build();
 
     world
@@ -143,14 +146,17 @@ fn initialise_walls(world: &mut World) {
             rotation: Quaternion::one(),
             scale: Vector3::new(0.1, 1.0, 1.0),
         })
-        .with(ObjectType::Wall)
-        .with(BodyPose2::new(Point2::new(0.9, 0.), Basis2::one()))
-        .with(Shape::new_simple_with_type(
-            CollisionStrategy::FullResolution,
-            CollisionMode::Discrete,
-            Rectangle::new(0.2, 2.0).into(),
-            ObjectType::Wall,
-        ))
+        .with_static_rigid_body(
+            Shape::new_simple_with_type(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                Rectangle::new(0.2, 2.0).into(),
+                ObjectType::Wall,
+            ),
+            BodyPose2::new(Point2::new(0.9, 0.), Basis2::one()),
+            RigidBody::default(),
+            Mass2::infinite(),
+        )
         .build();
 
     world
@@ -163,14 +169,17 @@ fn initialise_walls(world: &mut World) {
             rotation: Quaternion::one(),
             scale: Vector3::new(0.9, 0.1, 1.0),
         })
-        .with(ObjectType::Wall)
-        .with(BodyPose2::new(Point2::new(0., -0.9), Basis2::one()))
-        .with(Shape::new_simple_with_type(
-            CollisionStrategy::FullResolution,
-            CollisionMode::Discrete,
-            Rectangle::new(1.8, 0.2).into(),
-            ObjectType::Wall,
-        ))
+        .with_static_rigid_body(
+            Shape::new_simple_with_type(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                Rectangle::new(1.8, 0.2).into(),
+                ObjectType::Wall,
+            ),
+            BodyPose2::new(Point2::new(0., -0.9), Basis2::one()),
+            RigidBody::default(),
+            Mass2::infinite(),
+        )
         .build();
 
     world
@@ -183,14 +192,17 @@ fn initialise_walls(world: &mut World) {
             rotation: Quaternion::one(),
             scale: Vector3::new(0.9, 0.1, 1.0),
         })
-        .with(ObjectType::Wall)
-        .with(BodyPose2::new(Point2::new(0., 0.9), Basis2::one()))
-        .with(Shape::new_simple_with_type(
-            CollisionStrategy::FullResolution,
-            CollisionMode::Discrete,
-            Rectangle::new(1.8, 0.2).into(),
-            ObjectType::Wall,
-        ))
+        .with_static_rigid_body(
+            Shape::new_simple_with_type(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                Rectangle::new(1.8, 0.2).into(),
+                ObjectType::Wall,
+            ),
+            BodyPose2::new(Point2::new(0., 0.9), Basis2::one()),
+            RigidBody::default(),
+            Mass2::infinite(),
+        )
         .build();
 }
 
