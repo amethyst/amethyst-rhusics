@@ -4,5 +4,4 @@ extern crate rhusics;
 extern crate derivative;
 
 pub mod movement;
-pub mod debug;
 
