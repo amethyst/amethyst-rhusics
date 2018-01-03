@@ -1,5 +1,7 @@
+pub use self::deletion::BoxDeletionSystem;
 pub use self::emission::EmissionSystem;
-pub use self::movement::MovementSystem;
+pub use self::sync::PoseTransformSyncSystem;
 
 mod emission;
-mod movement;
+mod deletion;
+mod sync;
