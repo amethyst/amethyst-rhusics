@@ -1,38 +1,46 @@
+use std::marker;
+
 use amethyst::core::{ECSBundle, Result};
 use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
 use rhusics::ecs::physics::prelude2d::{register_physics, BasicCollisionSystem2, BodyPose2,
-                                       ContactEvent2, ContactResolutionSystem2, GJK2,
+                                       Collider, ContactEvent2, ContactResolutionSystem2, GJK2,
                                        ImpulseSolverSystem2, NextFrameSetupSystem2, SweepAndPrune2};
 
 use resources::{Emitter, ObjectType};
-use systems::{EmissionSystem, MovementSystem};
+use systems::{BoxDeletionSystem, EmissionSystem, PoseTransformSyncSystem};
 
-pub struct SimulationBundle;
+pub struct BasicPhysicsBundle2<Y> {
+    m: marker::PhantomData<Y>,
+}
 
-impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
+impl<Y> BasicPhysicsBundle2<Y> {
+    pub fn new() -> Self {
+        Self {
+            m: marker::PhantomData,
+        }
+    }
+}
+
+impl<'a, 'b, Y> ECSBundle<'a, 'b> for BasicPhysicsBundle2<Y>
+where
+    Y: Collider + Default + Send + Sync + 'static,
+{
     fn build(
         self,
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        register_physics::<ObjectType>(world);
+        register_physics::<Y>(world);
 
-        world.register::<Emitter>();
-        world.register::<ObjectType>();
-
-        let reader_1 = world
-            .write_resource::<EventChannel<ContactEvent2>>()
-            .register_reader();
-        let reader_2 = world
+        let reader = world
             .write_resource::<EventChannel<ContactEvent2>>()
             .register_reader();
         Ok(dispatcher
-            .add(EmissionSystem, "emission_system", &[])
             .add(ImpulseSolverSystem2::new(), "physics_solver_system", &[])
             .add(
-                MovementSystem::new(reader_2),
-                "movement_system",
+                PoseTransformSyncSystem::new(),
+                "sync_system",
                 &["physics_solver_system"],
             )
             .add(
@@ -41,16 +49,38 @@ impl<'a, 'b> ECSBundle<'a, 'b> for SimulationBundle {
                 &["physics_solver_system"],
             )
             .add(
-                BasicCollisionSystem2::<BodyPose2, ObjectType>::new()
+                BasicCollisionSystem2::<BodyPose2, Y>::new()
                     .with_broad_phase(SweepAndPrune2::new())
                     .with_narrow_phase(GJK2::new()),
                 "basic_collision_system",
                 &["next_frame_setup"],
             )
             .add(
-                ContactResolutionSystem2::new(reader_1),
+                ContactResolutionSystem2::new(reader),
                 "contact_resolution",
                 &["basic_collision_system"],
             ))
+    }
+}
+
+pub struct BoxSimulationBundle;
+
+impl<'a, 'b> ECSBundle<'a, 'b> for BoxSimulationBundle {
+    fn build(
+        self,
+        world: &mut World,
+        dispatcher: DispatcherBuilder<'a, 'b>,
+    ) -> Result<DispatcherBuilder<'a, 'b>> {
+        world.register::<Emitter>();
+        world.register::<ObjectType>();
+
+        let reader = world
+            .write_resource::<EventChannel<ContactEvent2>>()
+            .register_reader();
+        Ok(dispatcher.add(EmissionSystem, "emission_system", &[]).add(
+            BoxDeletionSystem::new(reader),
+            "deletion_system",
+            &["basic_collision_system"],
+        ))
     }
 }
