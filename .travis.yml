@@ -4,6 +4,12 @@ rust:
 - nightly
 - beta
 - stable
+os:
+  - linux
+addons:
+  apt:
+    packages:
+      - libasound2-dev
 matrix:
   allow_failures:
   - rust: nightly

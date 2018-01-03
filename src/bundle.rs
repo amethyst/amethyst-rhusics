@@ -5,7 +5,7 @@ use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
 use rhusics::ecs::physics::prelude2d::{register_physics, BasicCollisionSystem2, BodyPose2,
                                        Collider, ContactEvent2, ContactResolutionSystem2, GJK2,
-                                       ImpulseSolverSystem2, NextFrameSetupSystem2, SweepAndPrune2};
+                                       CurrentFrameUpdateSystem2, NextFrameSetupSystem2, SweepAndPrune2};
 
 use resources::{Emitter, ObjectType};
 use systems::{BoxDeletionSystem, EmissionSystem, PoseTransformSyncSystem};
@@ -37,7 +37,7 @@ where
             .write_resource::<EventChannel<ContactEvent2>>()
             .register_reader();
         Ok(dispatcher
-            .add(ImpulseSolverSystem2::new(), "physics_solver_system", &[])
+            .add(CurrentFrameUpdateSystem2::new(), "physics_solver_system", &[])
             .add(
                 PoseTransformSyncSystem::new(),
                 "sync_system",
