@@ -12,7 +12,10 @@ impl PoseTransformSyncSystem {
 }
 
 impl<'a> System<'a> for PoseTransformSyncSystem {
-    type SystemData = (ReadStorage<'a, BodyPose2>, WriteStorage<'a, LocalTransform>);
+    type SystemData = (
+        ReadStorage<'a, BodyPose2<f32>>,
+        WriteStorage<'a, LocalTransform>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
         let (poses, mut transforms) = data;
