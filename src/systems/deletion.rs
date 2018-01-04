@@ -5,11 +5,11 @@ use rhusics::ecs::collide::prelude2d::ContactEvent2;
 use resources::ObjectType;
 
 pub struct BoxDeletionSystem {
-    contact_reader: ReaderId<ContactEvent2>,
+    contact_reader: ReaderId<ContactEvent2<f32>>,
 }
 
 impl BoxDeletionSystem {
-    pub fn new(contact_reader: ReaderId<ContactEvent2>) -> Self {
+    pub fn new(contact_reader: ReaderId<ContactEvent2<f32>>) -> Self {
         Self { contact_reader }
     }
 }
@@ -17,7 +17,7 @@ impl BoxDeletionSystem {
 impl<'a> System<'a> for BoxDeletionSystem {
     type SystemData = (
         Entities<'a>,
-        Fetch<'a, EventChannel<ContactEvent2>>,
+        Fetch<'a, EventChannel<ContactEvent2<f32>>>,
         ReadStorage<'a, ObjectType>,
     );
 

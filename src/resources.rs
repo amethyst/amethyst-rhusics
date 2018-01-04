@@ -5,7 +5,7 @@ use amethyst::ecs::{Component, DenseVecStorage, VecStorage};
 use amethyst::renderer::{Material, Mesh};
 use rhusics::ecs::collide::prelude2d::{BodyPose2, Collider, CollisionShape2};
 
-pub type Shape = CollisionShape2<BodyPose2, ObjectType>;
+pub type Shape = CollisionShape2<f32, BodyPose2<f32>, ObjectType>;
 
 #[repr(u8)]
 #[derive(Debug, Clone, PartialOrd, PartialEq)]

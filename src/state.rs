@@ -28,7 +28,7 @@ impl State for Emitting {
     }
 
     fn update(&mut self, world: &mut World) -> Trans {
-        let mut delta = world.write_resource::<DeltaTime>();
+        let mut delta = world.write_resource::<DeltaTime<f32>>();
         let time = world.read_resource::<Time>();
         delta.delta_seconds = time.delta_seconds();
         println!("FPS: {}", world.read_resource::<FPSCounter>().sampled_fps());

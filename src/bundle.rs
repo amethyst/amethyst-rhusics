@@ -4,8 +4,9 @@ use amethyst::core::{ECSBundle, Result};
 use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
 use rhusics::ecs::physics::prelude2d::{register_physics, BasicCollisionSystem2, BodyPose2,
-                                       Collider, ContactEvent2, ContactResolutionSystem2, GJK2,
-                                       CurrentFrameUpdateSystem2, NextFrameSetupSystem2, SweepAndPrune2};
+                                       Collider, ContactEvent2, ContactResolutionSystem2,
+                                       CurrentFrameUpdateSystem2, GJK2, NextFrameSetupSystem2,
+                                       SweepAndPrune2};
 
 use resources::{Emitter, ObjectType};
 use systems::{BoxDeletionSystem, EmissionSystem, PoseTransformSyncSystem};
@@ -31,32 +32,36 @@ where
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        register_physics::<Y>(world);
+        register_physics::<f32, Y>(world);
 
         let reader = world
-            .write_resource::<EventChannel<ContactEvent2>>()
+            .write_resource::<EventChannel<ContactEvent2<f32>>>()
             .register_reader();
         Ok(dispatcher
-            .add(CurrentFrameUpdateSystem2::new(), "physics_solver_system", &[])
+            .add(
+                CurrentFrameUpdateSystem2::<f32>::new(),
+                "physics_solver_system",
+                &[],
+            )
             .add(
                 PoseTransformSyncSystem::new(),
                 "sync_system",
                 &["physics_solver_system"],
             )
             .add(
-                NextFrameSetupSystem2::new(),
+                NextFrameSetupSystem2::<f32>::new(),
                 "next_frame_setup",
                 &["physics_solver_system"],
             )
             .add(
-                BasicCollisionSystem2::<BodyPose2, Y>::new()
+                BasicCollisionSystem2::<f32, BodyPose2<f32>, Y>::new()
                     .with_broad_phase(SweepAndPrune2::new())
                     .with_narrow_phase(GJK2::new()),
                 "basic_collision_system",
                 &["next_frame_setup"],
             )
             .add(
-                ContactResolutionSystem2::new(reader),
+                ContactResolutionSystem2::<f32>::new(reader),
                 "contact_resolution",
                 &["basic_collision_system"],
             ))
@@ -75,7 +80,7 @@ impl<'a, 'b> ECSBundle<'a, 'b> for BoxSimulationBundle {
         world.register::<ObjectType>();
 
         let reader = world
-            .write_resource::<EventChannel<ContactEvent2>>()
+            .write_resource::<EventChannel<ContactEvent2<f32>>>()
             .register_reader();
         Ok(dispatcher.add(EmissionSystem, "emission_system", &[]).add(
             BoxDeletionSystem::new(reader),
