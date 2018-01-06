@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = []
 
 [dependencies]
-amethyst = { git = "https://github.com/amethyst/amethyst", branch = "develop" }
-rhusics = { git = "https://github.com/Rhuagh/rhusics", features = ["ecs"] }
+amethyst = { git = "https://github.com/Rhuagh/amethyst", branch = "fix/cgmath-0.16" }
+rhusics = { git = "https://github.com/Rhuagh/rhusics", features = ["ecs", "eders"] }
 genmesh = "0.5"
 rand = "0.3"
