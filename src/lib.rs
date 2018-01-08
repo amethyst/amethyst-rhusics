@@ -1,6 +1,7 @@
 extern crate amethyst_core;
 extern crate collision;
-extern crate rhusics;
+extern crate rhusics_core;
+extern crate rhusics_ecs;
 extern crate shrev;
 extern crate specs;
 

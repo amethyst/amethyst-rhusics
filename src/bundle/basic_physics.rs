@@ -8,15 +8,12 @@ use collision::{Aabb2, Aabb3, Bound, ComputeBound, Contains, Discrete, HasBound,
 use collision::algorithm::broad_phase::{SweepAndPrune2, SweepAndPrune3};
 use collision::dbvt::{TreeValue, TreeValueWrapped};
 use collision::primitive::{Primitive2, Primitive3};
-use rhusics::BodyPose;
-use rhusics::collide::{Collider, ContactEvent};
-use rhusics::ecs::WithRhusics;
-use rhusics::ecs::collide::{BasicCollisionSystem, GetEntity};
-use rhusics::ecs::physics::prelude2d::{ContactResolutionSystem2, CurrentFrameUpdateSystem2, GJK2,
-                                       NextFrameSetupSystem2};
-use rhusics::ecs::physics::prelude3d::{ContactResolutionSystem3, CurrentFrameUpdateSystem3, GJK3,
-                                       NextFrameSetupSystem3};
-use rhusics::physics::Inertia;
+use rhusics_core::{BodyPose, Collider, ContactEvent, GetId, Inertia};
+use rhusics_ecs::{BasicCollisionSystem, WithRhusics};
+use rhusics_ecs::physics2d::{ContactResolutionSystem2, CurrentFrameUpdateSystem2, GJK2,
+                             NextFrameSetupSystem2};
+use rhusics_ecs::physics3d::{ContactResolutionSystem3, CurrentFrameUpdateSystem3, GJK3,
+                             NextFrameSetupSystem3};
 use shrev::EventChannel;
 use specs::{DispatcherBuilder, Entity, World};
 
@@ -50,7 +47,7 @@ where
     D: HasBound<Bound = B>
         + From<(Entity, B)>
         + TreeValue<Bound = B>
-        + GetEntity
+        + GetId<Entity>
         + Send
         + Sync
         + 'static,
@@ -129,7 +126,7 @@ where
     D: HasBound<Bound = B>
         + From<(Entity, B)>
         + TreeValue<Bound = B>
-        + GetEntity
+        + GetId<Entity>
         + Send
         + Sync
         + 'static,

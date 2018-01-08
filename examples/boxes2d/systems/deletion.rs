@@ -1,6 +1,6 @@
 use amethyst::ecs::{Entities, Fetch, ReadStorage, System};
 use amethyst::shrev::{EventChannel, ReaderId};
-use rhusics::ecs::collide::prelude2d::ContactEvent2;
+use rhusics_ecs::collide2d::ContactEvent2;
 
 use resources::ObjectType;
 

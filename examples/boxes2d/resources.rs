@@ -3,7 +3,8 @@ use std::time::{Duration, Instant};
 use amethyst::assets::Handle;
 use amethyst::ecs::{Component, DenseVecStorage, VecStorage};
 use amethyst::renderer::{Material, Mesh};
-use rhusics::ecs::collide::prelude2d::{BodyPose2, Collider, CollisionShape2};
+use rhusics_core::Collider;
+use rhusics_ecs::collide2d::{BodyPose2, CollisionShape2};
 
 pub type Shape = CollisionShape2<f32, BodyPose2<f32>, ObjectType>;
 

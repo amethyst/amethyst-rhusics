@@ -1,7 +1,7 @@
 use amethyst::core::{ECSBundle, Result};
 use amethyst::ecs::{DispatcherBuilder, World};
 use amethyst::shrev::EventChannel;
-use rhusics::ecs::physics::prelude2d::ContactEvent2;
+use rhusics_ecs::collide2d::ContactEvent2;
 
 use resources::{Emitter, ObjectType};
 use systems::{BoxDeletionSystem, EmissionSystem};
