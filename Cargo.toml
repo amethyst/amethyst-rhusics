@@ -4,7 +4,17 @@ version = "0.1.0"
 authors = []
 
 [dependencies]
-amethyst = { git = "https://github.com/Rhuagh/amethyst", branch = "fix/cgmath-0.16" }
+amethyst_core = { git = "https://github.com/amethyst/amethyst", branch = "develop" }
 rhusics = { git = "https://github.com/Rhuagh/rhusics", features = ["ecs", "eders"] }
+specs = "0.10"
+shrev = "0.8"
+collision = "0.14"
+
+[dev-dependencies]
+amethyst = { git = "https://github.com/amethyst/amethyst", branch = "develop" }
 genmesh = "0.5"
 rand = "0.3"
+
+[[example]]
+name = "boxes2d"
+path = "examples/boxes2d/main.rs"
