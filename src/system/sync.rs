@@ -3,7 +3,7 @@ use std::marker;
 use amethyst_core::LocalTransform;
 use amethyst_core::cgmath::{BaseFloat, Basis2, EuclideanSpace, Point2, Point3, Quaternion,
                             Rotation, Vector3};
-use rhusics::BodyPose;
+use rhusics_core::BodyPose;
 use specs::{Join, ReadStorage, System, WriteStorage};
 
 use sync::Convert;

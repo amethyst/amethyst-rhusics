@@ -5,8 +5,10 @@ use amethyst::core::{LocalTransform, Transform};
 use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector2, Vector3};
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
-use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass2,
-                                       Rectangle, RigidBody, Velocity2, WithLazyRigidBody};
+use rhusics_core::RigidBody;
+use rhusics_ecs::WithLazyRigidBody;
+use rhusics_ecs::physics2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass2, Rectangle,
+                             Velocity2};
 
 use resources::{Emitter, Graphics, ObjectType, Shape};
 

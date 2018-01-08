@@ -1,6 +1,6 @@
 use amethyst_core::cgmath::{BaseFloat, Basis2, Matrix3, Point2, Point3, Quaternion, Vector3};
 use amethyst_core::timing::Time;
-use rhusics::ecs::physics::DeltaTime;
+use rhusics_ecs::DeltaTime;
 use specs::World;
 
 pub trait Convert {

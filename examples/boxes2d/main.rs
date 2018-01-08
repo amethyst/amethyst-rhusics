@@ -2,7 +2,8 @@ extern crate amethyst;
 extern crate amethyst_rhusics;
 extern crate genmesh;
 extern crate rand;
-extern crate rhusics;
+extern crate rhusics_core;
+extern crate rhusics_ecs;
 
 use amethyst::core::TransformBundle;
 use amethyst::prelude::*;

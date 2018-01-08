@@ -9,8 +9,9 @@ use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefault
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::FPSCounter;
 use amethyst_rhusics::time_sync;
-use rhusics::ecs::physics::prelude2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass2,
-                                       Rectangle, RigidBody, WithRigidBody};
+use rhusics_core::RigidBody;
+use rhusics_ecs::WithRigidBody;
+use rhusics_ecs::physics2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass2, Rectangle};
 
 use resources::{Emitter, Graphics, ObjectType, Shape};
 
