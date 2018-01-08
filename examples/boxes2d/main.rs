@@ -1,4 +1,5 @@
 extern crate amethyst;
+extern crate amethyst_rhusics;
 extern crate genmesh;
 extern crate rand;
 extern crate rhusics;
@@ -8,8 +9,9 @@ use amethyst::prelude::*;
 use amethyst::renderer::{DisplayConfig, DrawFlat, Pipeline, PosTex, RenderBundle, RenderSystem,
                          Stage};
 use amethyst::utils::fps_counter::FPSCounterBundle;
+use amethyst_rhusics::DefaultBasicPhysicsBundle2;
 
-use self::bundle::{BasicPhysicsBundle2, BoxSimulationBundle};
+use self::bundle::BoxSimulationBundle;
 use self::resources::ObjectType;
 
 mod systems;
@@ -32,7 +34,7 @@ fn run() -> Result<(), amethyst::Error> {
 
     let mut game = Application::build("./", self::state::Emitting)?
         .with_bundle(FPSCounterBundle::default())?
-        .with_bundle(BasicPhysicsBundle2::<ObjectType>::new())?
+        .with_bundle(DefaultBasicPhysicsBundle2::<f32, ObjectType>::new())?
         .with_bundle(BoxSimulationBundle)?
         .with_bundle(TransformBundle::new().with_dep(&["sync_system"]))?
         .with_bundle(RenderBundle::new())?
