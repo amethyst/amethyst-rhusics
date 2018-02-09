@@ -7,8 +7,7 @@ extern crate rhusics_ecs;
 
 use amethyst::core::TransformBundle;
 use amethyst::prelude::*;
-use amethyst::renderer::{DisplayConfig, DrawFlat, Pipeline, PosTex, RenderBundle, RenderSystem,
-                         Stage};
+use amethyst::renderer::{DisplayConfig, DrawFlat, Pipeline, PosTex, RenderBundle, Stage};
 use amethyst::utils::fps_counter::FPSCounterBundle;
 use amethyst_rhusics::DefaultBasicPhysicsBundle2;
 
@@ -38,8 +37,7 @@ fn run() -> Result<(), amethyst::Error> {
         .with_bundle(DefaultBasicPhysicsBundle2::<f32, ObjectType>::new())?
         .with_bundle(BoxSimulationBundle)?
         .with_bundle(TransformBundle::new().with_dep(&["sync_system"]))?
-        .with_bundle(RenderBundle::new())?
-        .with_local(RenderSystem::build(pipe, Some(config))?)
+        .with_bundle(RenderBundle::new(pipe, Some(config)))?
         .build()
         .expect("Fatal error");
 
