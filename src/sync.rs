@@ -1,7 +1,14 @@
-use amethyst_core::cgmath::{BaseFloat, Basis2, Matrix3, Point2, Point3, Quaternion, Vector3};
+use amethyst_core::LocalTransform;
+use amethyst_core::cgmath::{Array, BaseFloat, Basis2, EuclideanSpace, Matrix3, Point2, Point3,
+                            Quaternion, Rotation, Vector3};
 use amethyst_core::timing::Time;
+use rhusics_core::BodyPose;
 use rhusics_ecs::DeltaTime;
 use specs::World;
+
+pub trait AsLocalTransform {
+    fn as_local_transform(&self) -> LocalTransform;
+}
 
 pub trait Convert {
     type Output;
@@ -68,6 +75,21 @@ where
             self.v.y.to_f32().unwrap(),
             self.v.z.to_f32().unwrap(),
         )
+    }
+}
+
+impl<P, R> AsLocalTransform for BodyPose<P, R>
+where
+    P: EuclideanSpace + Convert<Output = Vector3<f32>>,
+    P::Scalar: BaseFloat,
+    R: Rotation<P> + Convert<Output = Quaternion<f32>>,
+{
+    fn as_local_transform(&self) -> LocalTransform {
+        LocalTransform {
+            translation: self.position().convert(),
+            rotation: self.rotation().convert(),
+            scale: Vector3::from_value(1.),
+        }
     }
 }
 

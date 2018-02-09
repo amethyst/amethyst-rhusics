@@ -1,21 +1,38 @@
+extern crate amethyst;
+extern crate amethyst_rhusics;
+extern crate collision;
+extern crate genmesh;
+extern crate rand;
+extern crate rhusics_core;
+extern crate rhusics_ecs;
+extern crate specs;
+
+#[path = "boxes/mod.rs"]
+mod boxes;
+
 use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
-use amethyst::core::{LocalTransform, Transform};
+use amethyst::core::{LocalTransform, Transform, TransformBundle};
 use amethyst::core::cgmath::{Array, Basis2, One, Point2, Quaternion, Vector3};
 use amethyst::ecs::World;
-use amethyst::prelude::{State, Trans};
-use amethyst::renderer::{Camera, Event, KeyboardInput, Material, MaterialDefaults, Mesh, PosTex,
+use amethyst::prelude::{Application, Config, State, Trans};
+use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
+                         MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
                          VirtualKeyCode, WindowEvent};
-use amethyst::utils::fps_counter::FPSCounter;
-use amethyst_rhusics::time_sync;
-use rhusics_core::RigidBody;
+use amethyst::utils::fps_counter::{FPSCounter, FPSCounterBundle};
+use amethyst_rhusics::{time_sync, DefaultBasicPhysicsBundle2};
+use collision::Aabb2;
+use collision::primitive::{Primitive2, Rectangle};
+use rhusics_core::{CollisionShape, RigidBody};
 use rhusics_ecs::WithRigidBody;
-use rhusics_ecs::physics2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass2, Rectangle};
+use rhusics_ecs::physics2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass2};
 
-use resources::{Emitter, Graphics, ObjectType, Shape};
+use self::boxes::{BoxSimulationBundle, Emitter, Graphics, ObjectType};
 
 pub struct Emitting;
+
+pub type Shape = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, ObjectType>;
 
 impl State for Emitting {
     fn on_start(&mut self, world: &mut World) {
@@ -206,40 +223,75 @@ fn initialise_walls(world: &mut World) {
         .build();
 }
 
+fn emitter(p: Point2<f32>, d: Duration) -> Emitter<Point2<f32>> {
+    Emitter {
+        location: p,
+        emission_interval: d,
+        last_emit: Instant::now(),
+    }
+}
+
 fn initialise_emitters(world: &mut World) {
     world
         .create_entity()
-        .with(Emitter {
-            location: (-0.4, 0.),
-            emission_interval: Duration::new(0, 500_000_000),
-            last_emit: Instant::now(),
-        })
+        .with(emitter(
+            Point2::new(-0.4, 0.),
+            Duration::new(0, 500_000_000),
+        ))
         .build();
 
     world
         .create_entity()
-        .with(Emitter {
-            location: (0.4, 0.),
-            emission_interval: Duration::new(0, 750_000_000),
-            last_emit: Instant::now(),
-        })
+        .with(emitter(Point2::new(0.4, 0.), Duration::new(0, 750_000_000)))
         .build();
 
     world
         .create_entity()
-        .with(Emitter {
-            location: (0., -0.4),
-            emission_interval: Duration::new(1, 0),
-            last_emit: Instant::now(),
-        })
+        .with(emitter(Point2::new(0., -0.4), Duration::new(1, 0)))
         .build();
 
     world
         .create_entity()
-        .with(Emitter {
-            location: (0., 0.4),
-            emission_interval: Duration::new(1, 250_000_000),
-            last_emit: Instant::now(),
-        })
+        .with(emitter(Point2::new(0., 0.4), Duration::new(1, 250_000_000)))
         .build();
+}
+
+fn run() -> Result<(), amethyst::Error> {
+    let path = format!(
+        "{}/../resources/display_config.ron",
+        env!("CARGO_MANIFEST_DIR")
+    );
+    let config = DisplayConfig::load(&path);
+
+    let pipe = Pipeline::build().with_stage(
+        Stage::with_backbuffer()
+            .clear_target([0., 0., 0., 1.0], 1.0)
+            .with_pass(DrawFlat::<PosTex>::new()),
+    );
+
+    let mut game = Application::build("./", Emitting)?
+        .with_bundle(FPSCounterBundle::default())?
+        .with_bundle(DefaultBasicPhysicsBundle2::<f32, ObjectType>::new())?
+        .with_bundle(BoxSimulationBundle::<
+            Primitive2<f32>,
+            Aabb2<f32>,
+            Basis2<f32>,
+            f32,
+            f32,
+        >::new(Rectangle::new(0.1, 0.1).into()))?
+        .with_bundle(TransformBundle::new().with_dep(&["sync_system"]))?
+        .with_bundle(RenderBundle::new(pipe, Some(config)))?
+        .build()
+        .expect("Fatal error");
+
+    game.run();
+
+    Ok(())
+}
+
+fn main() {
+    if let Err(e) = run() {
+        println!("Error occurred during game execution: {}", e);
+        ::std::process::exit(1);
+    }
 }

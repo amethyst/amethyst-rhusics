@@ -25,7 +25,3 @@ collision = "0.14"
 amethyst = { git = "https://github.com/amethyst/amethyst", branch = "develop" }
 genmesh = "0.5"
 rand = "0.3"
-
-[[example]]
-name = "boxes2d"
-path = "examples/boxes2d/main.rs"
