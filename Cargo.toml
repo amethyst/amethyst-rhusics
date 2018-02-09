@@ -5,8 +5,8 @@ authors = []
 
 [dependencies]
 amethyst_core = { git = "https://github.com/amethyst/amethyst", branch = "develop" }
-rhusics-ecs = { git = "https://github.com/Rhuagh/rhusics", features = ["eders"] }
-rhusics-core = { git = "https://github.com/Rhuagh/rhusics", features = ["specs", "eders"] }
+rhusics-ecs = { version = "0.1", features = ["eders"] }
+rhusics-core = { version = "0.1", features = ["specs", "eders"] }
 specs = "0.10"
 shrev = "0.8"
 collision = "0.14"
