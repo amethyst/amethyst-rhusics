@@ -1,23 +1,41 @@
-use amethyst::ecs::{Entities, Fetch, ReadStorage, System};
+use std::fmt::Debug;
+
+use amethyst::core::cgmath::{BaseFloat, EuclideanSpace};
+use amethyst::ecs::{Entities, Entity, Fetch, ReadStorage, System};
 use amethyst::shrev::{EventChannel, ReaderId};
-use rhusics_ecs::collide2d::ContactEvent2;
+use rhusics_core::ContactEvent;
 
-use resources::ObjectType;
+use super::ObjectType;
 
-pub struct BoxDeletionSystem {
-    contact_reader: ReaderId<ContactEvent2<f32>>,
+pub struct BoxDeletionSystem<P>
+where
+    P: EuclideanSpace,
+    P::Diff: Debug,
+    P::Scalar: BaseFloat,
+{
+    contact_reader: ReaderId<ContactEvent<Entity, P>>,
 }
 
-impl BoxDeletionSystem {
-    pub fn new(contact_reader: ReaderId<ContactEvent2<f32>>) -> Self {
+impl<P> BoxDeletionSystem<P>
+where
+    P: EuclideanSpace,
+    P::Diff: Debug,
+    P::Scalar: BaseFloat,
+{
+    pub fn new(contact_reader: ReaderId<ContactEvent<Entity, P>>) -> Self {
         Self { contact_reader }
     }
 }
 
-impl<'a> System<'a> for BoxDeletionSystem {
+impl<'a, P> System<'a> for BoxDeletionSystem<P>
+where
+    P: EuclideanSpace + Debug + Send + Sync + 'static,
+    P::Diff: Debug + Send + Sync + 'static,
+    P::Scalar: BaseFloat + Send + Sync + 'static,
+{
     type SystemData = (
         Entities<'a>,
-        Fetch<'a, EventChannel<ContactEvent2<f32>>>,
+        Fetch<'a, EventChannel<ContactEvent<Entity, P>>>,
         ReadStorage<'a, ObjectType>,
     );
 

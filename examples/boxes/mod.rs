@@ -1,12 +1,17 @@
+pub use self::bundle::BoxSimulationBundle;
+pub use self::deletion::BoxDeletionSystem;
+pub use self::emission::EmissionSystem;
+
+mod deletion;
+mod emission;
+mod bundle;
+
 use std::time::{Duration, Instant};
 
 use amethyst::assets::Handle;
 use amethyst::ecs::{Component, DenseVecStorage, VecStorage};
 use amethyst::renderer::{Material, Mesh};
 use rhusics_core::Collider;
-use rhusics_ecs::collide2d::{BodyPose2, CollisionShape2};
-
-pub type Shape = CollisionShape2<f32, BodyPose2<f32>, ObjectType>;
 
 #[repr(u8)]
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
@@ -31,13 +36,16 @@ impl Component for ObjectType {
     type Storage = VecStorage<Self>;
 }
 
-pub struct Emitter {
-    pub location: (f32, f32),
+pub struct Emitter<P> {
+    pub location: P,
     pub last_emit: Instant,
     pub emission_interval: Duration,
 }
 
-impl Component for Emitter {
+impl<P> Component for Emitter<P>
+where
+    P: Send + Sync + 'static,
+{
     type Storage = DenseVecStorage<Self>;
 }
 
