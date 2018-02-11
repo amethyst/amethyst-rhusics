@@ -14,7 +14,7 @@ description = "Integration of `amethyst` and `rhusics`"
 keywords = ["gamedev", "amethyst", "physics"]
 
 [dependencies]
-amethyst_core = { git = "https://github.com/amethyst/amethyst", branch = "develop" }
+amethyst_core = { version = "0.1.0", git = "https://github.com/amethyst/amethyst", branch = "develop" }
 rhusics-ecs = { version = "0.1", features = ["eders"] }
 rhusics-core = { version = "0.1", features = ["specs", "eders"] }
 specs = "0.10"
@@ -22,7 +22,7 @@ shrev = "0.8"
 collision = "0.14"
 
 [dev-dependencies]
-amethyst = { git = "https://github.com/amethyst/amethyst", branch = "develop" }
+amethyst = { version = "0.6.0", git = "https://github.com/amethyst/amethyst", branch = "develop" }
 genmesh = "0.5"
 rand = "0.3"
 
