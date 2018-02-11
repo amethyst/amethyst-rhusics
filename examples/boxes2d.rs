@@ -13,7 +13,7 @@ mod boxes;
 use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
-use amethyst::core::{LocalTransform, Transform, TransformBundle};
+use amethyst::core::{GlobalTransform, Transform, TransformBundle};
 use amethyst::core::cgmath::{Array, Basis2, One, Point2, Quaternion, Vector3};
 use amethyst::ecs::World;
 use amethyst::prelude::{Application, Config, State, Trans};
@@ -74,12 +74,12 @@ fn initialise_camera(world: &mut World) {
     world
         .create_entity()
         .with(Camera::standard_2d())
-        .with(LocalTransform {
+        .with(Transform {
             rotation: Quaternion::one(),
             scale: Vector3::from_value(1.),
             translation: Vector3::new(0., 0., 5.),
         })
-        .with(Transform::default())
+        .with(GlobalTransform::default())
         .build();
 }
 
@@ -134,8 +134,8 @@ fn initialise_walls(world: &mut World) {
         .create_entity()
         .with(mesh.clone())
         .with(material.clone())
-        .with(Transform::default())
-        .with(LocalTransform {
+        .with(GlobalTransform::default())
+        .with(Transform {
             translation: Vector3::new(-0.9, 0., 0.),
             rotation: Quaternion::one(),
             scale: Vector3::new(0.1, 1.0, 1.0),
@@ -157,8 +157,8 @@ fn initialise_walls(world: &mut World) {
         .create_entity()
         .with(mesh.clone())
         .with(material.clone())
-        .with(Transform::default())
-        .with(LocalTransform {
+        .with(GlobalTransform::default())
+        .with(Transform {
             translation: Vector3::new(0.9, 0., 0.),
             rotation: Quaternion::one(),
             scale: Vector3::new(0.1, 1.0, 1.0),
@@ -180,8 +180,8 @@ fn initialise_walls(world: &mut World) {
         .create_entity()
         .with(mesh.clone())
         .with(material.clone())
-        .with(Transform::default())
-        .with(LocalTransform {
+        .with(GlobalTransform::default())
+        .with(Transform {
             translation: Vector3::new(0., -0.9, 0.),
             rotation: Quaternion::one(),
             scale: Vector3::new(0.9, 0.1, 1.0),
@@ -203,8 +203,8 @@ fn initialise_walls(world: &mut World) {
         .create_entity()
         .with(mesh.clone())
         .with(material.clone())
-        .with(Transform::default())
-        .with(LocalTransform {
+        .with(GlobalTransform::default())
+        .with(Transform {
             translation: Vector3::new(0., 0.9, 0.),
             rotation: Quaternion::one(),
             scale: Vector3::new(0.9, 0.1, 1.0),

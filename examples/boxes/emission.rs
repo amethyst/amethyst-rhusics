@@ -2,13 +2,13 @@ use std::marker;
 use std::time::Instant;
 
 use amethyst::assets::Handle;
-use amethyst::core::Transform;
+use amethyst::core::GlobalTransform;
 use amethyst::core::cgmath::{Array, BaseFloat, EuclideanSpace, InnerSpace, One, Quaternion,
                              Rotation, Vector3, Zero};
 use amethyst::core::cgmath::num_traits::NumCast;
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
-use amethyst_rhusics::{AsLocalTransform, Convert};
+use amethyst_rhusics::{AsTransform, Convert};
 use collision::{Bound, ComputeBound, Primitive, Union};
 use rand::Rand;
 use rand::distributions::range::SampleRange;
@@ -95,13 +95,13 @@ fn emit_box<P, B, R, A, I>(
 
     let position = emitter.location + offset;
     let pose = BodyPose::new(position, R::one());
-    let mut local_transform = pose.as_local_transform();
-    local_transform.scale = Vector3::from_value(0.05);
+    let mut transform = pose.as_transform();
+    transform.scale = Vector3::from_value(0.05);
 
     lazy.insert(entity, ObjectType::Box);
     lazy.insert(entity, mesh);
     lazy.insert(entity, material);
-    lazy.insert(entity, Transform::default());
+    lazy.insert(entity, GlobalTransform::default());
 
     lazy.with_dynamic_rigid_body(
         entity,
@@ -117,5 +117,5 @@ fn emit_box<P, B, R, A, I>(
             <P::Point as EuclideanSpace>::Scalar::one(),
         ),
     );
-    lazy.insert(entity, local_transform);
+    lazy.insert(entity, transform);
 }
