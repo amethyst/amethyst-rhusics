@@ -18,6 +18,17 @@ use rhusics_ecs::WithLazyRigidBody;
 
 use super::{Emitter, Graphics, ObjectType};
 
+/// Primitive emission system.
+///
+/// Will spawn new primitives regularly, based on the `Emitter`s in the `World`
+///
+/// ### Type parameters:
+///
+/// - `P`: Collision primitive (see `collision::primitive` for more information)
+/// - `B`: Bounding volume (usually `Aabb2`, `Aabb3` or `Sphere`)
+/// - `R`: Rotational quantity (`Basis2` or `Quaternion`)
+/// - `A`: Angular velocity quantity (`Scalar` or `Vector3`)
+/// - `I`: Inertia tensor (`Scalar` or `Matrix3`)
 pub struct EmissionSystem<P, B, R, A, I> {
     primitive: P,
     m: marker::PhantomData<(B, R, A, I)>,

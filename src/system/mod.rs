@@ -1,3 +1,3 @@
-pub use self::sync::{PoseTransformSyncSystem, PoseTransformSyncSystem2, PoseTransformSyncSystem3};
+pub use self::sync::PoseTransformSyncSystem;
 
 mod sync;

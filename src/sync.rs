@@ -6,12 +6,20 @@ use rhusics_core::BodyPose;
 use rhusics_ecs::DeltaTime;
 use specs::World;
 
+/// Utility trait for converting a transform type into an amethyst `Transform`.
 pub trait AsTransform {
+    /// Convert to `Transform`
     fn as_transform(&self) -> Transform;
 }
 
+/// Utility trait for converting data between types.
+///
+/// Primarily used for mapping data into amethysts internal data formation in `Transform`,
+/// for example converting between `Point2<S>` to `Vector3<f32>` (which is used inside `Transform`).
 pub trait Convert {
+    /// Output type of conversion
     type Output;
+    /// Convert
     fn convert(&self) -> Self::Output;
 }
 
@@ -93,6 +101,7 @@ where
     }
 }
 
+/// Utility function to sync time management from amethysts view of time, to rhusics view of time.
 pub fn time_sync(world: &World) {
     let mut delta = world.write_resource::<DeltaTime<f32>>();
     let time = world.read_resource::<Time>();

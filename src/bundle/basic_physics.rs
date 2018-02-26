@@ -3,11 +3,9 @@ use std::ops::{Add, Sub};
 
 use amethyst_core::{ECSBundle, Result};
 use amethyst_core::cgmath::{BaseFloat, Basis2, Point2, Point3, Quaternion};
-use collision::{Aabb2, Aabb3, Bound, ComputeBound, Contains, Discrete, HasBound, Primitive,
-                SurfaceArea, Union};
+use collision::{Bound, ComputeBound, Contains, Discrete, HasBound, Primitive, SurfaceArea, Union};
 use collision::algorithm::broad_phase::{SweepAndPrune2, SweepAndPrune3};
-use collision::dbvt::{TreeValue, TreeValueWrapped};
-use collision::primitive::{Primitive2, Primitive3};
+use collision::dbvt::TreeValue;
 use rhusics_core::{BodyPose, Collider, ContactEvent, GetId, Inertia};
 use rhusics_ecs::{BasicCollisionSystem, WithRhusics};
 use rhusics_ecs::physics2d::{ContactResolutionSystem2, CurrentFrameUpdateSystem2, GJK2,
@@ -17,13 +15,24 @@ use rhusics_ecs::physics3d::{ContactResolutionSystem3, CurrentFrameUpdateSystem3
 use shrev::EventChannel;
 use specs::{DispatcherBuilder, Entity, World};
 
-use system::{PoseTransformSyncSystem2, PoseTransformSyncSystem3};
+use default::{PoseTransformSyncSystem2, PoseTransformSyncSystem3};
 
+/// Bundle for configuring 2D physics, using the basic collision detection setup in rhusics.
+///
+/// ### Type parameters:
+///
+/// - `S`: Scalar (`f32` or `f64`)
+/// - `P`: Collision primitive (see `collision::primitive` for more information)
+/// - `B`: Bounding volume (`Aabb2` for most scenarios)
+/// - `D`: Broad phase collision detection type (`TreeValueWrapped<Entity, B>` for the vast majority
+///        of scenarios).
+/// - `Y`: collision detection manager type (see `rhusics_core::Collider` for more information)
 pub struct BasicPhysicsBundle2<S, P, B, D, Y> {
     m: marker::PhantomData<(S, P, B, D, Y)>,
 }
 
 impl<S, P, B, D, Y> BasicPhysicsBundle2<S, P, B, D, Y> {
+    /// Create new bundle
     pub fn new() -> Self {
         Self {
             m: marker::PhantomData,
@@ -95,14 +104,22 @@ where
     }
 }
 
-pub type DefaultBasicPhysicsBundle2<S, Y> =
-    BasicPhysicsBundle2<S, Primitive2<S>, Aabb2<S>, TreeValueWrapped<Entity, Aabb2<S>>, Y>;
-
+/// Bundle for configuring 3D physics, using the basic collision detection setup in rhusics.
+///
+/// ### Type parameters:
+///
+/// - `S`: Scalar (`f32` or `f64`)
+/// - `P`: Collision primitive (see `collision::primitive` for more information)
+/// - `B`: Bounding volume (`Aabb3` or `Sphere` for most scenarios)
+/// - `D`: Broad phase collision detection type (`TreeValueWrapped<Entity, B>` for the vast majority
+///        of scenarios).
+/// - `Y`: collision detection manager type (see `rhusics_core::Collider` for more information)
 pub struct BasicPhysicsBundle3<S, P, B, D, Y> {
     m: marker::PhantomData<(S, P, B, D, Y)>,
 }
 
 impl<S, P, B, D, Y> BasicPhysicsBundle3<S, P, B, D, Y> {
+    /// Create new bundle
     pub fn new() -> Self {
         Self {
             m: marker::PhantomData,
@@ -113,7 +130,7 @@ impl<S, P, B, D, Y> BasicPhysicsBundle3<S, P, B, D, Y> {
 impl<'a, 'b, S, P, B, D, Y> ECSBundle<'a, 'b> for BasicPhysicsBundle3<S, P, B, D, Y>
 where
     P: Primitive<Point = Point3<S>> + ComputeBound<B> + Send + Sync + 'static,
-    S: BaseFloat + Copy + Inertia<Orientation = Quaternion<S>> + Send + Sync + 'static,
+    S: BaseFloat + Copy + Send + Sync + 'static,
     B: Bound<Point = P::Point>
         + Clone
         + Discrete<B>
@@ -173,6 +190,3 @@ where
             ))
     }
 }
-
-pub type DefaultBasicPhysicsBundle3<S, Y> =
-    BasicPhysicsBundle3<S, Primitive3<S>, Aabb3<S>, TreeValueWrapped<Entity, Aabb3<S>>, Y>;
