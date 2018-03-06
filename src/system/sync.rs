@@ -1,7 +1,7 @@
 use std::marker;
 
 use amethyst_core::Transform;
-use amethyst_core::cgmath::{BaseFloat, EuclideanSpace, Quaternion, Rotation, Vector3};
+use amethyst_core::cgmath::{EuclideanSpace, Quaternion, Rotation, Vector3};
 use rhusics_core::BodyPose;
 use specs::{Join, ReadStorage, System, WriteStorage};
 
@@ -12,8 +12,8 @@ use sync::Convert;
 ///
 /// ### Type parameters:
 ///
-/// - `P`: Positional quantity (`Point2` or `Point3` in most scenarios).
-/// - `R`: Rotational quantity (`Basis2` or `Quaternion` in most scenarios).
+/// - `P`: Positional quantity (`Point2<f32>` or `Point3<f32>` in most scenarios).
+/// - `R`: Rotational quantity (`Basis2<f32>` or `Quaternion<f32>` in most scenarios).
 pub struct PoseTransformSyncSystem<P, R> {
     m: marker::PhantomData<(P, R)>,
 }
@@ -29,9 +29,8 @@ impl<P, R> PoseTransformSyncSystem<P, R> {
 
 impl<'a, P, R> System<'a> for PoseTransformSyncSystem<P, R>
 where
-    P: EuclideanSpace + Convert<Output = Vector3<f32>> + Send + Sync + 'static,
+    P: EuclideanSpace<Scalar = f32> + Convert<Output = Vector3<f32>> + Send + Sync + 'static,
     R: Rotation<P> + Convert<Output = Quaternion<f32>> + Send + Sync + 'static,
-    P::Scalar: BaseFloat,
 {
     type SystemData = (ReadStorage<'a, BodyPose<P, R>>, WriteStorage<'a, Transform>);
 

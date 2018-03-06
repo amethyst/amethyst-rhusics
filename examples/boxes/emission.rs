@@ -3,15 +3,13 @@ use std::time::Instant;
 
 use amethyst::assets::Handle;
 use amethyst::core::GlobalTransform;
-use amethyst::core::cgmath::{Array, BaseFloat, EuclideanSpace, InnerSpace, One, Quaternion,
+use amethyst::core::cgmath::{Array, EuclideanSpace, InnerSpace, Quaternion,
                              Rotation, Vector3, Zero};
-use amethyst::core::cgmath::num_traits::NumCast;
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 use amethyst_rhusics::{AsTransform, Convert};
 use collision::{Bound, ComputeBound, Primitive, Union};
 use rand::Rand;
-use rand::distributions::range::SampleRange;
 use rhusics_core::{BodyPose, CollisionMode, CollisionShape, CollisionStrategy, Inertia, Mass,
                    RigidBody, Velocity};
 use rhusics_ecs::WithLazyRigidBody;
@@ -47,9 +45,8 @@ impl<'a, P, B, R, A, I> System<'a> for EmissionSystem<P, B, R, A, I>
 where
     B: Bound<Point = P::Point> + Union<B, Output = B> + Clone + Send + Sync + 'static,
     P: Primitive + ComputeBound<B> + Clone + Send + Sync + 'static,
-    P::Point: EuclideanSpace + Convert<Output = Vector3<f32>> + Send + Sync + 'static,
+    P::Point: EuclideanSpace<Scalar = f32> + Convert<Output = Vector3<f32>> + Send + Sync + 'static,
     <P::Point as EuclideanSpace>::Diff: Rand + InnerSpace + Array + Send + Sync + 'static,
-    <P::Point as EuclideanSpace>::Scalar: BaseFloat + SampleRange + Send + Sync + 'static,
     R: Rotation<P::Point> + Convert<Output = Quaternion<f32>> + Send + Sync + 'static,
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,
@@ -89,9 +86,8 @@ fn emit_box<P, B, R, A, I>(
 ) where
     B: Bound<Point = P::Point> + Union<B, Output = B> + Clone + Send + Sync + 'static,
     P: Primitive + ComputeBound<B> + Clone + Send + Sync + 'static,
-    P::Point: EuclideanSpace + Convert<Output = Vector3<f32>> + Send + Sync + 'static,
+    P::Point: EuclideanSpace<Scalar = f32> + Convert<Output = Vector3<f32>> + Send + Sync + 'static,
     <P::Point as EuclideanSpace>::Diff: Rand + InnerSpace + Array + Send + Sync + 'static,
-    <P::Point as EuclideanSpace>::Scalar: BaseFloat + SampleRange + Send + Sync + 'static,
     R: Rotation<P::Point> + Convert<Output = Quaternion<f32>> + Send + Sync + 'static,
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,
@@ -100,9 +96,9 @@ fn emit_box<P, B, R, A, I>(
     use rand::Rng;
 
     let offset = <P::Point as EuclideanSpace>::Diff::rand(&mut rand::thread_rng())
-        .normalize_to(NumCast::from(0.1).unwrap());
+        .normalize_to(0.1);
     let speed: <P::Point as EuclideanSpace>::Scalar =
-        rand::thread_rng().gen_range(NumCast::from(-10.0).unwrap(), NumCast::from(10.0).unwrap());
+        rand::thread_rng().gen_range(-10.0, 10.0);
 
     let position = emitter.location + offset;
     let pose = BodyPose::new(position, R::one());
@@ -124,8 +120,8 @@ fn emit_box<P, B, R, A, I>(
         pose,
         Velocity::<<P::Point as EuclideanSpace>::Diff, A>::from_linear(offset * speed),
         RigidBody::default(),
-        Mass::<<P::Point as EuclideanSpace>::Scalar, I>::new(
-            <P::Point as EuclideanSpace>::Scalar::one(),
+        Mass::<f32, I>::new(
+            1.,
         ),
     );
     lazy.insert(entity, transform);

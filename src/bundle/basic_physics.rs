@@ -1,12 +1,11 @@
 use std::marker;
-use std::ops::{Add, Sub};
 
 use amethyst_core::{ECSBundle, Result};
-use amethyst_core::cgmath::{BaseFloat, Basis2, Point2, Point3, Quaternion};
-use collision::{Bound, ComputeBound, Contains, Discrete, HasBound, Primitive, SurfaceArea, Union};
+use amethyst_core::cgmath::{Basis2, Point2, Point3, Quaternion};
+use collision::{Bound, ComputeBound, Contains, Discrete, Primitive, SurfaceArea, Union};
 use collision::algorithm::broad_phase::{SweepAndPrune2, SweepAndPrune3};
-use collision::dbvt::TreeValue;
-use rhusics_core::{BodyPose, Collider, ContactEvent, GetId, Inertia};
+use collision::dbvt::TreeValueWrapped;
+use rhusics_core::{BodyPose, Collider, ContactEvent};
 use rhusics_ecs::{BasicCollisionSystem, WithRhusics};
 use rhusics_ecs::physics2d::{ContactResolutionSystem2, CurrentFrameUpdateSystem2, GJK2,
                              NextFrameSetupSystem2};
@@ -21,17 +20,14 @@ use default::{PoseTransformSyncSystem2, PoseTransformSyncSystem3};
 ///
 /// ### Type parameters:
 ///
-/// - `S`: Scalar (`f32` or `f64`)
 /// - `P`: Collision primitive (see `collision::primitive` for more information)
 /// - `B`: Bounding volume (`Aabb2` for most scenarios)
-/// - `D`: Broad phase collision detection type (`TreeValueWrapped<Entity, B>` for the vast majority
-///        of scenarios).
 /// - `Y`: collision detection manager type (see `rhusics_core::Collider` for more information)
-pub struct BasicPhysicsBundle2<S, P, B, D, Y> {
-    m: marker::PhantomData<(S, P, B, D, Y)>,
+pub struct BasicPhysicsBundle2<P, B, Y> {
+    m: marker::PhantomData<(P, B, Y)>,
 }
 
-impl<S, P, B, D, Y> BasicPhysicsBundle2<S, P, B, D, Y> {
+impl<P, B, Y> BasicPhysicsBundle2<P, B, Y> {
     /// Create new bundle
     pub fn new() -> Self {
         Self {
@@ -40,64 +36,55 @@ impl<S, P, B, D, Y> BasicPhysicsBundle2<S, P, B, D, Y> {
     }
 }
 
-impl<'a, 'b, S, P, B, D, Y> ECSBundle<'a, 'b> for BasicPhysicsBundle2<S, P, B, D, Y>
+impl<'a, 'b, P, B, Y> ECSBundle<'a, 'b> for BasicPhysicsBundle2<P, B, Y>
 where
-    P: Primitive<Point = Point2<S>> + ComputeBound<B> + Send + Sync + 'static,
-    S: BaseFloat + Copy + Inertia<Orientation = Basis2<S>> + Send + Sync + 'static,
+    P: Primitive<Point = Point2<f32>> + ComputeBound<B> + Send + Sync + 'static,
     B: Bound<Point = P::Point>
         + Clone
         + Discrete<B>
         + Union<B, Output = B>
         + Contains<B>
-        + SurfaceArea<Scalar = S>
-        + Send
-        + Sync
-        + 'static,
-    D: HasBound<Bound = B>
-        + From<(Entity, B)>
-        + TreeValue<Bound = B>
-        + GetId<Entity>
+        + SurfaceArea<Scalar = f32>
         + Send
         + Sync
         + 'static,
     Y: Default + Collider + Send + Sync + 'static,
-    for<'c> &'c S: Sub<S, Output = S> + Add<S, Output = S>,
 {
     fn build(
         self,
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        world.register_physics_2d::<S, P, B, D, Y>();
+        world.register_physics_2d::<f32, P, B, TreeValueWrapped<Entity, B>, Y>();
 
         let reader = world
-            .write_resource::<EventChannel<ContactEvent<Entity, Point2<S>>>>()
+            .write_resource::<EventChannel<ContactEvent<Entity, Point2<f32>>>>()
             .register_reader();
         Ok(dispatcher
             .add(
-                CurrentFrameUpdateSystem2::<S>::new(),
+                CurrentFrameUpdateSystem2::<f32>::new(),
                 "physics_solver_system",
                 &[],
             )
             .add(
-                PoseTransformSyncSystem2::<S>::new(),
+                PoseTransformSyncSystem2::new(),
                 "sync_system",
                 &["physics_solver_system"],
             )
             .add(
-                NextFrameSetupSystem2::<S>::new(),
+                NextFrameSetupSystem2::<f32>::new(),
                 "next_frame_setup",
                 &["physics_solver_system"],
             )
             .add(
-                BasicCollisionSystem::<P, BodyPose<Point2<S>, Basis2<S>>, D, B, Y>::new()
-                    .with_broad_phase(SweepAndPrune2::<S, B>::new())
+                BasicCollisionSystem::<P, BodyPose<Point2<f32>, Basis2<f32>>, TreeValueWrapped<Entity, B>, B, Y>::new()
+                    .with_broad_phase(SweepAndPrune2::<f32, B>::new())
                     .with_narrow_phase(GJK2::new()),
                 "basic_collision_system",
                 &["next_frame_setup"],
             )
             .add(
-                ContactResolutionSystem2::<S>::new(reader),
+                ContactResolutionSystem2::<f32>::new(reader),
                 "contact_resolution",
                 &["basic_collision_system"],
             ))
@@ -108,17 +95,14 @@ where
 ///
 /// ### Type parameters:
 ///
-/// - `S`: Scalar (`f32` or `f64`)
 /// - `P`: Collision primitive (see `collision::primitive` for more information)
 /// - `B`: Bounding volume (`Aabb3` or `Sphere` for most scenarios)
-/// - `D`: Broad phase collision detection type (`TreeValueWrapped<Entity, B>` for the vast majority
-///        of scenarios).
 /// - `Y`: collision detection manager type (see `rhusics_core::Collider` for more information)
-pub struct BasicPhysicsBundle3<S, P, B, D, Y> {
-    m: marker::PhantomData<(S, P, B, D, Y)>,
+pub struct BasicPhysicsBundle3<P, B, Y> {
+    m: marker::PhantomData<(P, B, Y)>,
 }
 
-impl<S, P, B, D, Y> BasicPhysicsBundle3<S, P, B, D, Y> {
+impl<P, B, Y> BasicPhysicsBundle3<P, B, Y> {
     /// Create new bundle
     pub fn new() -> Self {
         Self {
@@ -127,64 +111,55 @@ impl<S, P, B, D, Y> BasicPhysicsBundle3<S, P, B, D, Y> {
     }
 }
 
-impl<'a, 'b, S, P, B, D, Y> ECSBundle<'a, 'b> for BasicPhysicsBundle3<S, P, B, D, Y>
+impl<'a, 'b, P, B, Y> ECSBundle<'a, 'b> for BasicPhysicsBundle3<P, B, Y>
 where
-    P: Primitive<Point = Point3<S>> + ComputeBound<B> + Send + Sync + 'static,
-    S: BaseFloat + Copy + Send + Sync + 'static,
+    P: Primitive<Point = Point3<f32>> + ComputeBound<B> + Send + Sync + 'static,
     B: Bound<Point = P::Point>
         + Clone
         + Discrete<B>
         + Union<B, Output = B>
         + Contains<B>
-        + SurfaceArea<Scalar = S>
-        + Send
-        + Sync
-        + 'static,
-    D: HasBound<Bound = B>
-        + From<(Entity, B)>
-        + TreeValue<Bound = B>
-        + GetId<Entity>
+        + SurfaceArea<Scalar = f32>
         + Send
         + Sync
         + 'static,
     Y: Default + Collider + Send + Sync + 'static,
-    for<'c> &'c S: Sub<S, Output = S> + Add<S, Output = S>,
 {
     fn build(
         self,
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        world.register_physics_3d::<S, P, B, D, Y>();
+        world.register_physics_3d::<f32, P, B, TreeValueWrapped<Entity, B>, Y>();
 
         let reader = world
-            .write_resource::<EventChannel<ContactEvent<Entity, Point3<S>>>>()
+            .write_resource::<EventChannel<ContactEvent<Entity, Point3<f32>>>>()
             .register_reader();
         Ok(dispatcher
             .add(
-                CurrentFrameUpdateSystem3::<S>::new(),
+                CurrentFrameUpdateSystem3::<f32>::new(),
                 "physics_solver_system",
                 &[],
             )
             .add(
-                PoseTransformSyncSystem3::<S>::new(),
+                PoseTransformSyncSystem3::new(),
                 "sync_system",
                 &["physics_solver_system"],
             )
             .add(
-                NextFrameSetupSystem3::<S>::new(),
+                NextFrameSetupSystem3::<f32>::new(),
                 "next_frame_setup",
                 &["physics_solver_system"],
             )
             .add(
-                BasicCollisionSystem::<P, BodyPose<Point3<S>, Quaternion<S>>, D, B, Y>::new()
-                    .with_broad_phase(SweepAndPrune3::<S, B>::new())
+                BasicCollisionSystem::<P, BodyPose<Point3<f32>, Quaternion<f32>>, TreeValueWrapped<Entity, B>, B, Y>::new()
+                    .with_broad_phase(SweepAndPrune3::<f32, B>::new())
                     .with_narrow_phase(GJK3::new()),
                 "basic_collision_system",
                 &["next_frame_setup"],
             )
             .add(
-                ContactResolutionSystem3::<S>::new(reader),
+                ContactResolutionSystem3::<f32>::new(reader),
                 "contact_resolution",
                 &["basic_collision_system"],
             ))

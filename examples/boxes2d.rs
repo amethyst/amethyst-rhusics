@@ -271,8 +271,8 @@ fn run() -> Result<(), amethyst::Error> {
 
     let mut game = Application::build("./", Emitting)?
         .with_bundle(FPSCounterBundle::default())?
-        .with_bundle(DefaultBasicPhysicsBundle2::<f32, ObjectType>::new())?
-        .with_bundle(BoxSimulationBundle2::<f32>::new(
+        .with_bundle(DefaultBasicPhysicsBundle2::<ObjectType>::new())?
+        .with_bundle(BoxSimulationBundle2::new(
             Rectangle::new(0.1, 0.1).into(),
         ))?
         .with_bundle(TransformBundle::new().with_dep(&["sync_system"]))?

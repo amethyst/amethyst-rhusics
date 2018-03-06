@@ -2,14 +2,13 @@ use std::fmt::Debug;
 use std::marker;
 
 use amethyst::core::{ECSBundle, Result};
-use amethyst::core::cgmath::{Array, BaseFloat, EuclideanSpace, InnerSpace, Quaternion, Rotation,
+use amethyst::core::cgmath::{Array, EuclideanSpace, InnerSpace, Quaternion, Rotation,
                              Vector3, Zero};
 use amethyst::ecs::{DispatcherBuilder, Entity, World};
 use amethyst::shrev::EventChannel;
 use amethyst_rhusics::Convert;
 use collision::{Bound, ComputeBound, Primitive, Union};
 use rand::Rand;
-use rand::distributions::range::SampleRange;
 use rhusics_core::{ContactEvent, Inertia};
 
 use super::{BoxDeletionSystem, EmissionSystem, Emitter, ObjectType};
@@ -43,9 +42,8 @@ impl<'a, 'b, P, B, R, A, I> ECSBundle<'a, 'b> for BoxSimulationBundle<P, B, R, A
 where
     B: Bound<Point = P::Point> + Union<B, Output = B> + Clone + Send + Sync + 'static,
     P: Primitive + ComputeBound<B> + Clone + Send + Sync + 'static,
-    P::Point: EuclideanSpace + Convert<Output = Vector3<f32>> + Debug + Send + Sync + 'static,
+    P::Point: EuclideanSpace<Scalar = f32> + Convert<Output = Vector3<f32>> + Debug + Send + Sync + 'static,
     <P::Point as EuclideanSpace>::Diff: Debug + Rand + InnerSpace + Array + Send + Sync + 'static,
-    <P::Point as EuclideanSpace>::Scalar: BaseFloat + Rand + SampleRange + Send + Sync + 'static,
     R: Rotation<P::Point> + Convert<Output = Quaternion<f32>> + Send + Sync + 'static,
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,

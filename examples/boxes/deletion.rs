@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use amethyst::core::cgmath::{BaseFloat, EuclideanSpace};
+use amethyst::core::cgmath::EuclideanSpace;
 use amethyst::ecs::{Entities, Entity, Fetch, ReadStorage, System};
 use amethyst::shrev::{EventChannel, ReaderId};
 use rhusics_core::ContactEvent;
@@ -14,18 +14,16 @@ use super::ObjectType;
 /// - `P`: Positional quantity (`Point2` or `Point3`)
 pub struct BoxDeletionSystem<P>
 where
-    P: EuclideanSpace,
+    P: EuclideanSpace<Scalar = f32>,
     P::Diff: Debug,
-    P::Scalar: BaseFloat,
 {
     contact_reader: ReaderId<ContactEvent<Entity, P>>,
 }
 
 impl<P> BoxDeletionSystem<P>
 where
-    P: EuclideanSpace,
+    P: EuclideanSpace<Scalar = f32>,
     P::Diff: Debug,
-    P::Scalar: BaseFloat,
 {
     pub fn new(contact_reader: ReaderId<ContactEvent<Entity, P>>) -> Self {
         Self { contact_reader }
@@ -34,9 +32,8 @@ where
 
 impl<'a, P> System<'a> for BoxDeletionSystem<P>
 where
-    P: EuclideanSpace + Debug + Send + Sync + 'static,
+    P: EuclideanSpace<Scalar = f32> + Debug + Send + Sync + 'static,
     P::Diff: Debug + Send + Sync + 'static,
-    P::Scalar: BaseFloat + Send + Sync + 'static,
 {
     type SystemData = (
         Entities<'a>,
