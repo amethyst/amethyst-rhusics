@@ -28,7 +28,7 @@ use rhusics_core::{CollisionShape, RigidBody};
 use rhusics_ecs::WithRigidBody;
 use rhusics_ecs::physics2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass2};
 
-use self::boxes::{BoxSimulationBundle, Emitter, Graphics, ObjectType};
+use self::boxes::{BoxSimulationBundle2, Emitter, Graphics, ObjectType};
 
 pub struct Emitting;
 
@@ -272,13 +272,9 @@ fn run() -> Result<(), amethyst::Error> {
     let mut game = Application::build("./", Emitting)?
         .with_bundle(FPSCounterBundle::default())?
         .with_bundle(DefaultBasicPhysicsBundle2::<f32, ObjectType>::new())?
-        .with_bundle(BoxSimulationBundle::<
-            Primitive2<f32>,
-            Aabb2<f32>,
-            Basis2<f32>,
-            f32,
-            f32,
-        >::new(Rectangle::new(0.1, 0.1).into()))?
+        .with_bundle(BoxSimulationBundle2::<f32>::new(
+            Rectangle::new(0.1, 0.1).into(),
+        ))?
         .with_bundle(TransformBundle::new().with_dep(&["sync_system"]))?
         .with_bundle(RenderBundle::new(pipe, Some(config)))?
         .build()

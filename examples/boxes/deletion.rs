@@ -7,6 +7,11 @@ use rhusics_core::ContactEvent;
 
 use super::ObjectType;
 
+/// Delete entities from the `World` on collision.
+///
+/// ### Type parameters:
+///
+/// - `P`: Positional quantity (`Point2` or `Point3`)
 pub struct BoxDeletionSystem<P>
 where
     P: EuclideanSpace,

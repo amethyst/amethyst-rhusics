@@ -14,6 +14,17 @@ use rhusics_core::{ContactEvent, Inertia};
 
 use super::{BoxDeletionSystem, EmissionSystem, Emitter, ObjectType};
 
+/// Bundle for box simulation.
+///
+/// Add spawn and deletion systems.
+///
+/// ### Type parameters:
+///
+/// - `P`: Collision primitive (see `collision::primitive` for more information)
+/// - `B`: Bounding volume (usually `Aabb2`, `Aabb3` or `Sphere`)
+/// - `R`: Rotational quantity (`Basis2` or `Quaternion`)
+/// - `A`: Angular velocity quantity (`Scalar` or `Vector3`)
+/// - `I`: Inertia tensor (`Scalar` or `Matrix3`)
 pub struct BoxSimulationBundle<P, B, R, A, I> {
     primitive: P,
     m: marker::PhantomData<(B, R, A, I)>,
