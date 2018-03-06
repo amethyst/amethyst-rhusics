@@ -1,5 +1,5 @@
 use amethyst_core::Transform;
-use amethyst_core::cgmath::{Array, BaseFloat, Basis2, EuclideanSpace, Matrix3, Point2, Point3,
+use amethyst_core::cgmath::{Array, Basis2, EuclideanSpace, Matrix3, Point2, Point3,
                             Quaternion, Rotation, Vector3};
 use amethyst_core::timing::Time;
 use rhusics_core::BodyPose;
@@ -23,45 +23,32 @@ pub trait Convert {
     fn convert(&self) -> Self::Output;
 }
 
-impl<S> Convert for Point2<S>
-where
-    S: BaseFloat,
-{
+impl Convert for Point2<f32> {
     type Output = Vector3<f32>;
 
     fn convert(&self) -> Self::Output {
-        Vector3::new(self.x.to_f32().unwrap(), self.y.to_f32().unwrap(), 0.)
+        Vector3::new(self.x, self.y, 0.)
     }
 }
 
-impl<S> Convert for Point3<S>
-where
-    S: BaseFloat,
-{
+impl Convert for Point3<f32> {
     type Output = Vector3<f32>;
 
     fn convert(&self) -> Self::Output {
-        Vector3::new(
-            self.x.to_f32().unwrap(),
-            self.y.to_f32().unwrap(),
-            self.z.to_f32().unwrap(),
-        )
+        self.to_vec()
     }
 }
 
-impl<S> Convert for Basis2<S>
-where
-    S: BaseFloat,
-{
+impl Convert for Basis2<f32> {
     type Output = Quaternion<f32>;
 
     fn convert(&self) -> Self::Output {
         Matrix3::new(
-            self.as_ref()[0][0].to_f32().unwrap(),
-            self.as_ref()[0][1].to_f32().unwrap(),
+            self.as_ref()[0][0],
+            self.as_ref()[0][1],
             0.,
-            self.as_ref()[1][0].to_f32().unwrap(),
-            self.as_ref()[1][1].to_f32().unwrap(),
+            self.as_ref()[1][0],
+            self.as_ref()[1][1],
             0.,
             0.,
             0.,
@@ -70,26 +57,17 @@ where
     }
 }
 
-impl<S> Convert for Quaternion<S>
-where
-    S: BaseFloat,
-{
+impl Convert for Quaternion<f32> {
     type Output = Quaternion<f32>;
 
     fn convert(&self) -> Self::Output {
-        Quaternion::new(
-            self.s.to_f32().unwrap(),
-            self.v.x.to_f32().unwrap(),
-            self.v.y.to_f32().unwrap(),
-            self.v.z.to_f32().unwrap(),
-        )
+        *self
     }
 }
 
 impl<P, R> AsTransform for BodyPose<P, R>
 where
-    P: EuclideanSpace + Convert<Output = Vector3<f32>>,
-    P::Scalar: BaseFloat,
+    P: EuclideanSpace<Scalar = f32> + Convert<Output = Vector3<f32>>,
     R: Rotation<P> + Convert<Output = Quaternion<f32>>,
 {
     fn as_transform(&self) -> Transform {
