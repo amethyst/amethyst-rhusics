@@ -3,8 +3,8 @@ use std::time::Instant;
 
 use amethyst::assets::Handle;
 use amethyst::core::GlobalTransform;
-use amethyst::core::cgmath::{Array, EuclideanSpace, InnerSpace, Quaternion,
-                             Rotation, Vector3, Zero};
+use amethyst::core::cgmath::{Array, EuclideanSpace, InnerSpace, Quaternion, Rotation, Vector3,
+                             Zero};
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 use amethyst_rhusics::{AsTransform, Convert};
@@ -95,10 +95,9 @@ fn emit_box<P, B, R, A, I>(
     use rand;
     use rand::Rng;
 
-    let offset = <P::Point as EuclideanSpace>::Diff::rand(&mut rand::thread_rng())
-        .normalize_to(0.1);
-    let speed: <P::Point as EuclideanSpace>::Scalar =
-        rand::thread_rng().gen_range(-10.0, 10.0);
+    let offset =
+        <P::Point as EuclideanSpace>::Diff::rand(&mut rand::thread_rng()).normalize_to(0.1);
+    let speed: <P::Point as EuclideanSpace>::Scalar = rand::thread_rng().gen_range(-10.0, 10.0);
 
     let position = emitter.location + offset;
     let pose = BodyPose::new(position, R::one());
@@ -120,9 +119,7 @@ fn emit_box<P, B, R, A, I>(
         pose,
         Velocity::<<P::Point as EuclideanSpace>::Diff, A>::from_linear(offset * speed),
         RigidBody::default(),
-        Mass::<f32, I>::new(
-            1.,
-        ),
+        Mass::<f32, I>::new(1.),
     );
     lazy.insert(entity, transform);
 }
