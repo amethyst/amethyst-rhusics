@@ -2,10 +2,11 @@
 
 #![warn(missing_docs)]
 
+pub extern crate rhusics_core;
+pub extern crate rhusics_ecs;
+pub extern crate collision;
+
 extern crate amethyst_core;
-extern crate collision;
-extern crate rhusics_core;
-extern crate rhusics_ecs;
 extern crate shrev;
 extern crate specs;
 
