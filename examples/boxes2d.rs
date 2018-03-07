@@ -21,7 +21,7 @@ use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, 
                          MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::{FPSCounter, FPSCounterBundle};
-use amethyst_rhusics::{time_sync, DefaultBasicPhysicsBundle2};
+use amethyst_rhusics::{time_sync, DefaultSpatialPhysicsBundle2};
 use collision::Aabb2;
 use collision::primitive::{Primitive2, Rectangle};
 use rhusics_core::{CollisionShape, RigidBody};
@@ -271,10 +271,8 @@ fn run() -> Result<(), amethyst::Error> {
 
     let mut game = Application::build("./", Emitting)?
         .with_bundle(FPSCounterBundle::default())?
-        .with_bundle(DefaultBasicPhysicsBundle2::<ObjectType>::new())?
-        .with_bundle(BoxSimulationBundle2::new(
-            Rectangle::new(0.1, 0.1).into(),
-        ))?
+        .with_bundle(DefaultSpatialPhysicsBundle2::<ObjectType>::new())?
+        .with_bundle(BoxSimulationBundle2::new(Rectangle::new(0.1, 0.1).into()))?
         .with_bundle(TransformBundle::new().with_dep(&["sync_system"]))?
         .with_bundle(RenderBundle::new(pipe, Some(config)))?
         .build()
