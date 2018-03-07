@@ -14,25 +14,25 @@ use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
-use amethyst::core::cgmath::{Array, Basis2, One, Point2, Quaternion, Vector3};
+use amethyst::core::cgmath::{Array, Deg, One, Point3, Quaternion, Rotation3, Vector3};
 use amethyst::ecs::World;
 use amethyst::prelude::{Application, Config, State, Trans};
 use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
                          MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::{FPSCounter, FPSCounterBundle};
-use amethyst_rhusics::{time_sync, DefaultSpatialPhysicsBundle2};
-use collision::{Aabb2, Line2};
-use collision::primitive::{Primitive2, Rectangle};
+use amethyst_rhusics::{time_sync, DefaultSpatialPhysicsBundle3};
+use collision::Aabb3;
+use collision::primitive::{Cuboid, Primitive3, RectangularPlane};
 use rhusics_core::{CollisionShape, RigidBody};
 use rhusics_ecs::WithRigidBody;
-use rhusics_ecs::physics2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass2};
+use rhusics_ecs::physics3d::{BodyPose3, CollisionMode, CollisionStrategy, Mass3};
 
-use self::boxes::{BoxSimulationBundle2, Emitter, Graphics, ObjectType};
+use self::boxes::{BoxSimulationBundle3, Emitter, Graphics, ObjectType};
 
 pub struct Emitting;
 
-pub type Shape = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, ObjectType>;
+pub type Shape = CollisionShape<Primitive3<f32>, BodyPose3<f32>, Aabb3<f32>, ObjectType>;
 
 impl State for Emitting {
     fn on_start(&mut self, world: &mut World) {
@@ -73,11 +73,11 @@ impl State for Emitting {
 fn initialise_camera(world: &mut World) {
     world
         .create_entity()
-        .with(Camera::standard_2d())
+        .with(Camera::standard_3d(500., 500.))
         .with(Transform {
             rotation: Quaternion::one(),
             scale: Vector3::from_value(1.),
-            translation: Vector3::new(0., 0., 5.),
+            translation: Vector3::new(0., 0., 1.),
         })
         .with(GlobalTransform::default())
         .build();
@@ -118,12 +118,15 @@ fn initialise_walls(world: &mut World) {
             Shape::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(0., -2.), Point2::new(0., 2.)).into(),
+                RectangularPlane::new(2., 2.).into(),
                 ObjectType::Wall,
             ),
-            BodyPose2::new(Point2::new(-1., 0.), Basis2::one()),
+            BodyPose3::new(
+                Point3::new(-1., 0., -1.),
+                Quaternion::from_angle_y(Deg(90.)),
+            ),
             RigidBody::default(),
-            Mass2::infinite(),
+            Mass3::infinite(),
         )
         .build();
 
@@ -133,12 +136,12 @@ fn initialise_walls(world: &mut World) {
             Shape::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(0., -2.), Point2::new(0., 2.)).into(),
+                RectangularPlane::new(2., 2.).into(),
                 ObjectType::Wall,
             ),
-            BodyPose2::new(Point2::new(1., 0.), Basis2::one()),
+            BodyPose3::new(Point3::new(1., 0., -1.), Quaternion::from_angle_y(Deg(90.))),
             RigidBody::default(),
-            Mass2::infinite(),
+            Mass3::infinite(),
         )
         .build();
 
@@ -148,12 +151,15 @@ fn initialise_walls(world: &mut World) {
             Shape::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(-2., 0.), Point2::new(2., 0.)).into(),
+                RectangularPlane::new(2., 2.).into(),
                 ObjectType::Wall,
             ),
-            BodyPose2::new(Point2::new(0., -1.), Basis2::one()),
+            BodyPose3::new(
+                Point3::new(0., -1., -1.),
+                Quaternion::from_angle_x(Deg(90.)),
+            ),
             RigidBody::default(),
-            Mass2::infinite(),
+            Mass3::infinite(),
         )
         .build();
 
@@ -163,17 +169,47 @@ fn initialise_walls(world: &mut World) {
             Shape::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(-2., 0.), Point2::new(2., 0.)).into(),
+                RectangularPlane::new(2., 2.).into(),
                 ObjectType::Wall,
             ),
-            BodyPose2::new(Point2::new(0., 1.0), Basis2::one()),
+            BodyPose3::new(Point3::new(0., 1., -1.), Quaternion::from_angle_x(Deg(90.))),
             RigidBody::default(),
-            Mass2::infinite(),
+            Mass3::infinite(),
+        )
+        .build();
+
+    world
+        .create_entity()
+        .with_static_rigid_body(
+            Shape::new_simple_with_type(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                RectangularPlane::new(2., 2.).into(),
+                ObjectType::Wall,
+            ),
+            BodyPose3::new(Point3::new(0., 0., 0.), Quaternion::one()),
+            RigidBody::default(),
+            Mass3::infinite(),
+        )
+        .build();
+
+    world
+        .create_entity()
+        .with_static_rigid_body(
+            Shape::new_simple_with_type(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                RectangularPlane::new(2., 2.).into(),
+                ObjectType::Wall,
+            ),
+            BodyPose3::new(Point3::new(0., 0., -2.), Quaternion::one()),
+            RigidBody::default(),
+            Mass3::infinite(),
         )
         .build();
 }
 
-fn emitter(p: Point2<f32>, d: Duration) -> Emitter<Point2<f32>> {
+fn emitter(p: Point3<f32>, d: Duration) -> Emitter<Point3<f32>> {
     Emitter {
         location: p,
         emission_interval: d,
@@ -185,24 +221,30 @@ fn initialise_emitters(world: &mut World) {
     world
         .create_entity()
         .with(emitter(
-            Point2::new(-0.4, 0.),
+            Point3::new(-0.4, 0., -1.),
             Duration::new(0, 500_000_000),
         ))
         .build();
 
     world
         .create_entity()
-        .with(emitter(Point2::new(0.4, 0.), Duration::new(0, 750_000_000)))
+        .with(emitter(
+            Point3::new(0.4, 0., -1.),
+            Duration::new(0, 750_000_000),
+        ))
         .build();
 
     world
         .create_entity()
-        .with(emitter(Point2::new(0., -0.4), Duration::new(1, 0)))
+        .with(emitter(Point3::new(0., -0.4, -1.), Duration::new(1, 0)))
         .build();
 
     world
         .create_entity()
-        .with(emitter(Point2::new(0., 0.4), Duration::new(1, 250_000_000)))
+        .with(emitter(
+            Point3::new(0., 0.4, -1.),
+            Duration::new(1, 250_000_000),
+        ))
         .build();
 }
 
@@ -221,8 +263,8 @@ fn run() -> Result<(), amethyst::Error> {
 
     let mut game = Application::build("./", Emitting)?
         .with_bundle(FPSCounterBundle::default())?
-        .with_bundle(DefaultSpatialPhysicsBundle2::<ObjectType>::new())?
-        .with_bundle(BoxSimulationBundle2::new(Rectangle::new(0.1, 0.1).into()))?
+        .with_bundle(DefaultSpatialPhysicsBundle3::<ObjectType>::new())?
+        .with_bundle(BoxSimulationBundle3::new(Cuboid::new(0.1, 0.1, 0.1).into()))?
         .with_bundle(TransformBundle::new().with_dep(&["sync_system"]))?
         .with_bundle(RenderBundle::new(pipe, Some(config)))?
         .build()
