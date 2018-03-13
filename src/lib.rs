@@ -10,6 +10,7 @@ extern crate amethyst_core;
 extern crate shrev;
 extern crate specs;
 
+pub use self::arena::{setup_2d_arena, setup_3d_arena};
 pub use self::bundle::{BasicPhysicsBundle2, BasicPhysicsBundle3, SpatialPhysicsBundle2,
                        SpatialPhysicsBundle3};
 pub use self::default::{DefaultBasicPhysicsBundle2, DefaultBasicPhysicsBundle3,
@@ -18,6 +19,7 @@ pub use self::default::{DefaultBasicPhysicsBundle2, DefaultBasicPhysicsBundle3,
 pub use self::sync::{time_sync, AsTransform, Convert};
 pub use self::system::PoseTransformSyncSystem;
 
+mod arena;
 mod bundle;
 mod default;
 mod sync;

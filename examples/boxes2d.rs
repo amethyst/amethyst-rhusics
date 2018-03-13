@@ -11,19 +11,18 @@ use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
-use amethyst::core::cgmath::{Array, Basis2, One, Point2, Quaternion, Vector3};
+use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector3};
 use amethyst::ecs::World;
 use amethyst::prelude::{Application, Config, State, Trans};
 use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
                          MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::{FPSCounter, FPSCounterBundle};
-use amethyst_rhusics::{time_sync, DefaultSpatialPhysicsBundle2};
-use collision::{Aabb2, Line2};
+use amethyst_rhusics::{time_sync, DefaultSpatialPhysicsBundle2, setup_2d_arena};
+use collision::Aabb2;
 use collision::primitive::{Primitive2, Rectangle};
-use rhusics_core::{CollisionShape, RigidBody};
-use rhusics_ecs::WithRigidBody;
-use rhusics_ecs::physics2d::{BodyPose2, CollisionMode, CollisionStrategy, Mass2};
+use rhusics_core::CollisionShape;
+use rhusics_ecs::physics2d::BodyPose2;
 
 use self::boxes::{BoxSimulationBundle2, Emitter, Graphics, ObjectType};
 
@@ -41,7 +40,17 @@ impl State for Emitting {
             material: initialise_material(world),
         };
         world.add_resource(g);
-        initialise_walls(world);
+        setup_2d_arena(
+            Point2::new(-1., -1.),
+            Point2::new(1., 1.),
+            (
+                ObjectType::Wall,
+                ObjectType::Wall,
+                ObjectType::Wall,
+                ObjectType::Wall,
+            ),
+            world,
+        );
         initialise_emitters(world);
     }
 
@@ -108,68 +117,6 @@ fn initialise_material(world: &mut World) -> Material {
         albedo,
         ..world.read_resource::<MaterialDefaults>().0.clone()
     }
-}
-
-fn initialise_walls(world: &mut World) {
-    world
-        .create_entity()
-        .with_static_rigid_body(
-            Shape::new_simple_with_type(
-                CollisionStrategy::FullResolution,
-                CollisionMode::Discrete,
-                Line2::new(Point2::new(0., -2.), Point2::new(0., 2.)).into(),
-                ObjectType::Wall,
-            ),
-            BodyPose2::new(Point2::new(-1., 0.), Basis2::one()),
-            RigidBody::default(),
-            Mass2::infinite(),
-        )
-        .build();
-
-    world
-        .create_entity()
-        .with_static_rigid_body(
-            Shape::new_simple_with_type(
-                CollisionStrategy::FullResolution,
-                CollisionMode::Discrete,
-                Line2::new(Point2::new(0., -2.), Point2::new(0., 2.)).into(),
-                ObjectType::Wall,
-            ),
-            BodyPose2::new(Point2::new(1., 0.), Basis2::one()),
-            RigidBody::default(),
-            Mass2::infinite(),
-        )
-        .build();
-
-    world
-        .create_entity()
-        .with_static_rigid_body(
-            Shape::new_simple_with_type(
-                CollisionStrategy::FullResolution,
-                CollisionMode::Discrete,
-                Line2::new(Point2::new(-2., 0.), Point2::new(2., 0.)).into(),
-                ObjectType::Wall,
-            ),
-            BodyPose2::new(Point2::new(0., -1.), Basis2::one()),
-            RigidBody::default(),
-            Mass2::infinite(),
-        )
-        .build();
-
-    world
-        .create_entity()
-        .with_static_rigid_body(
-            Shape::new_simple_with_type(
-                CollisionStrategy::FullResolution,
-                CollisionMode::Discrete,
-                Line2::new(Point2::new(-2., 0.), Point2::new(2., 0.)).into(),
-                ObjectType::Wall,
-            ),
-            BodyPose2::new(Point2::new(0., 1.0), Basis2::one()),
-            RigidBody::default(),
-            Mass2::infinite(),
-        )
-        .build();
 }
 
 fn emitter(p: Point2<f32>, d: Duration) -> Emitter<Point2<f32>> {
