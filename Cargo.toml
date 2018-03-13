@@ -15,11 +15,11 @@ keywords = ["gamedev", "amethyst", "physics"]
 
 [dependencies]
 amethyst_core = { version = "0.1.0", git = "https://github.com/amethyst/amethyst", branch = "develop" }
-rhusics-ecs = { version = "0.1", features = ["eders"] }
-rhusics-core = { version = "0.1", features = ["specs", "eders"] }
+rhusics-ecs = { version = "0.2", features = ["eders"] }
+rhusics-core = { version = "0.2", features = ["specs", "eders"] }
 specs = "0.10"
 shrev = "0.8"
-collision = "0.14"
+collision = { version = "0.15", features = ["eders"]}
 
 [dev-dependencies]
 amethyst = { version = "0.6.0", git = "https://github.com/amethyst/amethyst", branch = "develop" }
