@@ -2,7 +2,7 @@ use std::marker;
 use std::time::Instant;
 
 use amethyst::assets::Handle;
-use amethyst::core::GlobalTransform;
+use amethyst::core::{GlobalTransform, Transform};
 use amethyst::core::cgmath::{Array, EuclideanSpace, InnerSpace, Quaternion, Rotation, Vector3,
                              Zero};
 use amethyst::ecs::{Entities, Entity, Fetch, Join, LazyUpdate, System, WriteStorage};
@@ -100,7 +100,7 @@ fn emit_box<P, B, R, A, I>(
     let speed: <P::Point as EuclideanSpace>::Scalar = rand::thread_rng().gen_range(-10.0, 10.0);
 
     let position = emitter.location + offset;
-    let pose = BodyPose::new(position, R::one());
+    let pose = Transform::new(position, R::one());
     let mut transform = pose.as_transform();
     transform.scale = Vector3::from_value(0.05);
 

@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::marker;
 
-use amethyst_core::{ECSBundle, Result};
+use amethyst_core::{ECSBundle, Result, Transform};
 use amethyst_core::cgmath::{Basis2, Point2, Point3, Quaternion};
 use collision::{Bound, ComputeBound, Contains, Discrete, Primitive, SurfaceArea, Union};
 use collision::algorithm::broad_phase::{SweepAndPrune2, SweepAndPrune3};
@@ -57,31 +57,26 @@ where
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        world.register_physics_2d::<f32, P, B, TreeValueWrapped<Entity, B>, Y>();
+        world.register_physics_2d::<f32, P, B, TreeValueWrapped<Entity, B>, Y, Transform>();
 
         let reader = world
             .write_resource::<EventChannel<ContactEvent<Entity, Point2<f32>>>>()
             .register_reader();
         Ok(dispatcher
             .add(
-                CurrentFrameUpdateSystem2::<f32>::new(),
+                CurrentFrameUpdateSystem2::<f32, Transform>::new(),
                 "physics_solver_system",
                 &[],
             )
             .add(
-                PoseTransformSyncSystem2::new(),
-                "sync_system",
-                &["physics_solver_system"],
-            )
-            .add(
-                NextFrameSetupSystem2::<f32>::new(),
+                NextFrameSetupSystem2::<f32, Transform>::new(),
                 "next_frame_setup",
                 &["physics_solver_system"],
             )
             .add(
                 SpatialSortingSystem::<
                     P,
-                    BodyPose<Point2<f32>, Basis2<f32>>,
+                    Transform,
                     TreeValueWrapped<Entity, B>,
                     B,
                     Y,
@@ -92,7 +87,7 @@ where
             .add(
                 SpatialCollisionSystem::<
                     P,
-                    BodyPose<Point2<f32>, Basis2<f32>>,
+                    Transform,
                     (usize, TreeValueWrapped<Entity, B>),
                     B,
                     Y,
@@ -103,7 +98,7 @@ where
                 &["spatial_sorting_system"],
             )
             .add(
-                ContactResolutionSystem2::<f32>::new(reader),
+                ContactResolutionSystem2::<f32, Transform>::new(reader),
                 "contact_resolution",
                 &["collision_system"],
             ))
@@ -150,31 +145,26 @@ where
         world: &mut World,
         dispatcher: DispatcherBuilder<'a, 'b>,
     ) -> Result<DispatcherBuilder<'a, 'b>> {
-        world.register_physics_3d::<f32, P, B, TreeValueWrapped<Entity, B>, Y>();
+        world.register_physics_3d::<f32, P, B, TreeValueWrapped<Entity, B>, Y, Transform>();
 
         let reader = world
             .write_resource::<EventChannel<ContactEvent<Entity, Point3<f32>>>>()
             .register_reader();
         Ok(dispatcher
             .add(
-                CurrentFrameUpdateSystem3::<f32>::new(),
+                CurrentFrameUpdateSystem3::<f32, Transform>::new(),
                 "physics_solver_system",
                 &[],
             )
             .add(
-                PoseTransformSyncSystem3::new(),
-                "sync_system",
-                &["physics_solver_system"],
-            )
-            .add(
-                NextFrameSetupSystem3::<f32>::new(),
+                NextFrameSetupSystem3::<f32, Transform>::new(),
                 "next_frame_setup",
                 &["physics_solver_system"],
             )
             .add(
                 SpatialSortingSystem::<
                     P,
-                    BodyPose<Point3<f32>, Quaternion<f32>>,
+                    Transform,
                     TreeValueWrapped<Entity, B>,
                     B,
                     Y,
@@ -185,7 +175,7 @@ where
             .add(
                 SpatialCollisionSystem::<
                     P,
-                    BodyPose<Point3<f32>, Quaternion<f32>>,
+                    Transform,
                     (usize, TreeValueWrapped<Entity, B>),
                     B,
                     Y,
@@ -196,7 +186,7 @@ where
                 &["spatial_sorting_system"],
             )
             .add(
-                ContactResolutionSystem3::<f32>::new(reader),
+                ContactResolutionSystem3::<f32, Transform>::new(reader),
                 "contact_resolution",
                 &["collision_system"],
             ))

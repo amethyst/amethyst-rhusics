@@ -19,11 +19,9 @@ pub use self::default::{DefaultBasicPhysicsBundle2, DefaultBasicPhysicsBundle3,
                         PoseTransformSyncSystem2, PoseTransformSyncSystem3};
 pub use self::pick::{pick_ray, pick_ray_ndc};
 pub use self::sync::{time_sync, AsTransform, Convert};
-pub use self::system::PoseTransformSyncSystem;
 
 mod arena;
 mod bundle;
 mod default;
 mod pick;
 mod sync;
-mod system;

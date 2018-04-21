@@ -22,7 +22,6 @@ use amethyst_rhusics::{time_sync, DefaultSpatialPhysicsBundle2, setup_2d_arena};
 use collision::Aabb2;
 use collision::primitive::{Primitive2, Rectangle};
 use rhusics_core::CollisionShape;
-use rhusics_ecs::physics2d::BodyPose2;
 
 use self::boxes::{BoxSimulationBundle2, Emitter, Graphics, ObjectType};
 
@@ -30,7 +29,7 @@ mod boxes;
 
 pub struct Emitting;
 
-pub type Shape = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, ObjectType>;
+pub type Shape = CollisionShape<Primitive2<f32>, Transform, Aabb2<f32>, ObjectType>;
 
 impl State for Emitting {
     fn on_start(&mut self, world: &mut World) {

@@ -4,13 +4,6 @@ use collision::primitive::{Primitive2, Primitive3};
 
 use bundle::{BasicPhysicsBundle2, BasicPhysicsBundle3, SpatialPhysicsBundle2,
              SpatialPhysicsBundle3};
-use system::PoseTransformSyncSystem;
-
-/// Utility type for a 2D sync system (from `BodyPose` to `Transform`).
-pub type PoseTransformSyncSystem2 = PoseTransformSyncSystem<Point2<f32>, Basis2<f32>>;
-
-/// Utility type for a 3D sync system (from `BodyPose` to `Transform`).
-pub type PoseTransformSyncSystem3 = PoseTransformSyncSystem<Point3<f32>, Quaternion<f32>>;
 
 /// Utility type for a default 2D physics setup (including collision detection).
 ///

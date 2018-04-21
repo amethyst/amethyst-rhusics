@@ -35,7 +35,7 @@ where
                 Line2::new(Point2::new(center.x, min.y), Point2::new(center.x, max.y)).into(),
                 types.0,
             ),
-            BodyPose2::new(Point2::new(min.x, center.y), Basis2::one()),
+            Transform::new(Point2::new(min.x, center.y), Basis2::one()),
             RigidBody::default(),
             Mass2::infinite(),
         )
@@ -50,7 +50,7 @@ where
                 Line2::new(Point2::new(center.x, min.y), Point2::new(center.x, max.y)).into(),
                 types.1,
             ),
-            BodyPose2::new(Point2::new(max.x, center.y), Basis2::one()),
+            Transform::new(Point2::new(max.x, center.y), Basis2::one()),
             RigidBody::default(),
             Mass2::infinite(),
         )
@@ -65,7 +65,7 @@ where
                 Line2::new(Point2::new(min.x, center.y), Point2::new(max.x, center.y)).into(),
                 types.2,
             ),
-            BodyPose2::new(Point2::new(center.x, min.y), Basis2::one()),
+            Transform::new(Point2::new(center.x, min.y), Basis2::one()),
             RigidBody::default(),
             Mass2::infinite(),
         )
@@ -80,7 +80,7 @@ where
                 Line2::new(Point2::new(min.x, center.y), Point2::new(max.x, center.y)).into(),
                 types.3,
             ),
-            BodyPose2::new(Point2::new(center.x, max.y), Basis2::one()),
+            Transform::new(Point2::new(center.x, max.y), Basis2::one()),
             RigidBody::default(),
             Mass2::infinite(),
         )
@@ -123,7 +123,7 @@ pub fn setup_3d_arena<Y>(
                 Quad::new(dimension.z, dimension.y).into(),
                 types.0,
             ),
-            BodyPose3::new(
+            Transform::new(
                 Point3::new(min.x, center.y, center.z),
                 Quaternion::from_angle_y(Deg(90.)),
             ),
@@ -145,7 +145,7 @@ pub fn setup_3d_arena<Y>(
                 Quad::new(dimension.z, dimension.y).into(),
                 types.1,
             ),
-            BodyPose3::new(
+            Transform::new(
                 Point3::new(max.x, center.y, center.z),
                 Quaternion::from_angle_y(Deg(90.)),
             ),
@@ -167,7 +167,7 @@ pub fn setup_3d_arena<Y>(
                 Quad::new(dimension.x, dimension.z).into(),
                 types.2,
             ),
-            BodyPose3::new(
+            Transform::new(
                 Point3::new(center.x, min.y, center.z),
                 Quaternion::from_angle_x(Deg(90.)),
             ),
@@ -189,7 +189,7 @@ pub fn setup_3d_arena<Y>(
                 Quad::new(dimension.x, dimension.z).into(),
                 types.3,
             ),
-            BodyPose3::new(
+            Transform::new(
                 Point3::new(center.x, max.y, center.z),
                 Quaternion::from_angle_x(Deg(90.)),
             ),
@@ -211,7 +211,7 @@ pub fn setup_3d_arena<Y>(
                 Quad::new(dimension.x, dimension.y).into(),
                 types.4,
             ),
-            BodyPose3::new(Point3::new(center.x, center.y, max.z), Quaternion::one()),
+            Transform::new(Point3::new(center.x, center.y, max.z), Quaternion::one()),
             RigidBody::default(),
             Mass3::infinite(),
         )
@@ -230,7 +230,7 @@ pub fn setup_3d_arena<Y>(
                 Quad::new(dimension.x, dimension.y).into(),
                 types.5,
             ),
-            BodyPose3::new(Point3::new(center.x, center.y, min.z), Quaternion::one()),
+            Transform::new(Point3::new(center.x, center.y, min.z), Quaternion::one()),
             RigidBody::default(),
             Mass3::infinite(),
         )
