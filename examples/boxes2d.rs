@@ -5,6 +5,9 @@ extern crate genmesh;
 extern crate rand;
 extern crate rhusics_core;
 extern crate rhusics_ecs;
+extern crate shred;
+#[macro_use]
+extern crate shred_derive;
 extern crate specs;
 
 use std::time::{Duration, Instant};
@@ -12,13 +15,13 @@ use std::time::{Duration, Instant};
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
 use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector3};
-use amethyst::ecs::World;
+use amethyst::ecs::prelude::World;
 use amethyst::prelude::{Application, Config, State, Trans};
 use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
                          MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::{FPSCounter, FPSCounterBundle};
-use amethyst_rhusics::{time_sync, DefaultSpatialPhysicsBundle2, setup_2d_arena};
+use amethyst_rhusics::{time_sync, DefaultPhysicsBundle2, setup_2d_arena};
 use collision::Aabb2;
 use collision::primitive::{Primitive2, Rectangle};
 use rhusics_core::CollisionShape;
@@ -54,12 +57,6 @@ impl State for Emitting {
         initialise_emitters(world);
     }
 
-    fn update(&mut self, world: &mut World) -> Trans {
-        time_sync(world);
-        println!("FPS: {}", world.read_resource::<FPSCounter>().sampled_fps());
-        Trans::None
-    }
-
     fn handle_event(&mut self, _: &mut World, event: Event) -> Trans {
         match event {
             Event::WindowEvent { event, .. } => match event {
@@ -75,6 +72,13 @@ impl State for Emitting {
             },
             _ => Trans::None,
         }
+    }
+
+    fn update(&mut self, world: &mut World) -> Trans {
+        time_sync(world);
+        println!("FPS: {}", world.read_resource::<FPSCounter>().sampled_fps());
+
+        Trans::None
     }
 }
 
@@ -167,9 +171,9 @@ fn run() -> Result<(), amethyst::Error> {
 
     let mut game = Application::build("./", Emitting)?
         .with_bundle(FPSCounterBundle::default())?
-        .with_bundle(DefaultSpatialPhysicsBundle2::<ObjectType>::new())?
+        .with_bundle(DefaultPhysicsBundle2::<ObjectType>::new().with_spatial())?
         .with_bundle(BoxSimulationBundle2::new(Rectangle::new(0.1, 0.1).into()))?
-        .with_bundle(TransformBundle::new().with_dep(&["sync_system"]))?
+        .with_bundle(TransformBundle::new().with_dep(&["sync_system", "emission_system"]))?
         .with_bundle(RenderBundle::new(pipe, Some(config)))?
         .build()?;
 

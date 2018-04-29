@@ -1,7 +1,9 @@
+extern crate specs;
+
 use std::fmt::Debug;
 
 use amethyst::core::cgmath::EuclideanSpace;
-use amethyst::ecs::{Entities, Entity, Fetch, ReadStorage, System};
+use amethyst::ecs::prelude::{Entities, Entity, Read, ReadStorage, Resources, System, Join};
 use amethyst::shrev::{EventChannel, ReaderId};
 use rhusics_core::ContactEvent;
 
@@ -17,7 +19,7 @@ where
     P: EuclideanSpace<Scalar = f32>,
     P::Diff: Debug,
 {
-    contact_reader: ReaderId<ContactEvent<Entity, P>>,
+    contact_reader: Option<ReaderId<ContactEvent<Entity, P>>>,
 }
 
 impl<P> BoxDeletionSystem<P>
@@ -25,8 +27,10 @@ where
     P: EuclideanSpace<Scalar = f32>,
     P::Diff: Debug,
 {
-    pub fn new(contact_reader: ReaderId<ContactEvent<Entity, P>>) -> Self {
-        Self { contact_reader }
+    pub fn new() -> Self {
+        BoxDeletionSystem {
+            contact_reader: None,
+        }
     }
 }
 
@@ -37,16 +41,20 @@ where
 {
     type SystemData = (
         Entities<'a>,
-        Fetch<'a, EventChannel<ContactEvent<Entity, P>>>,
+        Read<'a, EventChannel<ContactEvent<Entity, P>>>,
         ReadStorage<'a, ObjectType>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
         let (entities, contacts, objects) = data;
-        for contact in contacts.read(&mut self.contact_reader) {
+        for entity in (&*entities).join() {
+            println!("{:?}", entity);
+        }
+        for contact in contacts.read(&mut self.contact_reader.as_mut().unwrap()) {
             println!("{:?}", contact);
             match (objects.get(contact.bodies.0), objects.get(contact.bodies.1)) {
                 (Some(_), Some(_)) => {
+                    println!("Removing entities");
                     match entities.delete(contact.bodies.0) {
                         Err(e) => println!("Error: {:?}", e),
                         _ => (),
@@ -59,5 +67,14 @@ where
                 _ => {}
             }
         }
+    }
+
+    fn setup(&mut self, res: &mut Resources) {
+        use amethyst::ecs::prelude::SystemData;
+        Self::SystemData::setup(res);
+        self.contact_reader = Some(
+            res.fetch_mut::<EventChannel<ContactEvent<Entity, P>>>()
+                .register_reader(),
+        )
     }
 }

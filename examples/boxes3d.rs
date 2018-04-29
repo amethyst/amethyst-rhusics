@@ -5,6 +5,9 @@ extern crate genmesh;
 extern crate rand;
 extern crate rhusics_core;
 extern crate rhusics_ecs;
+extern crate shred;
+#[macro_use]
+extern crate shred_derive;
 extern crate specs;
 
 use std::time::{Duration, Instant};
@@ -12,13 +15,13 @@ use std::time::{Duration, Instant};
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
 use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3};
-use amethyst::ecs::World;
+use amethyst::ecs::prelude::World;
 use amethyst::prelude::{Application, Config, State, Trans};
 use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
                          MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::{FPSCounter, FPSCounterBundle};
-use amethyst_rhusics::{time_sync, DefaultSpatialPhysicsBundle3, setup_3d_arena};
+use amethyst_rhusics::{time_sync, DefaultPhysicsBundle3, setup_3d_arena};
 use collision::Aabb3;
 use collision::primitive::{Cuboid, Primitive3};
 use rhusics_core::CollisionShape;
@@ -175,9 +178,9 @@ fn run() -> Result<(), amethyst::Error> {
 
     let mut game = Application::build("./", Emitting)?
         .with_bundle(FPSCounterBundle::default())?
-        .with_bundle(DefaultSpatialPhysicsBundle3::<ObjectType>::new())?
+        .with_bundle(DefaultPhysicsBundle3::<ObjectType>::new().with_spatial())?
         .with_bundle(BoxSimulationBundle3::new(Cuboid::new(0.1, 0.1, 0.1).into()))?
-        .with_bundle(TransformBundle::new().with_dep(&["sync_system"]))?
+        .with_bundle(TransformBundle::new().with_dep(&["sync_system", "emission_system"]))?
         .with_bundle(RenderBundle::new(pipe, Some(config)))?
         .build()?;
 

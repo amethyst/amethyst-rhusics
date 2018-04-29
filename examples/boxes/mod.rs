@@ -11,7 +11,7 @@ mod default;
 use std::time::{Duration, Instant};
 
 use amethyst::assets::Handle;
-use amethyst::ecs::{Component, DenseVecStorage, VecStorage};
+use amethyst::ecs::prelude::{Component, DenseVecStorage, VecStorage};
 use amethyst::renderer::{Material, Mesh};
 use rhusics_core::Collider;
 
