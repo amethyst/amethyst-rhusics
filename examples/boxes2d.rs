@@ -37,7 +37,7 @@ pub type Shape = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, Obj
 
 impl State for Emitting {
     fn on_start(&mut self, world: &mut World) {
-        world.write_resource::<KillRate>().0 = 0.;
+        world.write_resource::<KillRate>().0 = 1.;
         initialise_camera(world);
         let g = Graphics {
             mesh: initialise_mesh(world),

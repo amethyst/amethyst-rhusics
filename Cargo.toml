@@ -18,7 +18,7 @@ amethyst_core = { version = "0.1.0", git = "https://github.com/amethyst/amethyst
 amethyst_renderer = { version = "0.6.1", git = "https://github.com/amethyst/amethyst", branch = "develop" }
 rhusics-ecs = { version = "0.4.0-alpha1", features = ["eders"], git = "https://github.com/rustgd/rhusics" }
 rhusics-core = { version = "0.4.0-alpha1", features = ["specs", "eders"], git = "https://github.com/rustgd/rhusics" }
-specs = "0.11.0-alpha4"
+specs = "0.11.0-alpha5"
 shrev = "0.8"
 collision = { version = "0.16", features = ["eders"]}
 
@@ -31,4 +31,3 @@ shred-derive = "0.5.0-alpha1"
 
 [patch.crates-io]
 coreaudio-sys = { git = "https://github.com/regexident/coreaudio-sys.git", branch = "frameworks" }
-specs = { path = "../specs/" }
