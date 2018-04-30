@@ -27,7 +27,7 @@ use collision::primitive::{Cuboid, Primitive3};
 use rhusics_core::CollisionShape;
 use rhusics_ecs::physics3d::BodyPose3;
 
-use self::boxes::{BoxSimulationBundle3, Emitter, Graphics, ObjectType};
+use self::boxes::{BoxSimulationBundle3, Emitter, Graphics, ObjectType, KillRate};
 
 mod boxes;
 
@@ -37,10 +37,10 @@ pub type Shape = CollisionShape<Primitive3<f32>, BodyPose3<f32>, Aabb3<f32>, Obj
 
 impl State for Emitting {
     fn on_start(&mut self, world: &mut World) {
+        world.write_resource::<KillRate>().0 = 0.;
         initialise_camera(world);
         let g = Graphics {
             mesh: initialise_mesh(world),
-            material: initialise_material(world),
         };
         world.add_resource(g);
         setup_3d_arena(
@@ -59,12 +59,6 @@ impl State for Emitting {
         initialise_emitters(world);
     }
 
-    fn update(&mut self, world: &mut World) -> Trans {
-        time_sync(world);
-        println!("FPS: {}", world.read_resource::<FPSCounter>().sampled_fps());
-        Trans::None
-    }
-
     fn handle_event(&mut self, _: &mut World, event: Event) -> Trans {
         match event {
             Event::WindowEvent { event, .. } => match event {
@@ -80,6 +74,12 @@ impl State for Emitting {
             },
             _ => Trans::None,
         }
+    }
+
+    fn update(&mut self, world: &mut World) -> Trans {
+        time_sync(world);
+        println!("FPS: {}", world.read_resource::<FPSCounter>().sampled_fps());
+        Trans::None
     }
 }
 
@@ -112,9 +112,9 @@ fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
         .load_from_data(vertices.into(), (), &world.read_resource())
 }
 
-fn initialise_material(world: &mut World) -> Material {
+fn initialise_material(world: &mut World, r: f32, g: f32, b: f32) -> Material {
     let albedo = world.read_resource::<Loader>().load_from_data(
-        [0.7, 0.7, 0.7, 1.0].into(),
+        [r, g, b, 1.0].into(),
         (),
         &world.read_resource(),
     );
@@ -124,41 +124,49 @@ fn initialise_material(world: &mut World) -> Material {
     }
 }
 
-fn emitter(p: Point3<f32>, d: Duration) -> Emitter<Point3<f32>> {
+fn emitter(p: Point3<f32>, d: Duration, material: Material) -> Emitter<Point3<f32>> {
     Emitter {
         location: p,
         emission_interval: d,
         last_emit: Instant::now(),
+        material,
     }
 }
 
 fn initialise_emitters(world: &mut World) {
+    let mat = initialise_material(world, 0.3, 1.0, 0.3);
     world
         .create_entity()
         .with(emitter(
             Point3::new(-0.4, 0., -1.),
             Duration::new(0, 500_000_000),
+            mat,
         ))
         .build();
 
+    let mat = initialise_material(world, 0.3, 0.0, 0.3);
     world
         .create_entity()
         .with(emitter(
             Point3::new(0.4, 0., -1.),
             Duration::new(0, 750_000_000),
+            mat,
         ))
         .build();
 
+    let mat = initialise_material(world, 1.0, 1.0, 1.0);
     world
         .create_entity()
-        .with(emitter(Point3::new(0., -0.4, -1.), Duration::new(1, 0)))
+        .with(emitter(Point3::new(0., -0.4, -1.), Duration::new(1, 0), mat))
         .build();
 
+    let mat = initialise_material(world, 1.0, 0.3, 0.3);
     world
         .create_entity()
         .with(emitter(
             Point3::new(0., 0.4, -1.),
             Duration::new(1, 250_000_000),
+            mat,
         ))
         .build();
 }

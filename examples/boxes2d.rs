@@ -27,7 +27,7 @@ use collision::primitive::{Primitive2, Rectangle};
 use rhusics_core::CollisionShape;
 use rhusics_ecs::physics2d::BodyPose2;
 
-use self::boxes::{BoxSimulationBundle2, Emitter, Graphics, ObjectType};
+use self::boxes::{BoxSimulationBundle2, Emitter, Graphics, ObjectType, KillRate};
 
 mod boxes;
 
@@ -37,10 +37,10 @@ pub type Shape = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, Obj
 
 impl State for Emitting {
     fn on_start(&mut self, world: &mut World) {
+        world.write_resource::<KillRate>().0 = 0.;
         initialise_camera(world);
         let g = Graphics {
             mesh: initialise_mesh(world),
-            material: initialise_material(world),
         };
         world.add_resource(g);
         setup_2d_arena(
@@ -111,9 +111,9 @@ fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
         .load_from_data(vertices.into(), (), &world.read_resource())
 }
 
-fn initialise_material(world: &mut World) -> Material {
+fn initialise_material(world: &mut World, r: f32, g: f32, b: f32) -> Material {
     let albedo = world.read_resource::<Loader>().load_from_data(
-        [0.7, 0.7, 0.7, 1.0].into(),
+        [r, g, b, 1.0].into(),
         (),
         &world.read_resource(),
     );
@@ -123,36 +123,42 @@ fn initialise_material(world: &mut World) -> Material {
     }
 }
 
-fn emitter(p: Point2<f32>, d: Duration) -> Emitter<Point2<f32>> {
+fn emitter(p: Point2<f32>, d: Duration, material: Material) -> Emitter<Point2<f32>> {
     Emitter {
         location: p,
         emission_interval: d,
         last_emit: Instant::now(),
+        material,
     }
 }
 
 fn initialise_emitters(world: &mut World) {
+    let mat = initialise_material(world, 0.3, 1.0, 0.3);
     world
         .create_entity()
         .with(emitter(
             Point2::new(-0.4, 0.),
             Duration::new(0, 500_000_000),
+            mat,
         ))
         .build();
 
+    let mat = initialise_material(world, 0.3, 0.0, 0.3);
     world
         .create_entity()
-        .with(emitter(Point2::new(0.4, 0.), Duration::new(0, 750_000_000)))
+        .with(emitter(Point2::new(0.4, 0.), Duration::new(0, 750_000_000), mat))
         .build();
 
+    let mat = initialise_material(world, 1.0, 1.0, 1.0);
     world
         .create_entity()
-        .with(emitter(Point2::new(0., -0.4), Duration::new(1, 0)))
+        .with(emitter(Point2::new(0., -0.4), Duration::new(1, 0), mat))
         .build();
 
+    let mat = initialise_material(world, 1.0, 0.3, 0.3);
     world
         .create_entity()
-        .with(emitter(Point2::new(0., 0.4), Duration::new(1, 250_000_000)))
+        .with(emitter(Point2::new(0., 0.4), Duration::new(1, 250_000_000), mat))
         .build();
 }
 

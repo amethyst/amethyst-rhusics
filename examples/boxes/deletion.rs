@@ -3,11 +3,13 @@ extern crate specs;
 use std::fmt::Debug;
 
 use amethyst::core::cgmath::EuclideanSpace;
-use amethyst::ecs::prelude::{Entities, Entity, Read, ReadStorage, Resources, System, Join};
+use amethyst::ecs::prelude::{Entities, Entity, Read, ReadStorage, Resources, System};
 use amethyst::shrev::{EventChannel, ReaderId};
 use rhusics_core::ContactEvent;
+use rand;
+use rand::Rng;
 
-use super::ObjectType;
+use super::{KillRate, ObjectType};
 
 /// Delete entities from the `World` on collision.
 ///
@@ -42,26 +44,25 @@ where
     type SystemData = (
         Entities<'a>,
         Read<'a, EventChannel<ContactEvent<Entity, P>>>,
+        Read<'a, KillRate>,
         ReadStorage<'a, ObjectType>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (entities, contacts, objects) = data;
-        for entity in (&*entities).join() {
-            println!("{:?}", entity);
-        }
+        let (entities, contacts, kill_rate, objects) = data;
         for contact in contacts.read(&mut self.contact_reader.as_mut().unwrap()) {
-            println!("{:?}", contact);
             match (objects.get(contact.bodies.0), objects.get(contact.bodies.1)) {
                 (Some(_), Some(_)) => {
-                    println!("Removing entities");
-                    match entities.delete(contact.bodies.0) {
-                        Err(e) => println!("Error: {:?}", e),
-                        _ => (),
-                    }
-                    match entities.delete(contact.bodies.1) {
-                        Err(e) => println!("Error: {:?}", e),
-                        _ => (),
+                    let mut chance = rand::thread_rng().gen_range(0., 1.);
+                    if chance <= kill_rate.0 {
+                        match entities.delete(contact.bodies.0) {
+                            Err(e) => println!("Error: {:?}", e),
+                            _ => (),
+                        }
+                        match entities.delete(contact.bodies.1) {
+                            Err(e) => println!("Error: {:?}", e),
+                            _ => (),
+                        }
                     }
                 }
                 _ => {}

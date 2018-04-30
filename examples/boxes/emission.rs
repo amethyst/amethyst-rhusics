@@ -66,7 +66,6 @@ where
                     entities.create(),
                     &mut parts,
                     graphics.mesh.clone(),
-                    graphics.material.clone(),
                     &emitter,
                     &self.primitive,
                 );
@@ -80,7 +79,6 @@ fn emit_box<P, B, R, A, I>(
     entity: Entity,
     parts: &mut EmitterParts<P, B, R, A, I>,
     mesh: Handle<Mesh>,
-    material: Material,
     emitter: &Emitter<P::Point>,
     primitive: &P,
 ) where
@@ -106,7 +104,7 @@ fn emit_box<P, B, R, A, I>(
 
     parts.object_type.insert(entity, ObjectType::Box);
     parts.mesh.insert(entity, mesh);
-    parts.material.insert(entity, material);
+    parts.material.insert(entity, emitter.material.clone());
     parts.global.insert(entity, GlobalTransform::default());
     parts.local.insert(entity, transform);
     parts.rigid_body.dynamic_body(
