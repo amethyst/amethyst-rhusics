@@ -1,10 +1,10 @@
 use amethyst_core::Transform;
 use amethyst_core::cgmath::{Array, Basis2, EuclideanSpace, Matrix3, Point2, Point3, Quaternion,
                             Rotation, Vector3};
+use amethyst_core::specs::prelude::World;
 use amethyst_core::timing::Time;
-use rhusics_core::BodyPose;
+use rhusics_core::{BodyPose, Pose};
 use rhusics_ecs::DeltaTime;
-use specs::World;
 
 /// Utility trait for converting a transform type into an amethyst `Transform`.
 pub trait AsTransform {

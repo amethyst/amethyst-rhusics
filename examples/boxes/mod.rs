@@ -11,7 +11,7 @@ mod default;
 use std::time::{Duration, Instant};
 
 use amethyst::assets::Handle;
-use amethyst::ecs::{Component, DenseVecStorage, VecStorage};
+use amethyst::ecs::prelude::{Component, DenseVecStorage, VecStorage};
 use amethyst::renderer::{Material, Mesh};
 use rhusics_core::Collider;
 
@@ -49,6 +49,7 @@ pub struct Emitter<P> {
     pub location: P,
     pub last_emit: Instant,
     pub emission_interval: Duration,
+    pub material: Material,
 }
 
 impl<P> Component for Emitter<P>
@@ -61,5 +62,12 @@ where
 /// Internal graphics used for the primitive emission.
 pub struct Graphics {
     pub mesh: Handle<Mesh>,
-    pub material: Material,
+}
+
+pub struct KillRate(pub f32);
+
+impl Default for KillRate {
+    fn default() -> Self {
+        KillRate(1.0)
+    }
 }

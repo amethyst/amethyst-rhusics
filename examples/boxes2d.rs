@@ -5,6 +5,9 @@ extern crate genmesh;
 extern crate rand;
 extern crate rhusics_core;
 extern crate rhusics_ecs;
+extern crate shred;
+#[macro_use]
+extern crate shred_derive;
 extern crate specs;
 
 use std::time::{Duration, Instant};
@@ -12,19 +15,19 @@ use std::time::{Duration, Instant};
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
 use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector3};
-use amethyst::ecs::World;
+use amethyst::ecs::prelude::World;
 use amethyst::prelude::{Application, Config, State, Trans};
 use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
                          MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
                          VirtualKeyCode, WindowEvent};
 use amethyst::utils::fps_counter::{FPSCounter, FPSCounterBundle};
-use amethyst_rhusics::{time_sync, DefaultSpatialPhysicsBundle2, setup_2d_arena};
+use amethyst_rhusics::{time_sync, DefaultPhysicsBundle2, setup_2d_arena};
 use collision::Aabb2;
 use collision::primitive::{Primitive2, Rectangle};
 use rhusics_core::CollisionShape;
 use rhusics_ecs::physics2d::BodyPose2;
 
-use self::boxes::{BoxSimulationBundle2, Emitter, Graphics, ObjectType};
+use self::boxes::{BoxSimulationBundle2, Emitter, Graphics, ObjectType, KillRate};
 
 mod boxes;
 
@@ -34,10 +37,10 @@ pub type Shape = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, Obj
 
 impl State for Emitting {
     fn on_start(&mut self, world: &mut World) {
+        world.write_resource::<KillRate>().0 = 1.;
         initialise_camera(world);
         let g = Graphics {
             mesh: initialise_mesh(world),
-            material: initialise_material(world),
         };
         world.add_resource(g);
         setup_2d_arena(
@@ -52,12 +55,6 @@ impl State for Emitting {
             world,
         );
         initialise_emitters(world);
-    }
-
-    fn update(&mut self, world: &mut World) -> Trans {
-        time_sync(world);
-        println!("FPS: {}", world.read_resource::<FPSCounter>().sampled_fps());
-        Trans::None
     }
 
     fn handle_event(&mut self, _: &mut World, event: Event) -> Trans {
@@ -75,6 +72,13 @@ impl State for Emitting {
             },
             _ => Trans::None,
         }
+    }
+
+    fn update(&mut self, world: &mut World) -> Trans {
+        time_sync(world);
+        println!("FPS: {}", world.read_resource::<FPSCounter>().sampled_fps());
+
+        Trans::None
     }
 }
 
@@ -107,9 +111,9 @@ fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
         .load_from_data(vertices.into(), (), &world.read_resource())
 }
 
-fn initialise_material(world: &mut World) -> Material {
+fn initialise_material(world: &mut World, r: f32, g: f32, b: f32) -> Material {
     let albedo = world.read_resource::<Loader>().load_from_data(
-        [0.7, 0.7, 0.7, 1.0].into(),
+        [r, g, b, 1.0].into(),
         (),
         &world.read_resource(),
     );
@@ -119,36 +123,42 @@ fn initialise_material(world: &mut World) -> Material {
     }
 }
 
-fn emitter(p: Point2<f32>, d: Duration) -> Emitter<Point2<f32>> {
+fn emitter(p: Point2<f32>, d: Duration, material: Material) -> Emitter<Point2<f32>> {
     Emitter {
         location: p,
         emission_interval: d,
         last_emit: Instant::now(),
+        material,
     }
 }
 
 fn initialise_emitters(world: &mut World) {
+    let mat = initialise_material(world, 0.3, 1.0, 0.3);
     world
         .create_entity()
         .with(emitter(
             Point2::new(-0.4, 0.),
             Duration::new(0, 500_000_000),
+            mat,
         ))
         .build();
 
+    let mat = initialise_material(world, 0.3, 0.0, 0.3);
     world
         .create_entity()
-        .with(emitter(Point2::new(0.4, 0.), Duration::new(0, 750_000_000)))
+        .with(emitter(Point2::new(0.4, 0.), Duration::new(0, 750_000_000), mat))
         .build();
 
+    let mat = initialise_material(world, 1.0, 1.0, 1.0);
     world
         .create_entity()
-        .with(emitter(Point2::new(0., -0.4), Duration::new(1, 0)))
+        .with(emitter(Point2::new(0., -0.4), Duration::new(1, 0), mat))
         .build();
 
+    let mat = initialise_material(world, 1.0, 0.3, 0.3);
     world
         .create_entity()
-        .with(emitter(Point2::new(0., 0.4), Duration::new(1, 250_000_000)))
+        .with(emitter(Point2::new(0., 0.4), Duration::new(1, 250_000_000), mat))
         .build();
 }
 
@@ -167,9 +177,9 @@ fn run() -> Result<(), amethyst::Error> {
 
     let mut game = Application::build("./", Emitting)?
         .with_bundle(FPSCounterBundle::default())?
-        .with_bundle(DefaultSpatialPhysicsBundle2::<ObjectType>::new())?
+        .with_bundle(DefaultPhysicsBundle2::<ObjectType>::new().with_spatial())?
         .with_bundle(BoxSimulationBundle2::new(Rectangle::new(0.1, 0.1).into()))?
-        .with_bundle(TransformBundle::new().with_dep(&["sync_system"]))?
+        .with_bundle(TransformBundle::new().with_dep(&["sync_system", "emission_system"]))?
         .with_bundle(RenderBundle::new(pipe, Some(config)))?
         .build()?;
 

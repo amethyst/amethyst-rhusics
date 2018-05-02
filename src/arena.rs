@@ -1,12 +1,12 @@
 use amethyst_core::cgmath::{Basis2, Deg, EuclideanSpace, One, Point2, Point3, Quaternion,
                             Rotation3};
+use amethyst_core::specs::prelude::World;
 use collision::{Aabb2, Aabb3, Line2};
 use collision::primitive::{Primitive2, Primitive3, Quad};
-use rhusics_core::{CollisionMode, CollisionShape, CollisionStrategy, RigidBody};
+use rhusics_core::{CollisionMode, CollisionShape, CollisionStrategy, Pose, RigidBody};
 use rhusics_ecs::WithRigidBody;
 use rhusics_ecs::physics2d::{BodyPose2, Mass2};
 use rhusics_ecs::physics3d::{BodyPose3, Mass3};
-use specs::World;
 
 /// Setup 2D arena.
 ///

@@ -2,8 +2,8 @@ use std::marker;
 
 use amethyst_core::Transform;
 use amethyst_core::cgmath::{EuclideanSpace, Quaternion, Rotation, Vector3};
-use rhusics_core::BodyPose;
-use specs::{Join, ReadStorage, System, WriteStorage};
+use amethyst_core::specs::prelude::{Join, ReadStorage, System, WriteStorage};
+use rhusics_core::{BodyPose, Pose};
 
 use sync::Convert;
 
