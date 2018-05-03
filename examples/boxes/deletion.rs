@@ -3,13 +3,13 @@ extern crate specs;
 use std::fmt::Debug;
 
 use amethyst::core::cgmath::EuclideanSpace;
-use amethyst::ecs::prelude::{Entities, Entity, Read, ReadStorage, Resources, System};
+use amethyst::ecs::prelude::{Entities, Entity, Read, ReadStorage, Resources, System, Write};
 use amethyst::shrev::{EventChannel, ReaderId};
 use rhusics_core::ContactEvent;
 use rand;
 use rand::Rng;
 
-use super::{KillRate, ObjectType};
+use super::{KillRate, ObjectType, Collisions};
 
 /// Delete entities from the `World` on collision.
 ///
@@ -46,11 +46,14 @@ where
         Read<'a, EventChannel<ContactEvent<Entity, P>>>,
         Read<'a, KillRate>,
         ReadStorage<'a, ObjectType>,
+        Write<'a, Collisions>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (entities, contacts, kill_rate, objects) = data;
+        let (entities, contacts, kill_rate, objects, mut collisions) = data;
+        collisions.0 = 0;
         for contact in contacts.read(&mut self.contact_reader.as_mut().unwrap()) {
+            collisions.0 += 1;
             match (objects.get(contact.bodies.0), objects.get(contact.bodies.1)) {
                 (Some(_), Some(_)) => {
                     let mut chance = rand::thread_rng().gen_range(0., 1.);
