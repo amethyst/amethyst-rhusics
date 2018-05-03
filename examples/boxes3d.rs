@@ -15,23 +15,29 @@ use std::time::{Duration, Instant};
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
 use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3};
-use amethyst::ecs::prelude::World;
+use amethyst::ecs::prelude::{World, Entity};
 use amethyst::prelude::{Application, Config, State, Trans};
 use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
                          MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
                          VirtualKeyCode, WindowEvent};
-use amethyst::utils::fps_counter::{FPSCounter, FPSCounterBundle};
+use amethyst::ui::{DrawUi, UiBundle};
+use amethyst::utils::fps_counter::FPSCounterBundle;
 use amethyst_rhusics::{time_sync, DefaultPhysicsBundle3, setup_3d_arena};
 use collision::Aabb3;
 use collision::primitive::{Cuboid, Primitive3};
 use rhusics_core::CollisionShape;
 use rhusics_ecs::physics3d::BodyPose3;
 
-use self::boxes::{BoxSimulationBundle3, Emitter, Graphics, ObjectType, KillRate};
+use self::boxes::{BoxSimulationBundle3, Emitter, Graphics, ObjectType, KillRate, create_ui, update_ui};
 
 mod boxes;
 
-pub struct Emitting;
+#[derive(Default)]
+pub struct Emitting {
+    fps: Option<Entity>,
+    num: Option<Entity>,
+    collision: Option<Entity>,
+}
 
 pub type Shape = CollisionShape<Primitive3<f32>, BodyPose3<f32>, Aabb3<f32>, ObjectType>;
 
@@ -42,6 +48,12 @@ impl State for Emitting {
         let g = Graphics {
             mesh: initialise_mesh(world),
         };
+
+        let (num_display, fps_display, collisions_display) = create_ui(world);
+        self.num = Some(num_display);
+        self.fps = Some(fps_display);
+        self.collision = Some(collisions_display);
+
         world.add_resource(g);
         setup_3d_arena(
             Point3::new(-1., -1., -2.),
@@ -78,7 +90,7 @@ impl State for Emitting {
 
     fn update(&mut self, world: &mut World) -> Trans {
         time_sync(world);
-        println!("FPS: {}", world.read_resource::<FPSCounter>().sampled_fps());
+        update_ui::<Point3<f32>>(world, self.num.unwrap(), self.fps.unwrap(), self.collision.unwrap());
         Trans::None
     }
 }
@@ -130,6 +142,7 @@ fn emitter(p: Point3<f32>, d: Duration, material: Material) -> Emitter<Point3<f3
         emission_interval: d,
         last_emit: Instant::now(),
         material,
+        emitted: 0,
     }
 }
 
@@ -181,14 +194,16 @@ fn run() -> Result<(), amethyst::Error> {
     let pipe = Pipeline::build().with_stage(
         Stage::with_backbuffer()
             .clear_target([0., 0., 0., 1.0], 1.0)
-            .with_pass(DrawFlat::<PosTex>::new()),
+            .with_pass(DrawFlat::<PosTex>::new())
+            .with_pass(DrawUi::new()),
     );
 
-    let mut game = Application::build("./", Emitting)?
+    let mut game = Application::build("./", Emitting::default())?
         .with_bundle(FPSCounterBundle::default())?
         .with_bundle(DefaultPhysicsBundle3::<ObjectType>::new().with_spatial())?
         .with_bundle(BoxSimulationBundle3::new(Cuboid::new(0.1, 0.1, 0.1).into()))?
         .with_bundle(TransformBundle::new().with_dep(&["sync_system", "emission_system"]))?
+        .with_bundle(UiBundle::<String, String>::new())?
         .with_bundle(RenderBundle::new(pipe, Some(config)))?
         .build()?;
 

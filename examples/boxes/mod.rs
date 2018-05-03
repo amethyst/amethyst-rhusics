@@ -2,11 +2,13 @@ pub use self::bundle::BoxSimulationBundle;
 pub use self::default::{BoxSimulationBundle2, BoxSimulationBundle3};
 pub use self::deletion::BoxDeletionSystem;
 pub use self::emission::EmissionSystem;
+pub use self::ui::*;
 
 mod deletion;
 mod emission;
 mod bundle;
 mod default;
+mod ui;
 
 use std::time::{Duration, Instant};
 
@@ -50,6 +52,7 @@ pub struct Emitter<P> {
     pub last_emit: Instant,
     pub emission_interval: Duration,
     pub material: Material,
+    pub emitted: u64,
 }
 
 impl<P> Component for Emitter<P>
@@ -69,5 +72,13 @@ pub struct KillRate(pub f32);
 impl Default for KillRate {
     fn default() -> Self {
         KillRate(1.0)
+    }
+}
+
+pub struct Collisions(pub u32);
+
+impl Default for Collisions {
+    fn default() -> Self {
+        Collisions(0)
     }
 }
