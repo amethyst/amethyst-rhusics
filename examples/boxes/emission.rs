@@ -70,6 +70,7 @@ where
                     &self.primitive,
                 );
                 emitter.last_emit = now.clone();
+                emitter.emitted += 1;
             }
         }
     }
