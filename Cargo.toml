@@ -16,11 +16,11 @@ keywords = ["gamedev", "amethyst", "physics"]
 [dependencies]
 amethyst_core = { version = "0.1.0", git = "https://github.com/amethyst/amethyst", branch = "develop" }
 amethyst_renderer = { version = "0.6.1", git = "https://github.com/amethyst/amethyst", branch = "develop" }
-rhusics-ecs = { version = "0.4.0-alpha1", features = ["eders"] }
-rhusics-core = { version = "0.4.0-alpha1", features = ["specs", "eders"] }
-specs = "0.11.0-alpha5"
-shrev = "0.8"
-collision = { version = "0.16", features = ["eders"]}
+rhusics-ecs = { version = "0.4.0-alpha2", features = ["serde"] }
+rhusics-core = { version = "0.4.0-alpha2", features = ["specs", "serde"] }
+specs = "0.11.0-alpha6"
+shrev = "1.0.0"
+collision = { version = "0.17", features = ["serde"]}
 
 [dev-dependencies]
 amethyst = { version = "0.6.0", git = "https://github.com/amethyst/amethyst", branch = "develop" }
@@ -30,4 +30,4 @@ shred = "0.7.0-alpha5"
 shred-derive = "0.5.0-alpha1"
 
 [patch.crates-io]
-coreaudio-sys = { git = "https://github.com/regexident/coreaudio-sys.git", branch = "frameworks" }
+coreaudio-sys = { git = "https://github.com/RustAudio/coreaudio-sys.git" }

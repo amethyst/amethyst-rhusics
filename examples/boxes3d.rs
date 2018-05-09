@@ -152,7 +152,7 @@ fn initialise_emitters(world: &mut World) {
         .create_entity()
         .with(emitter(
             Point3::new(-0.4, 0., -1.),
-            Duration::new(0, 500_000_000),
+            Duration::new(0, 50_000_000),
             mat,
         ))
         .build();
@@ -162,7 +162,7 @@ fn initialise_emitters(world: &mut World) {
         .create_entity()
         .with(emitter(
             Point3::new(0.4, 0., -1.),
-            Duration::new(0, 750_000_000),
+            Duration::new(0, 75_000_000),
             mat,
         ))
         .build();
@@ -170,7 +170,7 @@ fn initialise_emitters(world: &mut World) {
     let mat = initialise_material(world, 1.0, 1.0, 1.0);
     world
         .create_entity()
-        .with(emitter(Point3::new(0., -0.4, -1.), Duration::new(1, 0), mat))
+        .with(emitter(Point3::new(0., -0.4, -1.), Duration::new(0, 100_000_000), mat))
         .build();
 
     let mat = initialise_material(world, 1.0, 0.3, 0.3);
@@ -178,7 +178,7 @@ fn initialise_emitters(world: &mut World) {
         .create_entity()
         .with(emitter(
             Point3::new(0., 0.4, -1.),
-            Duration::new(1, 250_000_000),
+            Duration::new(0, 25_000_000),
             mat,
         ))
         .build();
