@@ -1,5 +1,3 @@
-extern crate specs;
-
 use std::fmt::Debug;
 
 use amethyst::core::cgmath::EuclideanSpace;
@@ -9,7 +7,7 @@ use rhusics_core::ContactEvent;
 use rand;
 use rand::Rng;
 
-use super::{KillRate, ObjectType, Collisions};
+use super::{Collisions, KillRate, ObjectType};
 
 /// Delete entities from the `World` on collision.
 ///

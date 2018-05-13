@@ -36,7 +36,6 @@ impl Default for ObjectType {
 
 impl Collider for ObjectType {
     fn should_generate_contacts(&self, other: &ObjectType) -> bool {
-        println!("Checking {:?} vs {:?}", self, other);
         self != other || *self != ObjectType::Wall
     }
 }

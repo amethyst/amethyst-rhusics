@@ -8,14 +8,13 @@ extern crate rhusics_ecs;
 extern crate shred;
 #[macro_use]
 extern crate shred_derive;
-extern crate specs;
 
 use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
 use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector3};
-use amethyst::ecs::prelude::{World, Entity};
+use amethyst::ecs::prelude::{Entity, World};
 use amethyst::prelude::{Application, Config, State, Trans};
 use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
                          MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
@@ -28,7 +27,8 @@ use collision::primitive::{Primitive2, Rectangle};
 use rhusics_core::CollisionShape;
 use rhusics_ecs::physics2d::BodyPose2;
 
-use self::boxes::{BoxSimulationBundle2, Emitter, Graphics, ObjectType, KillRate, create_ui, update_ui};
+use self::boxes::{create_ui, update_ui, BoxSimulationBundle2, Emitter, Graphics, KillRate,
+                  ObjectType};
 
 mod boxes;
 
@@ -43,7 +43,7 @@ pub type Shape = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, Obj
 
 impl State for Emitting {
     fn on_start(&mut self, world: &mut World) {
-        world.write_resource::<KillRate>().0 = 0.;
+        world.write_resource::<KillRate>().0 = 0.01;
         initialise_camera(world);
         let g = Graphics {
             mesh: initialise_mesh(world),
@@ -87,7 +87,12 @@ impl State for Emitting {
 
     fn update(&mut self, world: &mut World) -> Trans {
         time_sync(world);
-        update_ui::<Point2<f32>>(world, self.num.unwrap(), self.fps.unwrap(), self.collision.unwrap());
+        update_ui::<Point2<f32>>(
+            world,
+            self.num.unwrap(),
+            self.fps.unwrap(),
+            self.collision.unwrap(),
+        );
         Trans::None
     }
 }
@@ -157,19 +162,31 @@ fn initialise_emitters(world: &mut World) {
     let mat = initialise_material(world, 0.3, 0.0, 0.3);
     world
         .create_entity()
-        .with(emitter(Point2::new(0.4, 0.), Duration::new(0, 75_000_000), mat))
+        .with(emitter(
+            Point2::new(0.4, 0.),
+            Duration::new(0, 75_000_000),
+            mat,
+        ))
         .build();
 
     let mat = initialise_material(world, 1.0, 1.0, 1.0);
     world
         .create_entity()
-        .with(emitter(Point2::new(0., -0.4), Duration::new(0, 100_000_000), mat))
+        .with(emitter(
+            Point2::new(0., -0.4),
+            Duration::new(0, 100_000_000),
+            mat,
+        ))
         .build();
 
     let mat = initialise_material(world, 1.0, 0.3, 0.3);
     world
         .create_entity()
-        .with(emitter(Point2::new(0., 0.4), Duration::new(1, 25_000_000), mat))
+        .with(emitter(
+            Point2::new(0., 0.4),
+            Duration::new(1, 25_000_000),
+            mat,
+        ))
         .build();
 }
 
