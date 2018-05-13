@@ -18,7 +18,7 @@ use super::{KillRate, ObjectType, Collisions};
 /// - `P`: Positional quantity (`Point2` or `Point3`)
 pub struct BoxDeletionSystem<P>
 where
-    P: EuclideanSpace<Scalar = f32>,
+    P: EuclideanSpace<Scalar = f32> + 'static,
     P::Diff: Debug,
 {
     contact_reader: Option<ReaderId<ContactEvent<Entity, P>>>,
