@@ -103,11 +103,11 @@ fn emit_box<P, B, R, A, I>(
     let mut transform = pose.as_transform();
     transform.scale = Vector3::from_value(0.05);
 
-    parts.object_type.insert(entity, ObjectType::Box);
-    parts.mesh.insert(entity, mesh);
-    parts.material.insert(entity, emitter.material.clone());
-    parts.global.insert(entity, GlobalTransform::default());
-    parts.local.insert(entity, transform);
+    parts.object_type.insert(entity, ObjectType::Box).unwrap();
+    parts.mesh.insert(entity, mesh).unwrap();
+    parts.material.insert(entity, emitter.material.clone()).unwrap();
+    parts.global.insert(entity, GlobalTransform::default()).unwrap();
+    parts.local.insert(entity, transform).unwrap();
     parts.rigid_body.dynamic_body(
         entity,
         CollisionShape::<P, BodyPose<P::Point, R>, B, ObjectType>::new_simple(
@@ -119,7 +119,7 @@ fn emit_box<P, B, R, A, I>(
         Velocity::<<P::Point as EuclideanSpace>::Diff, A>::from_linear(offset * speed),
         RigidBody::default(),
         Mass::<f32, I>::new(1.),
-    );
+    ).unwrap();
 }
 
 #[derive(SystemData)]

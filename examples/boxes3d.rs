@@ -8,14 +8,13 @@ extern crate rhusics_ecs;
 extern crate shred;
 #[macro_use]
 extern crate shred_derive;
-extern crate specs;
 
 use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
 use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3};
-use amethyst::ecs::prelude::{World, Entity};
+use amethyst::ecs::prelude::{Entity, World};
 use amethyst::prelude::{Application, Config, State, Trans};
 use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
                          MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
@@ -28,7 +27,8 @@ use collision::primitive::{Cuboid, Primitive3};
 use rhusics_core::CollisionShape;
 use rhusics_ecs::physics3d::BodyPose3;
 
-use self::boxes::{BoxSimulationBundle3, Emitter, Graphics, ObjectType, KillRate, create_ui, update_ui};
+use self::boxes::{create_ui, update_ui, BoxSimulationBundle3, Emitter, Graphics, KillRate,
+                  ObjectType};
 
 mod boxes;
 
@@ -90,7 +90,12 @@ impl State for Emitting {
 
     fn update(&mut self, world: &mut World) -> Trans {
         time_sync(world);
-        update_ui::<Point3<f32>>(world, self.num.unwrap(), self.fps.unwrap(), self.collision.unwrap());
+        update_ui::<Point3<f32>>(
+            world,
+            self.num.unwrap(),
+            self.fps.unwrap(),
+            self.collision.unwrap(),
+        );
         Trans::None
     }
 }
@@ -170,7 +175,11 @@ fn initialise_emitters(world: &mut World) {
     let mat = initialise_material(world, 1.0, 1.0, 1.0);
     world
         .create_entity()
-        .with(emitter(Point3::new(0., -0.4, -1.), Duration::new(0, 100_000_000), mat))
+        .with(emitter(
+            Point3::new(0., -0.4, -1.),
+            Duration::new(0, 100_000_000),
+            mat,
+        ))
         .build();
 
     let mat = initialise_material(world, 1.0, 0.3, 0.3);

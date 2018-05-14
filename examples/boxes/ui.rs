@@ -1,7 +1,7 @@
-use amethyst::ecs::prelude::{World, Entity, Join};
+use amethyst::ecs::prelude::{Entity, Join, World};
 use amethyst::assets::Loader;
-use amethyst::ui::{TtfFormat, UiTransform, UiText, Anchor, Anchored};
-use amethyst::core::{Time, Parent};
+use amethyst::ui::{Anchor, Anchored, TtfFormat, UiText, UiTransform};
+use amethyst::core::{Parent, Time};
 use amethyst::utils::fps_counter::FPSCounter;
 use super::{Collisions, Emitter};
 
@@ -50,7 +50,9 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             [1.0, 1.0, 1.0, 1.0],
             25.,
         ))
-        .with(Parent { entity: num_display } )
+        .with(Parent {
+            entity: num_display,
+        })
         .with(Anchored::new(Anchor::BottomLeft))
         .build();
 
@@ -71,13 +73,22 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             [1.0, 1.0, 1.0, 1.0],
             25.,
         ))
-        .with(Parent { entity: fps_display } )
+        .with(Parent {
+            entity: fps_display,
+        })
         .with(Anchored::new(Anchor::BottomLeft))
         .build();
     (num_display, fps_display, collisions_display)
 }
 
-pub fn update_ui<P>(world: &mut World, num_entity: Entity, fps_entity: Entity, collision_entity: Entity) where P: Send + Sync + 'static {
+pub fn update_ui<P>(
+    world: &mut World,
+    num_entity: Entity,
+    fps_entity: Entity,
+    collision_entity: Entity,
+) where
+    P: Send + Sync + 'static,
+{
     let frame_number = world.read_resource::<Time>().frame_number();
     let fps = world.read_resource::<FPSCounter>().sampled_fps();
 
@@ -85,7 +96,10 @@ pub fn update_ui<P>(world: &mut World, num_entity: Entity, fps_entity: Entity, c
         if let Some(fps_display) = world.write_storage::<UiText>().get_mut(fps_entity) {
             fps_display.text = format!("FPS: {:.*}", 2, fps);
         }
-        let emitted : u64 = (&world.read_storage::<Emitter<P>>()).join().map(|e| e.emitted).sum();
+        let emitted: u64 = (&world.read_storage::<Emitter<P>>())
+            .join()
+            .map(|e| e.emitted)
+            .sum();
         if let Some(num_display) = world.write_storage::<UiText>().get_mut(num_entity) {
             num_display.text = format!("Num: {:.*}", 2, emitted);
         }

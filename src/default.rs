@@ -3,7 +3,7 @@ use collision::{Aabb2, Aabb3};
 use collision::primitive::{Primitive2, Primitive3};
 
 use bundle::{PhysicsBundle2, PhysicsBundle3};
-use system::PoseTransformSyncSystem;
+use sync::PoseTransformSyncSystem;
 
 /// Utility type for a 2D sync system (from `BodyPose` to `Transform`).
 pub type PoseTransformSyncSystem2 = PoseTransformSyncSystem<Point2<f32>, Basis2<f32>>;

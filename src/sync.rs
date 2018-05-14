@@ -1,7 +1,9 @@
+use std::marker;
+
 use amethyst_core::Transform;
 use amethyst_core::cgmath::{Array, Basis2, EuclideanSpace, Matrix3, Point2, Point3, Quaternion,
                             Rotation, Vector3};
-use amethyst_core::specs::prelude::World;
+use amethyst_core::specs::prelude::{Join, ReadStorage, System, World, WriteStorage};
 use amethyst_core::timing::Time;
 use rhusics_core::{BodyPose, Pose};
 use rhusics_ecs::DeltaTime;
@@ -84,4 +86,43 @@ pub fn time_sync(world: &World) {
     let mut delta = world.write_resource::<DeltaTime<f32>>();
     let time = world.read_resource::<Time>();
     delta.delta_seconds = time.delta_seconds();
+}
+
+/// System that copies transform information from `BodyPose` in rhusics into `Transform`
+/// in amethyst.
+///
+/// ### Type parameters:
+///
+/// - `P`: Positional quantity (`Point2<f32>` or `Point3<f32>` in most scenarios).
+/// - `R`: Rotational quantity (`Basis2<f32>` or `Quaternion<f32>` in most scenarios).
+pub struct PoseTransformSyncSystem<P, R> {
+    m: marker::PhantomData<(P, R)>,
+}
+
+impl<P, R> PoseTransformSyncSystem<P, R> {
+    /// Create new system
+    pub fn new() -> Self {
+        Self {
+            m: marker::PhantomData,
+        }
+    }
+}
+
+impl<'a, P, R> System<'a> for PoseTransformSyncSystem<P, R>
+where
+    P: EuclideanSpace<Scalar = f32> + Convert<Output = Vector3<f32>> + Send + Sync + 'static,
+    R: Rotation<P> + Convert<Output = Quaternion<f32>> + Send + Sync + 'static,
+{
+    type SystemData = (ReadStorage<'a, BodyPose<P, R>>, WriteStorage<'a, Transform>);
+
+    fn run(&mut self, data: Self::SystemData) {
+        let (poses, mut transforms) = data;
+        for (pose, transform) in (&poses, &mut transforms).join() {
+            *transform = Transform {
+                translation: pose.position().convert(),
+                rotation: pose.rotation().convert(),
+                scale: transform.scale,
+            }
+        }
+    }
 }
