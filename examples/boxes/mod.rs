@@ -4,10 +4,10 @@ pub use self::deletion::BoxDeletionSystem;
 pub use self::emission::EmissionSystem;
 pub use self::ui::*;
 
-mod deletion;
-mod emission;
 mod bundle;
 mod default;
+mod deletion;
+mod emission;
 mod ui;
 
 use std::time::{Duration, Instant};

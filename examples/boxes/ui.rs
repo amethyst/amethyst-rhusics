@@ -1,9 +1,9 @@
-use amethyst::ecs::prelude::{Entity, Join, World};
-use amethyst::assets::Loader;
-use amethyst::ui::{Anchor, Anchored, TtfFormat, UiText, UiTransform};
-use amethyst::core::{Parent, Time};
-use amethyst::utils::fps_counter::FPSCounter;
 use super::{Collisions, Emitter};
+use amethyst::assets::Loader;
+use amethyst::core::{Parent, Time};
+use amethyst::ecs::prelude::{Entity, Join, World};
+use amethyst::ui::{Anchor, Anchored, TtfFormat, UiText, UiTransform};
+use amethyst::utils::fps_counter::FPSCounter;
 
 pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
     let font = world.read_resource::<Loader>().load(

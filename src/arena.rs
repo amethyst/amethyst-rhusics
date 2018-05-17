@@ -1,8 +1,8 @@
 use amethyst_core::cgmath::{Basis2, Deg, EuclideanSpace, One, Point2, Point3, Quaternion,
                             Rotation3, Vector2};
 use amethyst_core::specs::prelude::World;
-use collision::{Aabb2, Aabb3, Line2};
 use collision::primitive::{Primitive2, Primitive3, Quad};
+use collision::{Aabb2, Aabb3, Line2};
 use rhusics_core::{CollisionMode, CollisionShape, CollisionStrategy, Pose, RigidBody};
 use rhusics_ecs::WithRigidBody;
 use rhusics_ecs::physics2d::{BodyPose2, Mass2};

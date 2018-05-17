@@ -1,6 +1,6 @@
 use amethyst_core::cgmath::{Basis2, Point2, Point3, Quaternion};
-use collision::{Aabb2, Aabb3};
 use collision::primitive::{Primitive2, Primitive3};
+use collision::{Aabb2, Aabb3};
 
 use bundle::{PhysicsBundle2, PhysicsBundle3};
 use sync::PoseTransformSyncSystem;
