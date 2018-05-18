@@ -2,9 +2,9 @@ use std::marker;
 use std::time::Instant;
 
 use amethyst::assets::Handle;
-use amethyst::core::{GlobalTransform, Transform};
 use amethyst::core::cgmath::{Array, EuclideanSpace, InnerSpace, Quaternion, Rotation, Vector3,
                              Zero};
+use amethyst::core::{GlobalTransform, Transform};
 use amethyst::ecs::prelude::{Entities, Entity, Join, ReadExpect, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 use amethyst_rhusics::{AsTransform, Convert};
@@ -105,21 +105,30 @@ fn emit_box<P, B, R, A, I>(
 
     parts.object_type.insert(entity, ObjectType::Box).unwrap();
     parts.mesh.insert(entity, mesh).unwrap();
-    parts.material.insert(entity, emitter.material.clone()).unwrap();
-    parts.global.insert(entity, GlobalTransform::default()).unwrap();
+    parts
+        .material
+        .insert(entity, emitter.material.clone())
+        .unwrap();
+    parts
+        .global
+        .insert(entity, GlobalTransform::default())
+        .unwrap();
     parts.local.insert(entity, transform).unwrap();
-    parts.rigid_body.dynamic_body(
-        entity,
-        CollisionShape::<P, BodyPose<P::Point, R>, B, ObjectType>::new_simple(
-            CollisionStrategy::FullResolution,
-            CollisionMode::Discrete,
-            primitive.clone(),
-        ),
-        pose,
-        Velocity::<<P::Point as EuclideanSpace>::Diff, A>::from_linear(offset * speed),
-        RigidBody::default(),
-        Mass::<f32, I>::new(1.),
-    ).unwrap();
+    parts
+        .rigid_body
+        .dynamic_body(
+            entity,
+            CollisionShape::<P, BodyPose<P::Point, R>, B, ObjectType>::new_simple(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                primitive.clone(),
+            ),
+            pose,
+            Velocity::<<P::Point as EuclideanSpace>::Diff, A>::from_linear(offset * speed),
+            RigidBody::default(),
+            Mass::<f32, I>::new(1.),
+        )
+        .unwrap();
 }
 
 #[derive(SystemData)]

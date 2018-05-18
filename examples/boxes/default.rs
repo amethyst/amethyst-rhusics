@@ -1,6 +1,6 @@
 use amethyst::core::cgmath::{Basis2, Matrix3, Quaternion, Vector3};
-use collision::{Aabb2, Aabb3};
 use collision::primitive::{Primitive2, Primitive3};
+use collision::{Aabb2, Aabb3};
 
 use super::bundle::BoxSimulationBundle;
 

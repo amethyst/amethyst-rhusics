@@ -1,12 +1,12 @@
-use std::marker;
 use std::fmt::Debug;
+use std::marker;
 
-use amethyst_core::{Result, SystemBundle};
 use amethyst_core::cgmath::{Basis2, Point2, Point3, Quaternion};
 use amethyst_core::specs::prelude::{DispatcherBuilder, Entity};
-use collision::{Bound, ComputeBound, Contains, Discrete, Primitive, SurfaceArea, Union};
+use amethyst_core::{Result, SystemBundle};
 use collision::algorithm::broad_phase::{SweepAndPrune2, SweepAndPrune3};
 use collision::dbvt::TreeValueWrapped;
+use collision::{Bound, ComputeBound, Contains, Discrete, Primitive, SurfaceArea, Union};
 use rhusics_core::{BodyPose, Collider};
 use rhusics_ecs::DeltaTime;
 use rhusics_ecs::physics2d::{GJK2, setup_dispatch_2d};

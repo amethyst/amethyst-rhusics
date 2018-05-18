@@ -12,10 +12,10 @@ extern crate shred_derive;
 use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
-use amethyst::core::{GlobalTransform, Transform, TransformBundle};
 use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3};
+use amethyst::core::{GlobalTransform, Transform, TransformBundle};
 use amethyst::ecs::prelude::{Entity, World};
-use amethyst::prelude::{Application, Config, State, Trans};
+use amethyst::prelude::{Application, Config, GameData, GameDataBuilder, State, StateData, Trans};
 use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
                          MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
                          VirtualKeyCode, WindowEvent};
@@ -41,8 +41,9 @@ pub struct Emitting {
 
 pub type Shape = CollisionShape<Primitive3<f32>, BodyPose3<f32>, Aabb3<f32>, ObjectType>;
 
-impl State for Emitting {
-    fn on_start(&mut self, world: &mut World) {
+impl<'a, 'b> State<GameData<'a, 'b>> for Emitting {
+    fn on_start(&mut self, data: StateData<GameData<'a, 'b>>) {
+        let StateData { world, .. } = data;
         world.write_resource::<KillRate>().0 = 0.;
         initialise_camera(world);
         let g = Graphics {
@@ -71,7 +72,11 @@ impl State for Emitting {
         initialise_emitters(world);
     }
 
-    fn handle_event(&mut self, _: &mut World, event: Event) -> Trans {
+    fn handle_event(
+        &mut self,
+        _: StateData<GameData<'a, 'b>>,
+        event: Event,
+    ) -> Trans<GameData<'a, 'b>> {
         match event {
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::KeyboardInput {
@@ -88,14 +93,15 @@ impl State for Emitting {
         }
     }
 
-    fn update(&mut self, world: &mut World) -> Trans {
-        time_sync(world);
+    fn update(&mut self, data: StateData<GameData<'a, 'b>>) -> Trans<GameData<'a, 'b>> {
+        time_sync(&data.world);
         update_ui::<Point3<f32>>(
-            world,
+            data.world,
             self.num.unwrap(),
             self.fps.unwrap(),
             self.collision.unwrap(),
         );
+        data.data.update(&data.world);
         Trans::None
     }
 }
@@ -114,8 +120,8 @@ fn initialise_camera(world: &mut World) {
 }
 
 fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
-    use genmesh::{MapToVertices, Triangulate, Vertices};
     use genmesh::generators::Cube;
+    use genmesh::{MapToVertices, Triangulate, Vertices};
     let vertices = Cube::new()
         .vertex(|v| PosTex {
             position: v.pos.into(),
@@ -207,14 +213,14 @@ fn run() -> Result<(), amethyst::Error> {
             .with_pass(DrawUi::new()),
     );
 
-    let mut game = Application::build("./", Emitting::default())?
+    let game_data = GameDataBuilder::default()
         .with_bundle(FPSCounterBundle::default())?
         .with_bundle(DefaultPhysicsBundle3::<ObjectType>::new().with_spatial())?
         .with_bundle(BoxSimulationBundle3::new(Cuboid::new(0.1, 0.1, 0.1).into()))?
         .with_bundle(TransformBundle::new().with_dep(&["sync_system", "emission_system"]))?
         .with_bundle(UiBundle::<String, String>::new())?
-        .with_bundle(RenderBundle::new(pipe, Some(config)))?
-        .build()?;
+        .with_bundle(RenderBundle::new(pipe, Some(config)))?;
+    let mut game = Application::new("./", Emitting::default(), game_data)?;
 
     game.run();
 

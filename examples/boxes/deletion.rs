@@ -3,9 +3,9 @@ use std::fmt::Debug;
 use amethyst::core::cgmath::EuclideanSpace;
 use amethyst::ecs::prelude::{Entities, Entity, Read, ReadStorage, Resources, System, Write};
 use amethyst::shrev::{EventChannel, ReaderId};
-use rhusics_core::ContactEvent;
 use rand;
 use rand::Rng;
+use rhusics_core::ContactEvent;
 
 use super::{Collisions, KillRate, ObjectType};
 
