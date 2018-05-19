@@ -8,86 +8,9 @@ use rhusics_ecs::WithRigidBody;
 use rhusics_ecs::physics2d::{BodyPose2, Mass2};
 use rhusics_ecs::physics3d::{BodyPose3, Mass3};
 
-/// Setup 2D arena.
-///
-/// ### Parameters:
-///
-/// - `min`: Minimum corner of the arena
-/// - `max`: Maximum corner of the arena
-/// - `types`: Collider type of each arena barrier in order: Left, Right, Bottom, Top
-/// - `world`: World
-///
-/// ### Type parameters:
-///
-/// - `Y`: Collider type
-pub fn setup_2d_arena<Y>(min: Point2<f32>, max: Point2<f32>, types: (Y, Y, Y, Y), world: &mut World)
-where
-    Y: Default + Send + Sync + 'static,
-{
-    type Shape2<Y> = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, Y>;
-    let center = (min + max.to_vec()) / 2.;
-    world
-        .create_entity()
-        .with_static_rigid_body(
-            Shape2::new_simple_with_type(
-                CollisionStrategy::FullResolution,
-                CollisionMode::Discrete,
-                Line2::new(Point2::new(center.x, min.y), Point2::new(center.x, max.y)).into(),
-                types.0,
-            ),
-            BodyPose2::new(Point2::new(min.x, center.y), Basis2::one()),
-            RigidBody::default(),
-            Mass2::infinite(),
-        )
-        .build();
-
-    world
-        .create_entity()
-        .with_static_rigid_body(
-            Shape2::new_simple_with_type(
-                CollisionStrategy::FullResolution,
-                CollisionMode::Discrete,
-                Line2::new(Point2::new(center.x, min.y), Point2::new(center.x, max.y)).into(),
-                types.1,
-            ),
-            BodyPose2::new(Point2::new(max.x, center.y), Basis2::one()),
-            RigidBody::default(),
-            Mass2::infinite(),
-        )
-        .build();
-
-    world
-        .create_entity()
-        .with_static_rigid_body(
-            Shape2::new_simple_with_type(
-                CollisionStrategy::FullResolution,
-                CollisionMode::Discrete,
-                Line2::new(Point2::new(min.x, center.y), Point2::new(max.x, center.y)).into(),
-                types.2,
-            ),
-            BodyPose2::new(Point2::new(center.x, min.y), Basis2::one()),
-            RigidBody::default(),
-            Mass2::infinite(),
-        )
-        .build();
-
-    world
-        .create_entity()
-        .with_static_rigid_body(
-            Shape2::new_simple_with_type(
-                CollisionStrategy::FullResolution,
-                CollisionMode::Discrete,
-                Line2::new(Point2::new(min.x, center.y), Point2::new(max.x, center.y)).into(),
-                types.3,
-            ),
-            BodyPose2::new(Point2::new(center.x, max.y), Basis2::one()),
-            RigidBody::default(),
-            Mass2::infinite(),
-        )
-        .build();
-}
-
 /// Setup 3D arena.
+///
+/// An arena is a space with invisible walls around it, which have collision shapes defined.
 ///
 /// ### Parameters:
 ///
@@ -151,6 +74,87 @@ pub fn setup_3d_arena<Y>(
         Point3::new(center.x, center.y, min.z),
         Quaternion::one(),
     );
+}
+
+/// Setup 2D arena.
+///
+/// An arena is a space with invisible walls around the space, that defines a collision room.
+///
+/// ### Parameters:
+///
+/// - `min`: Minimum corner of the arena
+/// - `max`: Maximum corner of the arena
+/// - `types`: Collider type of each arena barrier in order: Left, Right, Bottom, Top
+/// - `world`: World
+///
+/// ### Type parameters:
+///
+/// - `Y`: Collider type
+pub fn setup_2d_arena<Y>(min: Point2<f32>, max: Point2<f32>, types: (Y, Y, Y, Y), world: &mut World)
+    where
+        Y: Default + Send + Sync + 'static,
+{
+    type Shape2<Y> = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, Y>;
+    let center = (min + max.to_vec()) / 2.;
+    world
+        .create_entity()
+        .with_static_rigid_body(
+            Shape2::new_simple_with_type(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                Line2::new(Point2::new(center.x, min.y), Point2::new(center.x, max.y)).into(),
+                types.0,
+            ),
+            BodyPose2::new(Point2::new(min.x, center.y), Basis2::one()),
+            RigidBody::default(),
+            Mass2::infinite(),
+        )
+        .build();
+
+    world
+        .create_entity()
+        .with_static_rigid_body(
+            Shape2::new_simple_with_type(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                Line2::new(Point2::new(center.x, min.y), Point2::new(center.x, max.y)).into(),
+                types.1,
+            ),
+            BodyPose2::new(Point2::new(max.x, center.y), Basis2::one()),
+            RigidBody::default(),
+            Mass2::infinite(),
+        )
+        .build();
+
+    world
+        .create_entity()
+        .with_static_rigid_body(
+            Shape2::new_simple_with_type(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                Line2::new(Point2::new(min.x, center.y), Point2::new(max.x, center.y)).into(),
+                types.2,
+            ),
+            BodyPose2::new(Point2::new(center.x, min.y), Basis2::one()),
+            RigidBody::default(),
+            Mass2::infinite(),
+        )
+        .build();
+
+    world
+        .create_entity()
+        .with_static_rigid_body(
+            Shape2::new_simple_with_type(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                Line2::new(Point2::new(min.x, center.y), Point2::new(max.x, center.y)).into(),
+                types.3,
+            ),
+            BodyPose2::new(Point2::new(center.x, max.y), Basis2::one()),
+            RigidBody::default(),
+            Mass2::infinite(),
+        )
+        .build();
 }
 
 fn create_3d_wall<Y>(

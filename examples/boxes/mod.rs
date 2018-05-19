@@ -21,6 +21,8 @@ use rhusics_core::Collider;
 ///
 /// Used by collision detection to determine if shapes should be checked for collisions or not.
 /// Only box-box collisions will be processed.
+///
+/// Showcase how `Collider` works.
 #[repr(u8)]
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub enum ObjectType {
@@ -35,6 +37,7 @@ impl Default for ObjectType {
 }
 
 impl Collider for ObjectType {
+    /// Remove collision testing for Wall - Wall shape pairs
     fn should_generate_contacts(&self, other: &ObjectType) -> bool {
         self != other || *self != ObjectType::Wall
     }

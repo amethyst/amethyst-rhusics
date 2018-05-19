@@ -18,7 +18,9 @@ use super::{Emitter, Graphics, ObjectType};
 
 /// Primitive emission system.
 ///
-/// Will spawn new primitives regularly, based on the `Emitter`s in the `World`
+/// Will spawn new primitives regularly, based on the `Emitter`s in the `World`.
+///
+/// Showcase how to use `RigidBodyParts` to setup new collidable entities
 ///
 /// ### Type parameters:
 ///

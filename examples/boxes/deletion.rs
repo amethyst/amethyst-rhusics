@@ -11,6 +11,8 @@ use super::{Collisions, KillRate, ObjectType};
 
 /// Delete entities from the `World` on collision.
 ///
+/// Showcase how to receive contact events.
+///
 /// ### Type parameters:
 ///
 /// - `P`: Positional quantity (`Point2` or `Point3`)

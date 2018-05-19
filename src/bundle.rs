@@ -14,7 +14,7 @@ use rhusics_ecs::physics3d::{GJK3, setup_dispatch_3d};
 
 use default::{PoseTransformSyncSystem2, PoseTransformSyncSystem3};
 
-/// Bundle for configuring 2D physics, using the basic collision detection setup in rhusics.
+/// Bundle for configuring 2D physics.
 ///
 /// ### Type parameters:
 ///
@@ -36,6 +36,9 @@ impl<P, B, Y> PhysicsBundle2<P, B, Y> {
     }
 
     /// Enable spatial sorting
+    ///
+    /// Cause rhusics to use `SpatialSortingSystem` and `SpatialCollisionSystem` instead of
+    /// `BasicCollisionSystem` which is the default.
     pub fn with_spatial(mut self) -> Self {
         self.spatial = true;
         self
@@ -105,6 +108,9 @@ impl<P, B, Y> PhysicsBundle3<P, B, Y> {
     }
 
     /// Enable spatial sorting
+    ///
+    /// Cause rhusics to use `SpatialSortingSystem` and `SpatialCollisionSystem` instead of
+    /// `BasicCollisionSystem` which is the default.
     pub fn with_spatial(mut self) -> Self {
         self.spatial = true;
         self
