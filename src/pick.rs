@@ -18,6 +18,13 @@ fn eye_to_world(eye: Vector4<f32>, inverse_view: Matrix4<f32>) -> Vector3<f32> {
 }
 
 /// Generate a ray for picking, based on the clicked position in pixel coordinates.
+///
+/// ## Parameters:
+///
+/// - `window_pos`: clicked position in pixel coordinates
+/// - `window_size`: window size in pixels
+/// - `camera`: `Camera`, used to convert from screen space to eye space
+/// - `view`: camera transform, inverse transform used to convert from eye space to world space
 pub fn pick_ray(
     window_pos: (f32, f32), // pixel coordinates
     window_size: (f32, f32),
@@ -31,6 +38,12 @@ pub fn pick_ray(
 }
 
 /// Generate a ray for picking, based on the clicked position in normalized device coordinates.
+///
+/// ## Parameters:
+///
+/// - `window_pos`: clicked position in normalized device coordinates, i.e. in the range (-1..1)
+/// - `camera`: `Camera`, used to convert from screen space to eye space
+/// - `view`: camera transform, inverse transform used to convert from eye space to world space
 pub fn pick_ray_ndc(
     window_pos: (f32, f32), // ndc coordinates (-1..1)
     camera: &Camera,

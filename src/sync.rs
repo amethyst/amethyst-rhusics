@@ -17,7 +17,7 @@ pub trait AsTransform {
 /// Utility trait for converting data between types.
 ///
 /// Primarily used for mapping data into amethysts internal data formation in `Transform`,
-/// for example converting between `Point2<S>` to `Vector3<f32>` (which is used inside `Transform`).
+/// for example converting between `Point2<S>` and `Vector3<f32>` (which is used inside `Transform`).
 pub trait Convert {
     /// Output type of conversion
     type Output;
@@ -97,6 +97,8 @@ pub fn time_sync(world: &World) {
 /// - `R`: Rotational quantity (`Basis2<f32>` or `Quaternion<f32>` in most scenarios).
 pub struct PoseTransformSyncSystem<P, R> {
     m: marker::PhantomData<(P, R)>,
+    translation: bool,
+    rotation: bool,
 }
 
 impl<P, R> PoseTransformSyncSystem<P, R> {
@@ -104,7 +106,21 @@ impl<P, R> PoseTransformSyncSystem<P, R> {
     pub fn new() -> Self {
         Self {
             m: marker::PhantomData,
+            translation: true,
+            rotation: true,
         }
+    }
+
+    /// Disable rotation sync
+    pub fn without_rotation(mut self) -> Self {
+        self.rotation = false;
+        self
+    }
+
+    /// Disable translation sync
+    pub fn without_translation(mut self) -> Self {
+        self.translation = false;
+        self
     }
 }
 
@@ -118,10 +134,11 @@ where
     fn run(&mut self, data: Self::SystemData) {
         let (poses, mut transforms) = data;
         for (pose, transform) in (&poses, &mut transforms).join() {
-            *transform = Transform {
-                translation: pose.position().convert(),
-                rotation: pose.rotation().convert(),
-                scale: transform.scale,
+            if self.translation {
+                transform.translation = pose.position().convert();
+            }
+            if self.rotation {
+                transform.rotation = pose.rotation().convert();
             }
         }
     }

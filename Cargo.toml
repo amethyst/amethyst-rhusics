@@ -14,19 +14,16 @@ description = "Integration of `amethyst` and `rhusics`"
 keywords = ["gamedev", "amethyst", "physics"]
 
 [dependencies]
-amethyst_core = { version = "0.1.0", git = "https://github.com/amethyst/amethyst", branch = "develop" }
-amethyst_renderer = { version = "0.6.1", git = "https://github.com/amethyst/amethyst", branch = "develop" }
+amethyst_core = { version = "0.2.0" }
+amethyst_renderer = { version = "0.7.0" }
 rhusics-ecs = { version = "0.4", features = ["serde"] }
 rhusics-core = { version = "0.4", features = ["specs", "serde"] }
 shrev = "1.0"
 collision = { version = "0.18", features = ["serde"]}
 
 [dev-dependencies]
-amethyst = { version = "0.6.0", git = "https://github.com/amethyst/amethyst", branch = "develop" }
+amethyst = { version = "0.7.0" }
 genmesh = "0.5"
 rand = "0.3"
 shred = "0.7"
 shred-derive = "0.5"
-
-[patch.crates-io]
-coreaudio-sys = { git = "https://github.com/RustAudio/coreaudio-sys.git" }
