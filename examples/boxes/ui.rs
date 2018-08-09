@@ -1,8 +1,8 @@
 use super::{Collisions, Emitter};
 use amethyst::assets::Loader;
 use amethyst::core::{Parent, Time};
-use amethyst::ecs::prelude::{Entity, Join, World};
-use amethyst::ui::{Anchor, Anchored, TtfFormat, UiText, UiTransform};
+use amethyst::ecs::prelude::{Entity, Join, World, Builder};
+use amethyst::ui::{Anchor, TtfFormat, UiText, UiTransform};
 use amethyst::utils::fps_counter::FPSCounter;
 
 pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
@@ -17,6 +17,7 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
         .create_entity()
         .with(UiTransform::new(
             "num".to_string(),
+            Anchor::TopLeft,
             100.,
             25.,
             1.,
@@ -30,13 +31,13 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             [1.0, 1.0, 1.0, 1.0],
             25.,
         ))
-        .with(Anchored::new(Anchor::TopLeft))
         .build();
 
     let fps_display = world
         .create_entity()
         .with(UiTransform::new(
             "fps".to_string(),
+            Anchor::BottomLeft,
             100.,
             0.,
             1.,
@@ -53,13 +54,13 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
         .with(Parent {
             entity: num_display,
         })
-        .with(Anchored::new(Anchor::BottomLeft))
         .build();
 
     let collisions_display = world
         .create_entity()
         .with(UiTransform::new(
             "collisions".to_string(),
+            Anchor::BottomLeft,
             100.,
             0.,
             1.,
@@ -76,7 +77,6 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
         .with(Parent {
             entity: fps_display,
         })
-        .with(Anchored::new(Anchor::BottomLeft))
         .build();
     (num_display, fps_display, collisions_display)
 }

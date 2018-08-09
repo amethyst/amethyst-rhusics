@@ -14,11 +14,11 @@ use std::time::{Duration, Instant};
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector3};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
-use amethyst::ecs::prelude::{Entity, World};
+use amethyst::ecs::prelude::{Entity, World, Builder};
 use amethyst::prelude::{Application, Config, GameData, GameDataBuilder, State, StateData, Trans};
 use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
                          MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
-                         VirtualKeyCode, WindowEvent};
+                         VirtualKeyCode, WindowEvent, TexturePrefab};
 use amethyst::ui::{DrawUi, UiBundle};
 use amethyst::utils::fps_counter::FPSCounterBundle;
 use amethyst_rhusics::{time_sync, DefaultPhysicsBundle2, setup_2d_arena};
