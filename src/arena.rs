@@ -1,12 +1,13 @@
-use amethyst_core::cgmath::{Basis2, Deg, EuclideanSpace, One, Point2, Point3, Quaternion,
-                            Rotation3, Vector2};
-use amethyst_core::specs::prelude::{World, Builder};
+use amethyst_core::cgmath::{
+    Basis2, Deg, EuclideanSpace, One, Point2, Point3, Quaternion, Rotation3, Vector2,
+};
+use amethyst_core::specs::prelude::{Builder, World};
 use collision::primitive::{Primitive2, Primitive3, Quad};
 use collision::{Aabb2, Aabb3, Line2};
-use rhusics_core::{CollisionMode, CollisionShape, CollisionStrategy, Pose, PhysicalEntity};
-use rhusics_ecs::WithPhysics;
+use rhusics_core::{CollisionMode, CollisionShape, CollisionStrategy, PhysicalEntity, Pose};
 use rhusics_ecs::physics2d::{BodyPose2, Mass2};
 use rhusics_ecs::physics3d::{BodyPose3, Mass3};
+use rhusics_ecs::WithPhysics;
 
 /// Setup 3D arena.
 ///
@@ -91,8 +92,8 @@ pub fn setup_3d_arena<Y>(
 ///
 /// - `Y`: Collider type
 pub fn setup_2d_arena<Y>(min: Point2<f32>, max: Point2<f32>, types: (Y, Y, Y, Y), world: &mut World)
-    where
-        Y: Default + Send + Sync + 'static,
+where
+    Y: Default + Send + Sync + 'static,
 {
     type Shape2<Y> = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, Y>;
     let center = (min + max.to_vec()) / 2.;

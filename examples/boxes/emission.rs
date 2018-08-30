@@ -2,16 +2,19 @@ use std::marker;
 use std::time::Instant;
 
 use amethyst::assets::Handle;
-use amethyst::core::cgmath::{Array, EuclideanSpace, InnerSpace, Quaternion, Rotation, Vector3,
-                             Zero};
+use amethyst::core::cgmath::{
+    Array, EuclideanSpace, InnerSpace, Quaternion, Rotation, Vector3, Zero,
+};
 use amethyst::core::{GlobalTransform, Transform};
 use amethyst::ecs::prelude::{Entities, Entity, Join, ReadExpect, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 use amethyst_rhusics::{AsTransform, Convert};
 use collision::{Bound, ComputeBound, Primitive, Union};
 use rand::Rand;
-use rhusics_core::{BodyPose, CollisionMode, CollisionShape, CollisionStrategy, Inertia, Mass,
-                   Pose, PhysicalEntity, Velocity};
+use rhusics_core::{
+    BodyPose, CollisionMode, CollisionShape, CollisionStrategy, Inertia, Mass, PhysicalEntity,
+    Pose, Velocity,
+};
 use rhusics_ecs::PhysicalEntityParts;
 
 use super::{Emitter, Graphics, ObjectType};

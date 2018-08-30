@@ -1,8 +1,9 @@
 use std::fmt::Debug;
 use std::marker;
 
-use amethyst::core::cgmath::{Array, EuclideanSpace, InnerSpace, Quaternion, Rotation, Vector3,
-                             Zero};
+use amethyst::core::cgmath::{
+    Array, EuclideanSpace, InnerSpace, Quaternion, Rotation, Vector3, Zero,
+};
 use amethyst::core::{Result, SystemBundle};
 use amethyst::ecs::prelude::DispatcherBuilder;
 use amethyst_rhusics::Convert;

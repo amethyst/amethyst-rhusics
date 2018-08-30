@@ -1,6 +1,7 @@
+use amethyst_core::cgmath::{
+    EuclideanSpace, InnerSpace, Matrix4, Point3, SquareMatrix, Transform, Vector3, Vector4,
+};
 use amethyst_core::GlobalTransform;
-use amethyst_core::cgmath::{EuclideanSpace, InnerSpace, Matrix4, Point3, SquareMatrix, Transform,
-                            Vector3, Vector4};
 use amethyst_renderer::Camera;
 use collision::Ray3;
 

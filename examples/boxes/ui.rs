@@ -1,7 +1,7 @@
 use super::{Collisions, Emitter};
 use amethyst::assets::Loader;
 use amethyst::core::{Parent, Time};
-use amethyst::ecs::prelude::{Entity, Join, World, Builder};
+use amethyst::ecs::prelude::{Builder, Entity, Join, World};
 use amethyst::ui::{Anchor, TtfFormat, UiText, UiTransform};
 use amethyst::utils::fps_counter::FPSCounter;
 
