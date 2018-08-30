@@ -3,8 +3,8 @@ use amethyst_core::cgmath::{Basis2, Deg, EuclideanSpace, One, Point2, Point3, Qu
 use amethyst_core::specs::prelude::{World, Builder};
 use collision::primitive::{Primitive2, Primitive3, Quad};
 use collision::{Aabb2, Aabb3, Line2};
-use rhusics_core::{CollisionMode, CollisionShape, CollisionStrategy, Pose, RigidBody};
-use rhusics_ecs::WithRigidBody;
+use rhusics_core::{CollisionMode, CollisionShape, CollisionStrategy, Pose, PhysicalEntity};
+use rhusics_ecs::WithPhysics;
 use rhusics_ecs::physics2d::{BodyPose2, Mass2};
 use rhusics_ecs::physics3d::{BodyPose3, Mass3};
 
@@ -98,7 +98,7 @@ pub fn setup_2d_arena<Y>(min: Point2<f32>, max: Point2<f32>, types: (Y, Y, Y, Y)
     let center = (min + max.to_vec()) / 2.;
     world
         .create_entity()
-        .with_static_rigid_body(
+        .with_static_physical_entity(
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
@@ -106,14 +106,14 @@ pub fn setup_2d_arena<Y>(min: Point2<f32>, max: Point2<f32>, types: (Y, Y, Y, Y)
                 types.0,
             ),
             BodyPose2::new(Point2::new(min.x, center.y), Basis2::one()),
-            RigidBody::default(),
+            PhysicalEntity::default(),
             Mass2::infinite(),
         )
         .build();
 
     world
         .create_entity()
-        .with_static_rigid_body(
+        .with_static_physical_entity(
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
@@ -121,14 +121,14 @@ pub fn setup_2d_arena<Y>(min: Point2<f32>, max: Point2<f32>, types: (Y, Y, Y, Y)
                 types.1,
             ),
             BodyPose2::new(Point2::new(max.x, center.y), Basis2::one()),
-            RigidBody::default(),
+            PhysicalEntity::default(),
             Mass2::infinite(),
         )
         .build();
 
     world
         .create_entity()
-        .with_static_rigid_body(
+        .with_static_physical_entity(
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
@@ -136,14 +136,14 @@ pub fn setup_2d_arena<Y>(min: Point2<f32>, max: Point2<f32>, types: (Y, Y, Y, Y)
                 types.2,
             ),
             BodyPose2::new(Point2::new(center.x, min.y), Basis2::one()),
-            RigidBody::default(),
+            PhysicalEntity::default(),
             Mass2::infinite(),
         )
         .build();
 
     world
         .create_entity()
-        .with_static_rigid_body(
+        .with_static_physical_entity(
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
@@ -151,7 +151,7 @@ pub fn setup_2d_arena<Y>(min: Point2<f32>, max: Point2<f32>, types: (Y, Y, Y, Y)
                 types.3,
             ),
             BodyPose2::new(Point2::new(center.x, max.y), Basis2::one()),
-            RigidBody::default(),
+            PhysicalEntity::default(),
             Mass2::infinite(),
         )
         .build();
@@ -172,7 +172,7 @@ fn create_3d_wall<Y>(
     );
     world
         .create_entity()
-        .with_static_rigid_body(
+        .with_static_physical_entity(
             Shape3::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
@@ -180,7 +180,7 @@ fn create_3d_wall<Y>(
                 t,
             ),
             BodyPose3::new(position, rot),
-            RigidBody::default(),
+            PhysicalEntity::default(),
             Mass3::infinite(),
         )
         .build();

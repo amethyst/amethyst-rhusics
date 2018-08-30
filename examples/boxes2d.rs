@@ -197,6 +197,7 @@ fn initialise_emitters(world: &mut World) {
 }
 
 fn run() -> Result<(), amethyst::Error> {
+    amethyst::start_logger(amethyst::LoggerConfig::default());
     let path = format!(
         "{}/../resources/display_config.ron",
         env!("CARGO_MANIFEST_DIR")
