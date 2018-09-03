@@ -1,10 +1,11 @@
 use std::marker;
 
-use amethyst_core::Transform;
-use amethyst_core::cgmath::{Array, Basis2, EuclideanSpace, Matrix3, Point2, Point3, Quaternion,
-                            Rotation, Vector3};
+use amethyst_core::cgmath::{
+    Array, Basis2, EuclideanSpace, Matrix3, Point2, Point3, Quaternion, Rotation, Vector3,
+};
 use amethyst_core::specs::prelude::{Join, ReadStorage, System, World, WriteStorage};
 use amethyst_core::timing::Time;
+use amethyst_core::Transform;
 use rhusics_core::{BodyPose, Pose};
 use rhusics_ecs::DeltaTime;
 

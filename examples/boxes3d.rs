@@ -14,21 +14,23 @@ use std::time::{Duration, Instant};
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
-use amethyst::ecs::prelude::{Entity, World, Builder};
+use amethyst::ecs::prelude::{Builder, Entity, World};
 use amethyst::prelude::{Application, Config, GameData, GameDataBuilder, State, StateData, Trans};
-use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
-                         MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
-                         VirtualKeyCode, WindowEvent};
+use amethyst::renderer::{
+    Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material, MaterialDefaults, Mesh,
+    Pipeline, PosTex, RenderBundle, Stage, VirtualKeyCode, WindowEvent,
+};
 use amethyst::ui::{DrawUi, UiBundle};
 use amethyst::utils::fps_counter::FPSCounterBundle;
-use amethyst_rhusics::{time_sync, DefaultPhysicsBundle3, setup_3d_arena};
-use collision::Aabb3;
+use amethyst_rhusics::{setup_3d_arena, time_sync, DefaultPhysicsBundle3};
 use collision::primitive::{Cuboid, Primitive3};
+use collision::Aabb3;
 use rhusics_core::CollisionShape;
 use rhusics_ecs::physics3d::BodyPose3;
 
-use self::boxes::{create_ui, update_ui, BoxSimulationBundle3, Emitter, Graphics, KillRate,
-                  ObjectType};
+use self::boxes::{
+    create_ui, update_ui, BoxSimulationBundle3, Emitter, Graphics, KillRate, ObjectType,
+};
 
 mod boxes;
 
@@ -200,6 +202,7 @@ fn initialise_emitters(world: &mut World) {
 }
 
 fn run() -> Result<(), amethyst::Error> {
+    amethyst::start_logger(amethyst::LoggerConfig::default());
     let path = format!(
         "{}/../resources/display_config.ron",
         env!("CARGO_MANIFEST_DIR")

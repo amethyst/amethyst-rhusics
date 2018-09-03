@@ -8,9 +8,9 @@ use collision::algorithm::broad_phase::{SweepAndPrune2, SweepAndPrune3};
 use collision::dbvt::TreeValueWrapped;
 use collision::{Bound, ComputeBound, Contains, Discrete, Primitive, SurfaceArea, Union};
 use rhusics_core::{BodyPose, Collider};
+use rhusics_ecs::physics2d::{setup_dispatch_2d, GJK2};
+use rhusics_ecs::physics3d::{setup_dispatch_3d, GJK3};
 use rhusics_ecs::DeltaTime;
-use rhusics_ecs::physics2d::{GJK2, setup_dispatch_2d};
-use rhusics_ecs::physics3d::{GJK3, setup_dispatch_3d};
 
 use default::{PoseTransformSyncSystem2, PoseTransformSyncSystem3};
 

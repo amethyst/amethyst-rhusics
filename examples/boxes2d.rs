@@ -14,21 +14,23 @@ use std::time::{Duration, Instant};
 use amethyst::assets::{Handle, Loader};
 use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector3};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
-use amethyst::ecs::prelude::{Entity, World, Builder};
+use amethyst::ecs::prelude::{Builder, Entity, World};
 use amethyst::prelude::{Application, Config, GameData, GameDataBuilder, State, StateData, Trans};
-use amethyst::renderer::{Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material,
-                         MaterialDefaults, Mesh, Pipeline, PosTex, RenderBundle, Stage,
-                         VirtualKeyCode, WindowEvent, TexturePrefab};
+use amethyst::renderer::{
+    Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material, MaterialDefaults, Mesh,
+    Pipeline, PosTex, RenderBundle, Stage, TexturePrefab, VirtualKeyCode, WindowEvent,
+};
 use amethyst::ui::{DrawUi, UiBundle};
 use amethyst::utils::fps_counter::FPSCounterBundle;
-use amethyst_rhusics::{time_sync, DefaultPhysicsBundle2, setup_2d_arena};
-use collision::Aabb2;
+use amethyst_rhusics::{setup_2d_arena, time_sync, DefaultPhysicsBundle2};
 use collision::primitive::{Primitive2, Rectangle};
+use collision::Aabb2;
 use rhusics_core::CollisionShape;
 use rhusics_ecs::physics2d::BodyPose2;
 
-use self::boxes::{create_ui, update_ui, BoxSimulationBundle2, Emitter, Graphics, KillRate,
-                  ObjectType};
+use self::boxes::{
+    create_ui, update_ui, BoxSimulationBundle2, Emitter, Graphics, KillRate, ObjectType,
+};
 
 mod boxes;
 
@@ -197,6 +199,7 @@ fn initialise_emitters(world: &mut World) {
 }
 
 fn run() -> Result<(), amethyst::Error> {
+    amethyst::start_logger(amethyst::LoggerConfig::default());
     let path = format!(
         "{}/../resources/display_config.ron",
         env!("CARGO_MANIFEST_DIR")

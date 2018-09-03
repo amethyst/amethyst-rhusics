@@ -2,17 +2,20 @@ use std::marker;
 use std::time::Instant;
 
 use amethyst::assets::Handle;
-use amethyst::core::cgmath::{Array, EuclideanSpace, InnerSpace, Quaternion, Rotation, Vector3,
-                             Zero};
+use amethyst::core::cgmath::{
+    Array, EuclideanSpace, InnerSpace, Quaternion, Rotation, Vector3, Zero,
+};
 use amethyst::core::{GlobalTransform, Transform};
 use amethyst::ecs::prelude::{Entities, Entity, Join, ReadExpect, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 use amethyst_rhusics::{AsTransform, Convert};
 use collision::{Bound, ComputeBound, Primitive, Union};
 use rand::Rand;
-use rhusics_core::{BodyPose, CollisionMode, CollisionShape, CollisionStrategy, Inertia, Mass,
-                   Pose, RigidBody, Velocity};
-use rhusics_ecs::RigidBodyParts;
+use rhusics_core::{
+    BodyPose, CollisionMode, CollisionShape, CollisionStrategy, Inertia, Mass, PhysicalEntity,
+    Pose, Velocity,
+};
+use rhusics_ecs::PhysicalEntityParts;
 
 use super::{Emitter, Graphics, ObjectType};
 
@@ -117,8 +120,8 @@ fn emit_box<P, B, R, A, I>(
         .unwrap();
     parts.local.insert(entity, transform).unwrap();
     parts
-        .rigid_body
-        .dynamic_body(
+        .physical_entity
+        .dynamic_entity(
             entity,
             CollisionShape::<P, BodyPose<P::Point, R>, B, ObjectType>::new_simple(
                 CollisionStrategy::FullResolution,
@@ -127,7 +130,7 @@ fn emit_box<P, B, R, A, I>(
             ),
             pose,
             Velocity::<<P::Point as EuclideanSpace>::Diff, A>::from_linear(offset * speed),
-            RigidBody::default(),
+            PhysicalEntity::default(),
             Mass::<f32, I>::new(1.),
         )
         .unwrap();
@@ -149,7 +152,7 @@ where
     pub material: WriteStorage<'a, Material>,
     pub global: WriteStorage<'a, GlobalTransform>,
     pub local: WriteStorage<'a, Transform>,
-    pub rigid_body: RigidBodyParts<
+    pub physical_entity: PhysicalEntityParts<
         'a,
         P,
         ObjectType,
