@@ -24,14 +24,12 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             200.,
             50.,
             0,
-        ))
-        .with(UiText::new(
+        )).with(UiText::new(
             font.clone(),
             "N/A".to_string(),
             [1.0, 1.0, 1.0, 1.0],
             25.,
-        ))
-        .build();
+        )).build();
 
     let fps_display = world
         .create_entity()
@@ -44,17 +42,14 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             200.,
             50.,
             0,
-        ))
-        .with(UiText::new(
+        )).with(UiText::new(
             font.clone(),
             "N/A".to_string(),
             [1.0, 1.0, 1.0, 1.0],
             25.,
-        ))
-        .with(Parent {
+        )).with(Parent {
             entity: num_display,
-        })
-        .build();
+        }).build();
 
     let collisions_display = world
         .create_entity()
@@ -67,17 +62,14 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             200.,
             50.,
             0,
-        ))
-        .with(UiText::new(
+        )).with(UiText::new(
             font.clone(),
             "N/A".to_string(),
             [1.0, 1.0, 1.0, 1.0],
             25.,
-        ))
-        .with(Parent {
+        )).with(Parent {
             entity: fps_display,
-        })
-        .build();
+        }).build();
     (num_display, fps_display, collisions_display)
 }
 

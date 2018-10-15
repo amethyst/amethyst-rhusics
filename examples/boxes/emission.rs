@@ -132,8 +132,7 @@ fn emit_box<P, B, R, A, I>(
             Velocity::<<P::Point as EuclideanSpace>::Diff, A>::from_linear(offset * speed),
             PhysicalEntity::default(),
             Mass::<f32, I>::new(1.),
-        )
-        .unwrap();
+        ).unwrap();
 }
 
 #[derive(SystemData)]
