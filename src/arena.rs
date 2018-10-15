@@ -109,8 +109,7 @@ where
             BodyPose2::new(Point2::new(min.x, center.y), Basis2::one()),
             PhysicalEntity::default(),
             Mass2::infinite(),
-        )
-        .build();
+        ).build();
 
     world
         .create_entity()
@@ -124,8 +123,7 @@ where
             BodyPose2::new(Point2::new(max.x, center.y), Basis2::one()),
             PhysicalEntity::default(),
             Mass2::infinite(),
-        )
-        .build();
+        ).build();
 
     world
         .create_entity()
@@ -139,8 +137,7 @@ where
             BodyPose2::new(Point2::new(center.x, min.y), Basis2::one()),
             PhysicalEntity::default(),
             Mass2::infinite(),
-        )
-        .build();
+        ).build();
 
     world
         .create_entity()
@@ -154,8 +151,7 @@ where
             BodyPose2::new(Point2::new(center.x, max.y), Basis2::one()),
             PhysicalEntity::default(),
             Mass2::infinite(),
-        )
-        .build();
+        ).build();
 }
 
 fn create_3d_wall<Y>(
@@ -183,8 +179,7 @@ fn create_3d_wall<Y>(
             BodyPose3::new(position, rot),
             PhysicalEntity::default(),
             Mass3::infinite(),
-        )
-        .build();
+        ).build();
 }
 
 type Shape3<Y> = CollisionShape<Primitive3<f32>, BodyPose3<f32>, Aabb3<f32>, Y>;

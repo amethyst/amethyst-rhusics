@@ -116,8 +116,7 @@ fn initialise_camera(world: &mut World) {
             rotation: Quaternion::one(),
             scale: Vector3::from_value(1.),
             translation: Vector3::new(0., 0., 1.),
-        })
-        .with(GlobalTransform::default())
+        }).with(GlobalTransform::default())
         .build();
 }
 
@@ -128,8 +127,7 @@ fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
         .vertex(|v| PosTex {
             position: v.pos.into(),
             tex_coord: [0.1, 0.1],
-        })
-        .triangulate()
+        }).triangulate()
         .vertices()
         .collect::<Vec<_>>();
     world
@@ -167,8 +165,7 @@ fn initialise_emitters(world: &mut World) {
             Point3::new(-0.4, 0., -1.),
             Duration::new(0, 50_000_000),
             mat,
-        ))
-        .build();
+        )).build();
 
     let mat = initialise_material(world, 0.3, 0.0, 0.3);
     world
@@ -177,8 +174,7 @@ fn initialise_emitters(world: &mut World) {
             Point3::new(0.4, 0., -1.),
             Duration::new(0, 75_000_000),
             mat,
-        ))
-        .build();
+        )).build();
 
     let mat = initialise_material(world, 1.0, 1.0, 1.0);
     world
@@ -187,8 +183,7 @@ fn initialise_emitters(world: &mut World) {
             Point3::new(0., -0.4, -1.),
             Duration::new(0, 100_000_000),
             mat,
-        ))
-        .build();
+        )).build();
 
     let mat = initialise_material(world, 1.0, 0.3, 0.3);
     world
@@ -197,8 +192,7 @@ fn initialise_emitters(world: &mut World) {
             Point3::new(0., 0.4, -1.),
             Duration::new(0, 25_000_000),
             mat,
-        ))
-        .build();
+        )).build();
 }
 
 fn run() -> Result<(), amethyst::Error> {

@@ -49,7 +49,13 @@ pub fn pick_ray_screen(
     camera_transform: &GlobalTransform,
 ) -> Ray3<f32> {
     let clip = Vector4::new(window_pos.0, window_pos.1, 0.0, 0.0);
-    let eye = clip_to_eye(clip, camera.proj.invert().expect("degenerate projection matrix caused breakdown in matrix inversion"));
+    let eye = clip_to_eye(
+        clip,
+        camera
+            .proj
+            .invert()
+            .expect("degenerate projection matrix caused breakdown in matrix inversion"),
+    );
     let world_dir = eye_to_world(eye, &camera_transform.0);
     let origin = camera_transform.0.transform_point(Point3::origin());
     Ray3::new(origin, world_dir)
