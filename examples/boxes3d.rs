@@ -15,10 +15,11 @@ use amethyst::assets::{Handle, Loader};
 use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3};
 use amethyst::core::{GlobalTransform, Transform, TransformBundle};
 use amethyst::ecs::prelude::{Builder, Entity, World};
-use amethyst::prelude::{Application, Config, GameData, GameDataBuilder, State, StateData, Trans};
+use amethyst::input::{is_close_requested, is_key_down};
+use amethyst::prelude::{Application, Config, GameData, GameDataBuilder, StateData, Trans, SimpleTrans, SimpleState, StateEvent};
 use amethyst::renderer::{
-    Camera, DisplayConfig, DrawFlat, Event, KeyboardInput, Material, MaterialDefaults, Mesh,
-    Pipeline, PosTex, RenderBundle, Stage, VirtualKeyCode, WindowEvent,
+    Camera, DisplayConfig, DrawFlat, Material, MaterialDefaults, Mesh,
+    Pipeline, PosTex, RenderBundle, Stage, VirtualKeyCode,
 };
 use amethyst::ui::{DrawUi, UiBundle};
 use amethyst::utils::fps_counter::FPSCounterBundle;
@@ -43,8 +44,8 @@ pub struct Emitting {
 
 pub type Shape = CollisionShape<Primitive3<f32>, BodyPose3<f32>, Aabb3<f32>, ObjectType>;
 
-impl<'a, 'b> State<GameData<'a, 'b>> for Emitting {
-    fn on_start(&mut self, data: StateData<GameData<'a, 'b>>) {
+impl<'a, 'b> SimpleState<'a, 'b> for Emitting {
+    fn on_start(&mut self, data: StateData<GameData>) {
         let StateData { world, .. } = data;
         world.write_resource::<KillRate>().0 = 0.;
         initialise_camera(world);
@@ -76,26 +77,20 @@ impl<'a, 'b> State<GameData<'a, 'b>> for Emitting {
 
     fn handle_event(
         &mut self,
-        _: StateData<GameData<'a, 'b>>,
-        event: Event,
-    ) -> Trans<GameData<'a, 'b>> {
+        _: StateData<GameData>,
+        event: StateEvent,
+    ) -> SimpleTrans<'a, 'b> {
         match event {
-            Event::WindowEvent { event, .. } => match event {
-                WindowEvent::KeyboardInput {
-                    input:
-                        KeyboardInput {
-                            virtual_keycode: Some(VirtualKeyCode::Escape),
-                            ..
-                        },
-                    ..
-                } => Trans::Quit,
-                _ => Trans::None,
-            },
+            StateEvent::Window(ref event)
+            if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) =>
+                {
+                    Trans::Quit
+                }
             _ => Trans::None,
         }
     }
 
-    fn update(&mut self, data: StateData<GameData<'a, 'b>>) -> Trans<GameData<'a, 'b>> {
+    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans<'a, 'b> {
         time_sync(&data.world);
         update_ui::<Point3<f32>>(
             data.world,
