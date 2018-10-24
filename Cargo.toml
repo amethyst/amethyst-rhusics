@@ -1,6 +1,6 @@
 [package]
 name = "amethyst-rhusics"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Simon Rönnberg <seamonr@gmail.com>"]
 
 repository = "https://github.com/amethyst/amethyst-rhusics.git"
@@ -14,15 +14,15 @@ description = "Integration of `amethyst` and `rhusics`"
 keywords = ["gamedev", "amethyst", "physics"]
 
 [dependencies]
-amethyst_core = { version = "0.3", git = "https://github.com/amethyst/amethyst" }
-amethyst_renderer = { version = "0.8.0", git = "https://github.com/amethyst/amethyst" }
-rhusics-ecs = { version = "0.5", features = ["serde"], git = "https://github.com/rustgd/rhusics" }
-rhusics-core = { version = "0.5", features = ["specs", "serde"], git = "https://github.com/rustgd/rhusics" }
+amethyst_core = { version = "0.4" }
+amethyst_renderer = { version = "0.9" }
+rhusics-ecs = { version = "0.6", features = ["serde"] }
+rhusics-core = { version = "0.6", features = ["specs", "serde"] }
 shrev = "1.0"
 collision = { version = "0.18", features = ["serde"]}
 
 [dev-dependencies]
-amethyst = { version = "0.8", git = "https://github.com/amethyst/amethyst" }
+amethyst = { version = "0.9" }
 genmesh = "0.5"
 rand = "0.3"
 shred = "0.7"
