@@ -103,7 +103,7 @@ where
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(center.x, min.y), Point2::new(center.x, max.y)).into(),
+                Line2::new(Point2::new(0.0, min.y), Point2::new(0.0, max.y)).into(),
                 types.0,
             ),
             BodyPose2::new(Point2::new(min.x, center.y), Basis2::one()),
@@ -117,7 +117,7 @@ where
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(center.x, min.y), Point2::new(center.x, max.y)).into(),
+                Line2::new(Point2::new(0.0, min.y), Point2::new(0.0, max.y)).into(),
                 types.1,
             ),
             BodyPose2::new(Point2::new(max.x, center.y), Basis2::one()),
@@ -131,7 +131,7 @@ where
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(min.x, center.y), Point2::new(max.x, center.y)).into(),
+                Line2::new(Point2::new(min.x, 0.0), Point2::new(max.x, 0.0)).into(),
                 types.2,
             ),
             BodyPose2::new(Point2::new(center.x, min.y), Basis2::one()),
@@ -145,7 +145,7 @@ where
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(min.x, center.y), Point2::new(max.x, center.y)).into(),
+                Line2::new(Point2::new(min.x, 0.0), Point2::new(max.x, 0.0)).into(),
                 types.3,
             ),
             BodyPose2::new(Point2::new(center.x, max.y), Basis2::one()),
