@@ -96,6 +96,7 @@ where
     Y: Default + Send + Sync + 'static,
 {
     type Shape2<Y> = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, Y>;
+    let dimensions = max - min;
     let center = (min + max.to_vec()) / 2.;
     world
         .create_entity()
@@ -103,7 +104,7 @@ where
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(center.x, min.y), Point2::new(center.x, max.y)).into(),
+                Line2::new(Point2::new(0.0, -dimensions.y / 2.0), Point2::new(0.0, dimensions.y / 2.0)).into(),
                 types.0,
             ),
             BodyPose2::new(Point2::new(min.x, center.y), Basis2::one()),
@@ -117,7 +118,7 @@ where
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(center.x, min.y), Point2::new(center.x, max.y)).into(),
+                Line2::new(Point2::new(0.0, -dimensions.y / 2.0), Point2::new(0.0, dimensions.y / 2.0)).into(),
                 types.1,
             ),
             BodyPose2::new(Point2::new(max.x, center.y), Basis2::one()),
@@ -131,7 +132,7 @@ where
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(min.x, center.y), Point2::new(max.x, center.y)).into(),
+                Line2::new(Point2::new(-dimensions.x / 2.0, 0.0), Point2::new(dimensions.x / 2.0, 0.0)).into(),
                 types.2,
             ),
             BodyPose2::new(Point2::new(center.x, min.y), Basis2::one()),
@@ -145,7 +146,7 @@ where
             Shape2::new_simple_with_type(
                 CollisionStrategy::FullResolution,
                 CollisionMode::Discrete,
-                Line2::new(Point2::new(min.x, center.y), Point2::new(max.x, center.y)).into(),
+                Line2::new(Point2::new(-dimensions.x / 2.0, 0.0), Point2::new(dimensions.x / 2.0, 0.0)).into(),
                 types.3,
             ),
             BodyPose2::new(Point2::new(center.x, max.y), Basis2::one()),
