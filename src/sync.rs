@@ -1,11 +1,10 @@
 use std::marker;
 
-use amethyst_core::cgmath::{
-    Array, Basis2, EuclideanSpace, Matrix3, Point2, Point3, Quaternion, Rotation, Vector3,
-};
+use amethyst_core::nalgebra as na;
 use amethyst_core::specs::prelude::{Join, ReadStorage, System, World, WriteStorage};
 use amethyst_core::timing::Time;
 use amethyst_core::Transform;
+use cgmath::{Basis2, EuclideanSpace, Point2, Point3, Quaternion, Rotation};
 use rhusics_core::{BodyPose, Pose};
 use rhusics_ecs::DeltaTime;
 
@@ -27,26 +26,26 @@ pub trait Convert {
 }
 
 impl Convert for Point2<f32> {
-    type Output = Vector3<f32>;
+    type Output = na::Vector3<f32>;
 
     fn convert(&self) -> Self::Output {
-        Vector3::new(self.x, self.y, 0.)
+        na::Vector3::new(self.x, self.y, 0.)
     }
 }
 
 impl Convert for Point3<f32> {
-    type Output = Vector3<f32>;
+    type Output = na::Vector3<f32>;
 
     fn convert(&self) -> Self::Output {
-        self.to_vec()
+        na::Vector3::new(self.x, self.y, self.z)
     }
 }
 
 impl Convert for Basis2<f32> {
-    type Output = Quaternion<f32>;
+    type Output = na::UnitQuaternion<f32>;
 
     fn convert(&self) -> Self::Output {
-        Matrix3::new(
+        let matrix = na::Matrix3::new(
             self.as_ref()[0][0],
             self.as_ref()[0][1],
             0.,
@@ -56,29 +55,29 @@ impl Convert for Basis2<f32> {
             0.,
             0.,
             1.,
-        ).into()
+        );
+        na::UnitQuaternion::from_rotation_matrix(&na::Rotation3::from_matrix_unchecked(matrix))
     }
 }
 
 impl Convert for Quaternion<f32> {
-    type Output = Quaternion<f32>;
+    type Output = na::UnitQuaternion<f32>;
 
     fn convert(&self) -> Self::Output {
-        *self
+        na::Unit::new_normalize(na::Quaternion::new(self.s, self.v.x, self.v.y, self.v.z))
     }
 }
 
 impl<P, R> AsTransform for BodyPose<P, R>
 where
-    P: EuclideanSpace<Scalar = f32> + Convert<Output = Vector3<f32>>,
-    R: Rotation<P> + Convert<Output = Quaternion<f32>>,
+    P: EuclideanSpace<Scalar = f32> + Convert<Output = na::Vector3<f32>>,
+    R: Rotation<P> + Convert<Output = na::UnitQuaternion<f32>>,
 {
     fn as_transform(&self) -> Transform {
-        Transform {
-            translation: self.position().convert(),
-            rotation: self.rotation().convert(),
-            scale: Vector3::from_value(1.),
-        }
+        let mut t = Transform::default();
+        t.set_position(self.position().convert());
+        t.set_rotation(self.rotation().convert());
+        t
     }
 }
 
@@ -125,10 +124,17 @@ impl<P, R> PoseTransformSyncSystem<P, R> {
     }
 }
 
+use std::fmt::Debug;
+
 impl<'a, P, R> System<'a> for PoseTransformSyncSystem<P, R>
 where
-    P: EuclideanSpace<Scalar = f32> + Convert<Output = Vector3<f32>> + Send + Sync + 'static,
-    R: Rotation<P> + Convert<Output = Quaternion<f32>> + Send + Sync + 'static,
+    P: Debug
+        + EuclideanSpace<Scalar = f32>
+        + Convert<Output = na::Vector3<f32>>
+        + Send
+        + Sync
+        + 'static,
+    R: Debug + Rotation<P> + Convert<Output = na::UnitQuaternion<f32>> + Send + Sync + 'static,
 {
     type SystemData = (ReadStorage<'a, BodyPose<P, R>>, WriteStorage<'a, Transform>);
 
@@ -136,11 +142,13 @@ where
         let (poses, mut transforms) = data;
         for (pose, transform) in (&poses, &mut transforms).join() {
             if self.translation {
-                transform.translation = pose.position().convert();
+                transform.set_position(pose.position().convert());
             }
             if self.rotation {
-                transform.rotation = pose.rotation().convert();
+                transform.set_rotation(pose.rotation().convert());
             }
+            println!("T: {:?}", transform);
+            println!("P: {:?}", pose);
         }
     }
 }

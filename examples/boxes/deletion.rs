@@ -1,8 +1,8 @@
 use std::fmt::Debug;
 
-use amethyst::core::cgmath::EuclideanSpace;
 use amethyst::ecs::prelude::{Entities, Entity, Read, ReadStorage, Resources, System, Write};
 use amethyst::shrev::{EventChannel, ReaderId};
+use cgmath::EuclideanSpace;
 use rand;
 use rand::Rng;
 use rhusics_core::ContactEvent;
