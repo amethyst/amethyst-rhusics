@@ -1,5 +1,6 @@
 extern crate amethyst;
 extern crate amethyst_rhusics;
+extern crate cgmath;
 extern crate collision;
 extern crate genmesh;
 extern crate rand;
@@ -12,8 +13,8 @@ extern crate shred_derive;
 use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
-use amethyst::core::cgmath::{Array, One, Point2, Quaternion, Vector3};
-use amethyst::core::{GlobalTransform, Transform, TransformBundle};
+use amethyst::core::nalgebra as na;
+use amethyst::core::{Transform, TransformBundle};
 use amethyst::ecs::prelude::{Builder, Entity, World};
 use amethyst::input::{is_close_requested, is_key_down};
 use amethyst::prelude::{
@@ -21,12 +22,13 @@ use amethyst::prelude::{
     StateEvent, Trans,
 };
 use amethyst::renderer::{
-    Camera, DisplayConfig, DrawFlat, Material, MaterialDefaults, Mesh,
-    Pipeline, PosTex, RenderBundle, Stage, VirtualKeyCode,
+    Camera, DisplayConfig, DrawFlat, Material, MaterialDefaults, Mesh, Pipeline, PosTex,
+    RenderBundle, Stage, VirtualKeyCode,
 };
 use amethyst::ui::{DrawUi, UiBundle};
 use amethyst::utils::fps_counter::FPSCounterBundle;
 use amethyst_rhusics::{setup_2d_arena, time_sync, DefaultPhysicsBundle2};
+use cgmath::Point2;
 use collision::primitive::{Primitive2, Rectangle};
 use collision::Aabb2;
 use rhusics_core::CollisionShape;
@@ -103,11 +105,7 @@ fn initialise_camera(world: &mut World) {
     world
         .create_entity()
         .with(Camera::standard_2d())
-        .with(Transform {
-            rotation: Quaternion::one(),
-            scale: Vector3::from_value(1.),
-            translation: Vector3::new(0., 0., 5.),
-        }).with(GlobalTransform::default())
+        .with(Transform::from(na::Vector3::new(0., 0., 5.)))
         .build();
 }
 
@@ -117,7 +115,7 @@ fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
     let vertices = Cube::new()
         .vertex(|v| PosTex {
             position: v.pos.into(),
-            tex_coord: [0.1, 0.1],
+            tex_coord: na::Vector2::new(0.1, 0.1),
         }).triangulate()
         .vertices()
         .collect::<Vec<_>>();

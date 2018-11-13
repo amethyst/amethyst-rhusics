@@ -1,12 +1,11 @@
 use std::fmt::Debug;
 use std::marker;
 
-use amethyst::core::cgmath::{
-    Array, EuclideanSpace, InnerSpace, Quaternion, Rotation, Vector3, Zero,
-};
+use amethyst::core::nalgebra as na;
 use amethyst::core::{Result, SystemBundle};
 use amethyst::ecs::prelude::DispatcherBuilder;
 use amethyst_rhusics::Convert;
+use cgmath::{Array, EuclideanSpace, InnerSpace, Rotation, Zero};
 use collision::{Bound, ComputeBound, Primitive, Union};
 use rand::Rand;
 use rhusics_core::Inertia;
@@ -43,13 +42,13 @@ where
     B: Bound<Point = P::Point> + Union<B, Output = B> + Clone + Send + Sync + 'static,
     P: Primitive + ComputeBound<B> + Clone + Send + Sync + 'static,
     P::Point: EuclideanSpace<Scalar = f32>
-        + Convert<Output = Vector3<f32>>
+        + Convert<Output = na::Vector3<f32>>
         + Debug
         + Send
         + Sync
         + 'static,
     <P::Point as EuclideanSpace>::Diff: Debug + Rand + InnerSpace + Array + Send + Sync + 'static,
-    R: Rotation<P::Point> + Convert<Output = Quaternion<f32>> + Send + Sync + 'static,
+    R: Rotation<P::Point> + Convert<Output = na::UnitQuaternion<f32>> + Send + Sync + 'static,
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,
 {

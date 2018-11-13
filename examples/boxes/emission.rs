@@ -2,13 +2,12 @@ use std::marker;
 use std::time::Instant;
 
 use amethyst::assets::Handle;
-use amethyst::core::cgmath::{
-    Array, EuclideanSpace, InnerSpace, Quaternion, Rotation, Vector3, Zero,
-};
+use amethyst::core::nalgebra as na;
 use amethyst::core::{GlobalTransform, Transform};
 use amethyst::ecs::prelude::{Entities, Entity, Join, ReadExpect, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 use amethyst_rhusics::{AsTransform, Convert};
+use cgmath::{Array, EuclideanSpace, InnerSpace, Rotation, Zero};
 use collision::{Bound, ComputeBound, Primitive, Union};
 use rand::Rand;
 use rhusics_core::{
@@ -50,9 +49,10 @@ impl<'a, P, B, R, A, I> System<'a> for EmissionSystem<P, B, R, A, I>
 where
     B: Bound<Point = P::Point> + Union<B, Output = B> + Clone + Send + Sync + 'static,
     P: Primitive + ComputeBound<B> + Clone + Send + Sync + 'static,
-    P::Point: EuclideanSpace<Scalar = f32> + Convert<Output = Vector3<f32>> + Send + Sync + 'static,
+    P::Point:
+        EuclideanSpace<Scalar = f32> + Convert<Output = na::Vector3<f32>> + Send + Sync + 'static,
     <P::Point as EuclideanSpace>::Diff: Rand + InnerSpace + Array + Send + Sync + 'static,
-    R: Rotation<P::Point> + Convert<Output = Quaternion<f32>> + Send + Sync + 'static,
+    R: Rotation<P::Point> + Convert<Output = na::UnitQuaternion<f32>> + Send + Sync + 'static,
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,
 {
@@ -90,9 +90,10 @@ fn emit_box<P, B, R, A, I>(
 ) where
     B: Bound<Point = P::Point> + Union<B, Output = B> + Clone + Send + Sync + 'static,
     P: Primitive + ComputeBound<B> + Clone + Send + Sync + 'static,
-    P::Point: EuclideanSpace<Scalar = f32> + Convert<Output = Vector3<f32>> + Send + Sync + 'static,
+    P::Point:
+        EuclideanSpace<Scalar = f32> + Convert<Output = na::Vector3<f32>> + Send + Sync + 'static,
     <P::Point as EuclideanSpace>::Diff: Rand + InnerSpace + Array + Send + Sync + 'static,
-    R: Rotation<P::Point> + Convert<Output = Quaternion<f32>> + Send + Sync + 'static,
+    R: Rotation<P::Point> + Convert<Output = na::UnitQuaternion<f32>> + Send + Sync + 'static,
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,
 {
@@ -106,7 +107,7 @@ fn emit_box<P, B, R, A, I>(
     let position = emitter.location + offset;
     let pose = BodyPose::new(position, R::one());
     let mut transform = pose.as_transform();
-    transform.scale = Vector3::from_value(0.05);
+    transform.set_scale(0.05, 0.05, 0.05);
 
     parts.object_type.insert(entity, ObjectType::Box).unwrap();
     parts.mesh.insert(entity, mesh).unwrap();
@@ -140,9 +141,10 @@ pub struct EmitterParts<'a, P, B, R, A, I>
 where
     B: Bound<Point = P::Point> + Union<B, Output = B> + Clone + Send + Sync + 'static,
     P: Primitive + ComputeBound<B> + Clone + Send + Sync + 'static,
-    P::Point: EuclideanSpace<Scalar = f32> + Convert<Output = Vector3<f32>> + Send + Sync + 'static,
+    P::Point:
+        EuclideanSpace<Scalar = f32> + Convert<Output = na::Vector3<f32>> + Send + Sync + 'static,
     <P::Point as EuclideanSpace>::Diff: Rand + InnerSpace + Array + Send + Sync + 'static,
-    R: Rotation<P::Point> + Convert<Output = Quaternion<f32>> + Send + Sync + 'static,
+    R: Rotation<P::Point> + Convert<Output = na::UnitQuaternion<f32>> + Send + Sync + 'static,
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,
 {
