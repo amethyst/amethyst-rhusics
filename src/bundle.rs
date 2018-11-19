@@ -1,9 +1,9 @@
 use std::fmt::Debug;
 use std::marker;
 
-use amethyst_core::cgmath::{Basis2, Point2, Point3, Quaternion};
 use amethyst_core::specs::prelude::{DispatcherBuilder, Entity};
 use amethyst_core::{Result, SystemBundle};
+use cgmath::{Basis2, Point2, Point3, Quaternion};
 use collision::algorithm::broad_phase::{SweepAndPrune2, SweepAndPrune3};
 use collision::dbvt::TreeValueWrapped;
 use collision::{Bound, ComputeBound, Contains, Discrete, Primitive, SurfaceArea, Union};

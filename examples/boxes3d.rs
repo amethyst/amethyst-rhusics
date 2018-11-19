@@ -1,5 +1,6 @@
 extern crate amethyst;
 extern crate amethyst_rhusics;
+extern crate cgmath;
 extern crate collision;
 extern crate genmesh;
 extern crate rand;
@@ -12,18 +13,22 @@ extern crate shred_derive;
 use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
-use amethyst::core::cgmath::{Array, One, Point3, Quaternion, Vector3};
-use amethyst::core::{GlobalTransform, Transform, TransformBundle};
+use amethyst::core::nalgebra as na;
+use amethyst::core::{Transform, TransformBundle};
 use amethyst::ecs::prelude::{Builder, Entity, World};
 use amethyst::input::{is_close_requested, is_key_down};
-use amethyst::prelude::{Application, Config, GameData, GameDataBuilder, StateData, Trans, SimpleTrans, SimpleState, StateEvent};
+use amethyst::prelude::{
+    Application, Config, GameData, GameDataBuilder, SimpleState, SimpleTrans, StateData,
+    StateEvent, Trans,
+};
 use amethyst::renderer::{
-    Camera, DisplayConfig, DrawFlat, Material, MaterialDefaults, Mesh,
-    Pipeline, PosTex, RenderBundle, Stage, VirtualKeyCode,
+    Camera, DisplayConfig, DrawFlat, Material, MaterialDefaults, Mesh, Pipeline, PosTex,
+    RenderBundle, Stage, VirtualKeyCode,
 };
 use amethyst::ui::{DrawUi, UiBundle};
 use amethyst::utils::fps_counter::FPSCounterBundle;
 use amethyst_rhusics::{setup_3d_arena, time_sync, DefaultPhysicsBundle3};
+use cgmath::Point3;
 use collision::primitive::{Cuboid, Primitive3};
 use collision::Aabb3;
 use rhusics_core::CollisionShape;
@@ -75,17 +80,13 @@ impl<'a, 'b> SimpleState<'a, 'b> for Emitting {
         initialise_emitters(world);
     }
 
-    fn handle_event(
-        &mut self,
-        _: StateData<GameData>,
-        event: StateEvent,
-    ) -> SimpleTrans<'a, 'b> {
+    fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans<'a, 'b> {
         match event {
             StateEvent::Window(ref event)
-            if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) =>
-                {
-                    Trans::Quit
-                }
+                if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) =>
+            {
+                Trans::Quit
+            }
             _ => Trans::None,
         }
     }
@@ -106,12 +107,8 @@ impl<'a, 'b> SimpleState<'a, 'b> for Emitting {
 fn initialise_camera(world: &mut World) {
     world
         .create_entity()
-        .with(Camera::standard_3d(500., 500.))
-        .with(Transform {
-            rotation: Quaternion::one(),
-            scale: Vector3::from_value(1.),
-            translation: Vector3::new(0., 0., 1.),
-        }).with(GlobalTransform::default())
+        .with(Camera::standard_3d(1000., 1000.))
+        .with(Transform::from(na::Vector3::new(0., 0., 1.)))
         .build();
 }
 
@@ -121,7 +118,7 @@ fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
     let vertices = Cube::new()
         .vertex(|v| PosTex {
             position: v.pos.into(),
-            tex_coord: [0.1, 0.1],
+            tex_coord: na::Vector2::new(0.1, 0.1),
         }).triangulate()
         .vertices()
         .collect::<Vec<_>>();

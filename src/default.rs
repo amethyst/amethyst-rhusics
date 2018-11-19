@@ -1,4 +1,4 @@
-use amethyst_core::cgmath::{Basis2, Point2, Point3, Quaternion};
+use cgmath::{Basis2, Point2, Point3, Quaternion};
 use collision::primitive::{Primitive2, Primitive3};
 use collision::{Aabb2, Aabb3};
 
