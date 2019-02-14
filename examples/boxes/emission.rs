@@ -7,6 +7,7 @@ use amethyst::core::{GlobalTransform, Transform};
 use amethyst::ecs::prelude::{Entities, Entity, Join, ReadExpect, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 use amethyst_rhusics::{AsTransform, Convert};
+use shred_derive::SystemData;
 use cgmath::{Array, EuclideanSpace, InnerSpace, Rotation, Zero};
 use collision::{Bound, ComputeBound, Primitive, Union};
 use rand::Rand;

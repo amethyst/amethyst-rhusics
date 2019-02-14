@@ -2,7 +2,8 @@ use std::fmt::Debug;
 use std::marker;
 
 use amethyst::core::nalgebra as na;
-use amethyst::core::{Result, SystemBundle};
+use amethyst_error::Error;
+use amethyst::core::{SystemBundle};
 use amethyst::ecs::prelude::DispatcherBuilder;
 use amethyst_rhusics::Convert;
 use cgmath::{Array, EuclideanSpace, InnerSpace, Rotation, Zero};
@@ -52,7 +53,7 @@ where
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,
 {
-    fn build(self, dispatcher: &mut DispatcherBuilder<'a, 'b>) -> Result<()> {
+    fn build(self, dispatcher: &mut DispatcherBuilder<'a, 'b>) -> Result<(), Error> {
         dispatcher.add(
             EmissionSystem::<P, B, R, A, I>::new(self.primitive),
             "emission_system",

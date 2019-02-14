@@ -23,7 +23,6 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             1.,
             200.,
             50.,
-            0,
         )).with(UiText::new(
             font.clone(),
             "N/A".to_string(),
@@ -41,7 +40,6 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             1.,
             200.,
             50.,
-            0,
         )).with(UiText::new(
             font.clone(),
             "N/A".to_string(),
@@ -61,7 +59,6 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             1.,
             200.,
             50.,
-            0,
         )).with(UiText::new(
             font.clone(),
             "N/A".to_string(),

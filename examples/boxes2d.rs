@@ -1,14 +1,3 @@
-extern crate amethyst;
-extern crate amethyst_rhusics;
-extern crate cgmath;
-extern crate collision;
-extern crate genmesh;
-extern crate rand;
-extern crate rhusics_core;
-extern crate rhusics_ecs;
-extern crate shred;
-#[macro_use]
-extern crate shred_derive;
 
 use std::time::{Duration, Instant};
 
@@ -34,7 +23,7 @@ use collision::Aabb2;
 use rhusics_core::CollisionShape;
 use rhusics_ecs::physics2d::BodyPose2;
 
-use self::boxes::{
+use crate::boxes::{
     create_ui, update_ui, BoxSimulationBundle2, Emitter, Graphics, KillRate, ObjectType,
 };
 
@@ -49,8 +38,8 @@ pub struct Emitting {
 
 pub type Shape = CollisionShape<Primitive2<f32>, BodyPose2<f32>, Aabb2<f32>, ObjectType>;
 
-impl<'a, 'b> SimpleState<'a, 'b> for Emitting {
-    fn on_start(&mut self, data: StateData<GameData>) {
+impl SimpleState for Emitting {
+    fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let StateData { world, .. } = data;
         world.write_resource::<KillRate>().0 = 0.01;
         initialise_camera(world);
@@ -77,7 +66,7 @@ impl<'a, 'b> SimpleState<'a, 'b> for Emitting {
         initialise_emitters(world);
     }
 
-    fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans<'a, 'b> {
+    fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans {
         match event {
             StateEvent::Window(ref event)
                 if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) =>
@@ -88,7 +77,7 @@ impl<'a, 'b> SimpleState<'a, 'b> for Emitting {
         }
     }
 
-    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans<'a, 'b> {
+    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
         time_sync(&data.world);
         update_ui::<Point2<f32>>(
             data.world,

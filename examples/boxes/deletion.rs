@@ -56,7 +56,7 @@ where
             collisions.0 += 1;
             match (objects.get(contact.bodies.0), objects.get(contact.bodies.1)) {
                 (Some(_), Some(_)) => {
-                    let mut chance = rand::thread_rng().gen_range(0., 1.);
+                    let chance = rand::thread_rng().gen_range(0., 1.);
                     if chance <= kill_rate.0 {
                         match entities.delete(contact.bodies.0) {
                             Err(e) => println!("Error: {:?}", e),
