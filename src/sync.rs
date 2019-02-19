@@ -147,8 +147,8 @@ where
             if self.rotation {
                 transform.set_rotation(pose.rotation().convert());
             }
-            println!("T: {:?}", transform);
-            println!("P: {:?}", pose);
+            //println!("T: {:?}", transform);
+            //println!("P: {:?}", pose);
         }
     }
 }
