@@ -8,7 +8,9 @@ use amethyst::ecs::prelude::DispatcherBuilder;
 use amethyst_rhusics::Convert;
 use cgmath::{Array, EuclideanSpace, InnerSpace, Rotation, Zero};
 use collision::{Bound, ComputeBound, Primitive, Union};
-use rand::Rand;
+//use rand::Rand;
+use rand::distributions::Distribution;
+use rand::distributions::Standard;
 use rhusics_core::Inertia;
 
 use super::{BoxDeletionSystem, EmissionSystem};
@@ -48,10 +50,11 @@ where
         + Send
         + Sync
         + 'static,
-    <P::Point as EuclideanSpace>::Diff: Debug + Rand + InnerSpace + Array + Send + Sync + 'static,
+    <P::Point as EuclideanSpace>::Diff: Debug + /*Distribution<<P::Point as EuclideanSpace>::Diff> +*/ InnerSpace + Array + Send + Sync + 'static,
     R: Rotation<P::Point> + Convert<Output = na::UnitQuaternion<f32>> + Send + Sync + 'static,
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,
+    Standard: Distribution<<P::Point as EuclideanSpace>::Diff>,
 {
     fn build(self, dispatcher: &mut DispatcherBuilder<'a, 'b>) -> Result<(), Error> {
         dispatcher.add(

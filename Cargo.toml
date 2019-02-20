@@ -23,11 +23,11 @@ rhusics-core = { version = "*", features = ["specs", "serde"] }
 shrev = "*"
 collision = { version = "0.18", features = ["serde"]}
 nalgebra = "*"
-cgmath = "0.16.1"
+cgmath = "0.16"
 
 [dev-dependencies]
 amethyst = { git = "https://github.com/amethyst/amethyst" }
-genmesh = "0.5"
-rand = "0.3"
-shred = "0.7"
-shred-derive = "0.5"
+genmesh = "*"
+rand = "0.5"
+shred = "*"
+shred-derive = "*"

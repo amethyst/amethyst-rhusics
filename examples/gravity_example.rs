@@ -175,7 +175,7 @@ fn get_mesh(world: &mut World, scale: Vector3<f32>) -> Handle<Mesh> {
     use genmesh::{MapToVertices, Triangulate, Vertices};
     let vertices = Cube::new()
         .vertex(|v| PosTex {
-            position: Vector3::new(v.pos[0] * scale[0], v.pos[1] * scale[1], v.pos[2] * scale[2]),
+            position: Vector3::new(v.pos.x * scale[0], v.pos.y * scale[1], v.pos.z * scale[2]),
             tex_coord: na::Vector2::new(0.1, 0.1),
         }).triangulate()
         .vertices()
