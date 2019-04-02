@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::marker;
 
-use amethyst::core::nalgebra as na;
+use amethyst::core::math as na;
 use amethyst_error::Error;
 use amethyst::core::{SystemBundle};
 use amethyst::ecs::prelude::DispatcherBuilder;

@@ -1,8 +1,8 @@
 //! This is a simple example showing the physics system
 //! handling gravity. A box will tumble until it hits the ground
 
-use amethyst_core::nalgebra as na;
-use amethyst_core::specs::Builder;
+use amethyst_core::math as na;
+use amethyst_core::ecs::Builder;
 use amethyst_core::SystemBundle;
 use amethyst_core::transform::components::Transform;
 use amethyst_core::transform::TransformBundle;
@@ -151,7 +151,7 @@ fn add_resources(world: &mut World) {
 /// Adds a camera.
 fn add_camera(world: &mut World) {
     let mut transform = Transform::default();
-    transform.set_z(100.0);
+    transform.set_translation_z(100.0);
     world.create_entity()
         .with(Camera::from(
             Projection::orthographic(

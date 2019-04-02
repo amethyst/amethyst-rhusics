@@ -1,7 +1,7 @@
 use std::marker;
 
-use amethyst_core::nalgebra as na;
-use amethyst_core::specs::prelude::{Join, ReadStorage, System, World, WriteStorage};
+use amethyst_core::math as na;
+use amethyst_core::ecs::{Join, ReadStorage, System, World, WriteStorage};
 use amethyst_core::timing::Time;
 use amethyst_core::Transform;
 use cgmath::{Basis2, EuclideanSpace, Point2, Point3, Quaternion, Rotation};
@@ -75,7 +75,7 @@ where
 {
     fn as_transform(&self) -> Transform {
         let mut t = Transform::default();
-        t.set_position(self.position().convert());
+        t.set_translation(self.position().convert());
         t.set_rotation(self.rotation().convert());
         t
     }
@@ -130,6 +130,7 @@ impl<'a, P, R> System<'a> for PoseTransformSyncSystem<P, R>
 where
     P: Debug
         + EuclideanSpace<Scalar = f32>
+        + cgmath::EuclideanSpace<Scalar = f32>
         + Convert<Output = na::Vector3<f32>>
         + Send
         + Sync
@@ -142,7 +143,7 @@ where
         let (poses, mut transforms) = data;
         for (pose, transform) in (&poses, &mut transforms).join() {
             if self.translation {
-                transform.set_position(pose.position().convert());
+                transform.set_translation(pose.position().convert());
             }
             if self.rotation {
                 transform.set_rotation(pose.rotation().convert());

@@ -13,7 +13,7 @@ extern crate shred_derive;
 use std::time::{Duration, Instant};
 
 use amethyst::assets::{Handle, Loader};
-use amethyst::core::nalgebra as na;
+use amethyst::core::math as na;
 use amethyst::core::{Transform, TransformBundle};
 use amethyst::ecs::prelude::{Builder, Entity, World};
 use amethyst::input::{is_close_requested, is_key_down};

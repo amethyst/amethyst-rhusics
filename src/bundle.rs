@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::marker;
 
-use amethyst_core::specs::prelude::{DispatcherBuilder, Entity};
+use amethyst_core::ecs::{DispatcherBuilder, Entity};
 use amethyst_error::Error;
 use amethyst_core::{SystemBundle};
 use cgmath::{Basis2, Point2, Point3, Quaternion};
