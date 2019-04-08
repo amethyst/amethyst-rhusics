@@ -21,13 +21,13 @@ keywords = ["gamedev", "amethyst", "physics"]
 amethyst_error = { git = "https://github.com/amethyst/amethyst"}
 amethyst_core = { git = "https://github.com/amethyst/amethyst"}
 amethyst_renderer = { git = "https://github.com/amethyst/amethyst"}
-rhusics-ecs = { version = "*", git = "https://github.com/trsoluti/rhusics", features = ["serde"] }
-rhusics-core = { version = "*", git = "https://github.com/trsoluti/rhusics", features = ["specs", "serde"] }
+rhusics-ecs = { version = "0.8", git = "https://github.com/trsoluti/rhusics", features = ["serde"] }
+rhusics-core = { version = "0.8", git = "https://github.com/trsoluti/rhusics", features = ["specs", "serde"] }
 shrev = "*"
-collision = { git = "https://github.com/rustgd/collision-rs", features = ["serde"]}
-# collision = { version = "0.20", features = ["serde"]
+# collision = { git = "https://github.com/rustgd/collision-rs", features = ["serde"]}
+collision = { version = "0.20", features = ["serde"] }
 nalgebra = "0.17"
-cgmath = "*"
+cgmath = "0.17"
 
 [dev-dependencies]
 amethyst = { git = "https://github.com/amethyst/amethyst" }
