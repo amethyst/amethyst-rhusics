@@ -49,7 +49,7 @@ pub struct Emitting {
 
 pub type Shape = CollisionShape<Primitive3<f32>, BodyPose3<f32>, Aabb3<f32>, ObjectType>;
 
-impl<'a, 'b> SimpleState<'a, 'b> for Emitting {
+impl SimpleState for Emitting {
     fn on_start(&mut self, data: StateData<GameData>) {
         let StateData { world, .. } = data;
         world.write_resource::<KillRate>().0 = 0.;
@@ -80,7 +80,7 @@ impl<'a, 'b> SimpleState<'a, 'b> for Emitting {
         initialise_emitters(world);
     }
 
-    fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans<'a, 'b> {
+    fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans {
         match event {
             StateEvent::Window(ref event)
                 if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) =>
@@ -91,7 +91,7 @@ impl<'a, 'b> SimpleState<'a, 'b> for Emitting {
         }
     }
 
-    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans<'a, 'b> {
+    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
         time_sync(&data.world);
         update_ui::<Point3<f32>>(
             data.world,
