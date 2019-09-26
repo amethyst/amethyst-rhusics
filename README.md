@@ -2,6 +2,8 @@
 
 [![Build Status][bi]][bl] [![Crates.io][ci]][cl] [![Gitter][gi]][gl] ![MIT/Apache][li] [![Docs.rs][di]][dl] ![LoC][lo]
 
+***Currently unmaintained ([#45](https://github.com/amethyst/amethyst-rhusics/issues/45))***
+
 [bi]: https://travis-ci.org/amethyst/amethyst-rhusics.svg?branch=master
 [bl]: https://travis-ci.org/amethyst/amethyst-rhusics
 
