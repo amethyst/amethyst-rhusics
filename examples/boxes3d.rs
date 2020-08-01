@@ -22,7 +22,7 @@ use amethyst::prelude::{
     StateEvent, Trans,
 };
 use amethyst::renderer::{Camera, Material, MaterialDefaults, Mesh, RenderingBundle, RenderToWindow, RenderShaded3D};
-use amethyst::renderer::rendy::mesh::{PosTex, TexCoord, MeshBuilder};
+use amethyst::renderer::rendy::mesh::{TexCoord, MeshBuilder, Position, PosNormTex, Normal};
 use amethyst::ui::{/*DrawUi,*/ UiBundle};
 use amethyst::utils::fps_counter::FpsCounterBundle;
 use amethyst_rhusics::{setup_3d_arena, time_sync, DefaultPhysicsBundle3};
@@ -110,21 +110,34 @@ fn initialise_camera(world: &mut World) {
     world
         .create_entity()
         .with(Camera::standard_3d(1000., 1000.))
-        .with(Transform::from(na::Vector3::new(0., 0., 1.)))
+        .with(Transform::from(na::Vector3::new(0., 0., 5.)))
         .build();
 }
 
 fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
     use genmesh::generators::Cube;
     use genmesh::{MapToVertices, Triangulate, Vertices};
-    let vertices = Cube::new()
-        .vertex(|v| PosTex {
+    let vertices:Vec<PosNormTex> = Cube::new()
+        .vertex(|v| PosNormTex {
             position: v.pos.into(),
+            normal: v.normal.into(),
             tex_coord: TexCoord::from([0.1, 1.0]),
         }).triangulate()
         .vertices()
         .collect::<Vec<_>>();
-    let mesh_builder = MeshBuilder::from(vertices);
+    let positions:Vec<Position> = vertices.iter().map(|v:&PosNormTex|->Position {
+        v.position
+    }).collect();
+    let normals:Vec<Normal> = vertices.iter().map(|v:&PosNormTex|->Normal {
+        v.normal
+    }).collect();
+    let tex_coords:Vec<TexCoord> = vertices.iter().map(|v:&PosNormTex|->TexCoord {
+        v.tex_coord
+    }).collect();
+    let mesh_builder = MeshBuilder::new()
+        .with_vertices(positions)
+        .with_vertices(normals)
+        .with_vertices(tex_coords);
     let mesh_data = MeshData::from(mesh_builder);
     world
         .read_resource::<Loader>()
@@ -205,7 +218,7 @@ fn run() -> Result<(), amethyst::Error> {
     // );
     // let config = DisplayConfig::load(&path);
     let app_root = application_root_dir()?;
-    let resources = app_root.join("../resources");
+    let resources = app_root.join("examples/resources");
     let display_config = resources.join("display_config.ron");
 
     // let pipe = Pipeline::build().with_stage(
@@ -218,9 +231,10 @@ fn run() -> Result<(), amethyst::Error> {
     let game_data = GameDataBuilder::default()
         .with_bundle(FpsCounterBundle::default())?
         .with_bundle(DefaultPhysicsBundle3::<ObjectType>::new().with_spatial())?
-        .with_bundle(BoxSimulationBundle3::new(Cuboid::new(0.1, 0.1, 0.1).into()))?
+        .with_bundle(BoxSimulationBundle3::new(
+            Cuboid::new(0.05, 0.05, 0.05).into())
+        )?
         .with_bundle(TransformBundle::new().with_dep(&["sync_system", "emission_system"]))?
-        .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(InputBundle::<StringBindings>::new())?
         .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(
@@ -232,7 +246,11 @@ fn run() -> Result<(), amethyst::Error> {
                 .with_plugin(RenderShaded3D::default()),
         )?;
 
-    let mut game = Application::new("./", Emitting::default(), game_data)?;
+    let mut game = Application::new(
+        resources,
+        Emitting::default(),
+        game_data
+    )?;
 
     game.run();
 

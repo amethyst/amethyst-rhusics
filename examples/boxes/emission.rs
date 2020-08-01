@@ -109,6 +109,13 @@ fn emit_box<P, B, R, A, I>(
     /*use rand::Rng;*/
     /*use rand::rngs::StdRng;*/
 
+    // Determine the size of the box based on the size of our
+    // primitive (which we set when we bundled the box simulation bundle).
+    let primitive_bound = primitive.compute_bound();
+    let bound_min:na::Vector3<f32> = primitive_bound.min_extent().convert();
+    let bound_max:na::Vector3<f32> = primitive_bound.max_extent().convert();
+    let size = bound_max - bound_min;
+
     let offset:<P::Point as EuclideanSpace>::Diff =
         StdRng::from_entropy().sample(Standard);
     let speed: <P::Point as EuclideanSpace>::Scalar =
@@ -117,8 +124,7 @@ fn emit_box<P, B, R, A, I>(
     let position = emitter.location + offset;
     let pose = BodyPose::new(position, R::one());
     let mut transform = pose.as_transform();
-    // transform.set_scale([0.05, 0.05, 0.05].into());
-    transform.set_scale([5., 5., 1.].into());
+    transform.set_scale(size);
     //+ log::info!("emitting box at {:?}", transform.translation());
     parts.object_type.insert(entity, ObjectType::Box).unwrap();
     parts.mesh.insert(entity, mesh).unwrap();

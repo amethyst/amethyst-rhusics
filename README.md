@@ -18,7 +18,15 @@
 
 [lo]: https://tokei.rs/b1/github/amethyst/amethyst-rhusics?category=code
 
+[CHANGE LOG](CHANGELOG.md)
+
 Bridge between Amethyst and rhusics.
+
+Note: this is a temporary package for light-weight
+physics needs. The difference between this package
+and the others is that the others depend on a full-featured
+physics package to do system-like operations in their "step"
+function.
 
 ## License
 
@@ -32,7 +40,7 @@ at your option.
 ## Contribution
 
 We are a community project that welcomes contribution from anyone. If you're interested in helping out, you can contact
-us either through GitHub, or via [Gitter](https://gitter.im/amethyst/general).
+us either through GitHub or via [Discord](https://discord.gg/DmTaAN).
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any
