@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use amethyst::ecs::prelude::{Entities, Entity, Read, ReadStorage, Resources, System, Write};
+use amethyst::ecs::prelude::{Entities, Entity, Read, ReadStorage, World, System, Write};
 use amethyst::shrev::{EventChannel, ReaderId};
 use cgmath::EuclideanSpace;
 use rand;
@@ -73,7 +73,7 @@ where
         }
     }
 
-    fn setup(&mut self, res: &mut Resources) {
+    fn setup(&mut self, res: &mut World) {
         use amethyst::ecs::prelude::SystemData;
         Self::SystemData::setup(res);
         self.contact_reader = Some(

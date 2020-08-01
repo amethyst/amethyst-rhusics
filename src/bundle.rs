@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::marker;
 
-use amethyst_core::ecs::{DispatcherBuilder, Entity};
+use amethyst_core::ecs::{DispatcherBuilder, Entity, World};
 use amethyst_error::Error;
 use amethyst_core::{SystemBundle};
 use cgmath::{Basis2, Point2, Point3, Quaternion};
@@ -61,7 +61,7 @@ where
         + 'static,
     Y: Default + Collider + Send + Sync + 'static,
 {
-    fn build(self, dispatcher: &mut DispatcherBuilder<'a, 'b>) -> Result<(), Error> {
+    fn build(self, _world: &mut World, dispatcher: &mut DispatcherBuilder<'a, 'b>) -> Result<(), Error> {
         setup_dispatch_2d::<
             f32,
             P,
@@ -133,7 +133,7 @@ where
         + 'static,
     Y: Default + Collider + Send + Sync + 'static,
 {
-    fn build(self, dispatcher: &mut DispatcherBuilder<'a, 'b>) -> Result<(), Error> {
+    fn build(self, _world: &mut World, dispatcher: &mut DispatcherBuilder<'a, 'b>) -> Result<(), Error> {
         setup_dispatch_3d::<
             f32,
             P,

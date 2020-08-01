@@ -14,6 +14,7 @@ use rand::distributions::Standard;
 use rhusics_core::Inertia;
 
 use super::{BoxDeletionSystem, EmissionSystem};
+use amethyst_core::ecs::World;
 
 /// Bundle for box simulation.
 ///
@@ -32,6 +33,7 @@ pub struct BoxSimulationBundle<P, B, R, A, I> {
 }
 
 impl<P, B, R, A, I> BoxSimulationBundle<P, B, R, A, I> {
+    #[allow(unused)]
     pub fn new(primitive: P) -> Self {
         Self {
             primitive,
@@ -56,7 +58,7 @@ where
     I: Inertia + Send + Sync + 'static,
     Standard: Distribution<<P::Point as EuclideanSpace>::Diff>,
 {
-    fn build(self, dispatcher: &mut DispatcherBuilder<'a, 'b>) -> Result<(), Error> {
+    fn build(self, _world: &mut World, dispatcher: &mut DispatcherBuilder<'a, 'b>) -> Result<(), Error> {
         dispatcher.add(
             EmissionSystem::<P, B, R, A, I>::new(self.primitive),
             "emission_system",

@@ -3,11 +3,14 @@ use std::time::Instant;
 
 use amethyst::assets::Handle;
 use amethyst::core::math as na;
-use amethyst::core::{GlobalTransform, Transform};
+use amethyst::core::{/*GlobalTransform,*/ Transform};
 use amethyst::ecs::prelude::{Entities, Entity, Join, ReadExpect, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 use amethyst_rhusics::{AsTransform, Convert};
-use shred_derive::SystemData;
+//use shred_derive::SystemData;
+use shred::SystemData;
+use shred::World;
+use shred::ResourceId;
 use cgmath::{Array, EuclideanSpace, InnerSpace, Rotation, Zero};
 use collision::{Bound, ComputeBound, Primitive, Union};
 //use rand::Rand;
@@ -102,18 +105,19 @@ fn emit_box<P, B, R, A, I>(
     I: Inertia + Send + Sync + 'static,
     Standard: Distribution<<P::Point as EuclideanSpace>::Diff>,
 {
-    use rand;
-    use rand::Rng;
+    /*use rand;*/
+    /*use rand::Rng;*/
+    /*use rand::rngs::StdRng;*/
 
     let offset:<P::Point as EuclideanSpace>::Diff =
-        SmallRng::from_entropy().sample(Standard);
+        StdRng::from_entropy().sample(Standard);
     let speed: <P::Point as EuclideanSpace>::Scalar =
         rand::thread_rng().gen_range(-10.0, 10.0);
 
     let position = emitter.location + offset;
     let pose = BodyPose::new(position, R::one());
     let mut transform = pose.as_transform();
-    transform.set_scale(0.05, 0.05, 0.05);
+    transform.set_scale([0.05, 0.05, 0.05].into());
 
     parts.object_type.insert(entity, ObjectType::Box).unwrap();
     parts.mesh.insert(entity, mesh).unwrap();
@@ -121,10 +125,10 @@ fn emit_box<P, B, R, A, I>(
         .material
         .insert(entity, emitter.material.clone())
         .unwrap();
-    parts
-        .global
-        .insert(entity, GlobalTransform::default())
-        .unwrap();
+    // parts
+    //     .global
+    //     .insert(entity, /*Global*/Transform::default())
+    //     .unwrap();
     parts.local.insert(entity, transform).unwrap();
     parts
         .physical_entity
@@ -157,8 +161,8 @@ where
 {
     pub object_type: WriteStorage<'a, ObjectType>,
     pub mesh: WriteStorage<'a, Handle<Mesh>>,
-    pub material: WriteStorage<'a, Material>,
-    pub global: WriteStorage<'a, GlobalTransform>,
+    pub material: WriteStorage<'a, Handle<Material>>,
+    /*pub global: WriteStorage<'a, GlobalTransform>,*/
     pub local: WriteStorage<'a, Transform>,
     pub physical_entity: PhysicalEntityParts<
         'a,

@@ -1,7 +1,7 @@
 use std::marker;
 
 use amethyst_core::math as na;
-use amethyst_core::ecs::{Join, ReadStorage, System, World, WriteStorage};
+use amethyst_core::ecs::{Join, ReadStorage, System, World, WorldExt, WriteStorage};
 use amethyst_core::timing::Time;
 use amethyst_core::Transform;
 use cgmath::{Basis2, EuclideanSpace, Point2, Point3, Quaternion, Rotation};

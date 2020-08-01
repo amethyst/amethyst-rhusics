@@ -1,4 +1,4 @@
-use amethyst_core::ecs::{Builder, World};
+use amethyst_core::ecs::{Builder, World, WorldExt};
 use cgmath::{Basis2, Deg, EuclideanSpace, One, Point2, Point3, Quaternion, Rotation3, Vector2};
 use collision::primitive::{Primitive2, Primitive3, Quad};
 use collision::{Aabb2, Aabb3, Line2};

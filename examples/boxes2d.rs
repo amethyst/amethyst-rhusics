@@ -1,21 +1,20 @@
 
 use std::time::{Duration, Instant};
 
-use amethyst::assets::{Handle, Loader};
+use amethyst::assets::{Handle, Loader, AssetLoaderSystemData};
 use amethyst::core::math as na;
 use amethyst::core::{Transform, TransformBundle};
-use amethyst::ecs::prelude::{Builder, Entity, World};
-use amethyst::input::{is_close_requested, is_key_down};
+use amethyst::ecs::prelude::{Builder, Entity, World, WorldExt};
+use amethyst::input::{is_close_requested, is_key_down, VirtualKeyCode, StringBindings, InputBundle};
 use amethyst::prelude::{
-    Application, Config, GameData, GameDataBuilder, SimpleState, SimpleTrans, StateData,
+    Application, /*Config,*/ GameData, GameDataBuilder, SimpleState, SimpleTrans, StateData,
     StateEvent, Trans,
 };
-use amethyst::renderer::{
-    Camera, DisplayConfig, DrawFlat, Material, MaterialDefaults, Mesh, Pipeline, PosTex,
-    RenderBundle, Stage, VirtualKeyCode,
-};
-use amethyst::ui::{DrawUi, UiBundle};
-use amethyst::utils::fps_counter::FPSCounterBundle;
+use amethyst::renderer::{Camera, Material, MaterialDefaults, Mesh, RenderingBundle, RenderToWindow, RenderFlat2D};
+use amethyst::renderer::rendy::mesh::{PosTex, TexCoord, MeshBuilder};
+use amethyst::renderer::types::DefaultBackend;
+// use amethyst::ui::{DrawUi, UiBundle};
+use amethyst::utils::fps_counter::FpsCounterBundle;
 use amethyst_rhusics::{setup_2d_arena, time_sync, DefaultPhysicsBundle2};
 use cgmath::Point2;
 use collision::primitive::{Primitive2, Rectangle};
@@ -26,6 +25,12 @@ use rhusics_ecs::physics2d::BodyPose2;
 use crate::boxes::{
     create_ui, update_ui, BoxSimulationBundle2, Emitter, Graphics, KillRate, ObjectType,
 };
+use amethyst::utils::application_root_dir;
+use amethyst::window::ScreenDimensions;
+use amethyst::renderer::types::MeshData;
+use amethyst::renderer::loaders::load_from_linear_rgba;
+use amethyst::renderer::palette::LinSrgba;
+use amethyst::ui::UiBundle;
 
 mod boxes;
 
@@ -51,7 +56,7 @@ impl SimpleState for Emitting {
         self.fps = Some(fps_display);
         self.collision = Some(collisions_display);
 
-        world.add_resource(g);
+        world.insert(g);
         setup_2d_arena(
             Point2::new(-1., -1.),
             Point2::new(1., 1.),
@@ -91,9 +96,10 @@ impl SimpleState for Emitting {
 }
 
 fn initialise_camera(world: &mut World) {
+    let screen_dimensions = (*world.read_resource::<ScreenDimensions>()).clone();
     world
         .create_entity()
-        .with(Camera::standard_2d())
+        .with(Camera::standard_2d(screen_dimensions.width(), screen_dimensions.height()))
         .with(Transform::from(na::Vector3::new(0., 0., 5.)))
         .build();
 }
@@ -104,28 +110,36 @@ fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
     let vertices = Cube::new()
         .vertex(|v| PosTex {
             position: v.pos.into(),
-            tex_coord: na::Vector2::new(0.1, 0.1),
+            tex_coord: TexCoord::from([0.1, 0.1]),
         }).triangulate()
         .vertices()
         .collect::<Vec<_>>();
+    let mesh_builder = MeshBuilder::from(vertices);
+    let mesh_data = MeshData::from(mesh_builder);
     world
         .read_resource::<Loader>()
-        .load_from_data(vertices.into(), (), &world.read_resource())
+        .load_from_data(mesh_data, (), &world.read_resource())
 }
 
-fn initialise_material(world: &mut World, r: f32, g: f32, b: f32) -> Material {
+fn initialise_material(world: &mut World, r: f32, g: f32, b: f32) -> Handle<Material> {
     let albedo = world.read_resource::<Loader>().load_from_data(
-        [r, g, b, 1.0].into(),
+        load_from_linear_rgba(LinSrgba::new(r,g,b,1.)).into(),
         (),
         &world.read_resource(),
     );
-    Material {
-        albedo,
-        ..world.read_resource::<MaterialDefaults>().0.clone()
-    }
+    let defaults = world.read_resource::<MaterialDefaults>().0.clone();
+    world.exec(|mtl_loader: AssetLoaderSystemData<'_, Material>|{
+        mtl_loader.load_from_data(
+            Material {
+                albedo,
+                ..defaults
+            },
+            ()
+        )
+    })
 }
 
-fn emitter(p: Point2<f32>, d: Duration, material: Material) -> Emitter<Point2<f32>> {
+fn emitter(p: Point2<f32>, d: Duration, material: Handle<Material>) -> Emitter<Point2<f32>> {
     Emitter {
         location: p,
         emission_interval: d,
@@ -175,28 +189,48 @@ fn initialise_emitters(world: &mut World) {
 
 fn run() -> Result<(), amethyst::Error> {
     amethyst::start_logger(amethyst::LoggerConfig::default());
-    let path = format!(
-        "{}/../resources/display_config.ron",
-        env!("CARGO_MANIFEST_DIR")
-    );
-    let config = DisplayConfig::load(&path);
+    // let path = format!(
+    //     "{}/../resources/display_config.ron",
+    //     env!("CARGO_MANIFEST_DIR")
+    // );
+    // let config = DisplayConfig::load(&path);
+    let app_root = application_root_dir()?;
+    let resources = app_root.join("examples/resources");
+    let display_config = resources.join("display_config.ron");
 
-    let pipe = Pipeline::build().with_stage(
-        Stage::with_backbuffer()
-            .clear_target([0., 0., 0., 1.0], 1.0)
-            .with_pass(DrawFlat::<PosTex>::new())
-            .with_pass(DrawUi::new()),
-    );
+    //
+    // let pipe = Pipeline::build().with_stage(
+    //     Stage::with_backbuffer()
+    //         .clear_target([0., 0., 0., 1.0], 1.0)
+    //         .with_pass(DrawFlat::<PosTex>::new())
+    //         .with_pass(DrawUi::new()),
+    // );
 
+    // let game_data = GameDataBuilder::default()
+    //     .with_bundle(TransformBundle::new().with_dep(&["sync_system", "emission_system"]))?
+    //     .with_bundle(UiBundle::<String, String>::new())?
+    //     .with_bundle(RenderBundle::new(pipe, Some(config)))?;
     let game_data = GameDataBuilder::default()
-        .with_bundle(FPSCounterBundle::default())?
+        .with_bundle(FpsCounterBundle::default())?
         .with_bundle(DefaultPhysicsBundle2::<ObjectType>::new().with_spatial())?
         .with_bundle(BoxSimulationBundle2::new(Rectangle::new(0.1, 0.1).into()))?
-        .with_bundle(TransformBundle::new().with_dep(&["sync_system", "emission_system"]))?
-        .with_bundle(UiBundle::<String, String>::new())?
-        .with_bundle(RenderBundle::new(pipe, Some(config)))?;
+        .with_bundle(TransformBundle::new())?
+        .with_bundle(InputBundle::<StringBindings>::new())?
+        .with_bundle(UiBundle::<StringBindings>::new())?
+        .with_bundle(
+            RenderingBundle::<DefaultBackend>::new()
+                .with_plugin(
+                    RenderToWindow::from_config_path(display_config)?
+                        .with_clear([0.34, 0.36, 0.52, 1.0]),
+                )
+                .with_plugin(RenderFlat2D::default()),
+        )?;
 
-    let mut game = Application::new("./", Emitting::default(), game_data)?;
+    let mut game = Application::new(
+        resources,
+        Emitting::default(),
+        game_data
+    )?;
     game.run();
 
     Ok(())

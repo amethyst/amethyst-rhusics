@@ -56,7 +56,7 @@ pub struct Emitter<P> {
     pub location: P,
     pub last_emit: Instant,
     pub emission_interval: Duration,
-    pub material: Material,
+    pub material: Handle<Material>,
     pub emitted: u64,
 }
 
