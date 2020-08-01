@@ -117,8 +117,9 @@ fn emit_box<P, B, R, A, I>(
     let position = emitter.location + offset;
     let pose = BodyPose::new(position, R::one());
     let mut transform = pose.as_transform();
-    transform.set_scale([0.05, 0.05, 0.05].into());
-
+    // transform.set_scale([0.05, 0.05, 0.05].into());
+    transform.set_scale([5., 5., 1.].into());
+    //+ log::info!("emitting box at {:?}", transform.translation());
     parts.object_type.insert(entity, ObjectType::Box).unwrap();
     parts.mesh.insert(entity, mesh).unwrap();
     parts

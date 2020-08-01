@@ -91,7 +91,8 @@ fn add_rectangle(world: &mut World, dimensions: &ScreenDimensions) {
     let y = dimensions.height() * 0.5;
     let mut transform = Transform::default();
     transform.set_translation_xyz(x, y, 0.);
-
+    // Scale is needed if you generate the mesh using genmesh (initialize_mesh())
+    // transform.set_scale([scale.x, scale.y, scale.z].into());
 
     // This code from amethyst/examples/rendy/main.rs
     let (mesh, albedo) = {
@@ -103,6 +104,9 @@ fn add_rectangle(world: &mut World, dimensions: &ScreenDimensions) {
                 (),
             )
         });
+        // If you want to check out generating messages using genmesh,
+        // comment out the above lines, and uncomment the following:
+        // let mesh = initialise_mesh(world);
         let albedo = world.exec(|loader: AssetLoaderSystemData<'_, Texture>| {
             loader.load_from_data(
                 load_from_linear_rgba(LinSrgba::new(1., 1., 0.7, 1.))
@@ -142,6 +146,87 @@ fn add_rectangle(world: &mut World, dimensions: &ScreenDimensions) {
             Mass2::new(1.),
         )
         .build();
+}
+// This is another way to generate meshes, using
+// the genmesh crate. It's faster and more efficient
+// now to use the one in Amethyst.
+#[allow(unused)]
+fn initialise_mesh(world: &mut World) -> amethyst::assets::Handle<Mesh> {
+    use genmesh::generators::Cube;
+    use genmesh::Vertex;
+    use genmesh::{MapToVertices, Triangulate, Vertices};
+    use amethyst::renderer::rendy::mesh::PosTex;
+    use amethyst::renderer::rendy::mesh::PosNormTangTex;
+    use amethyst::assets::Loader;
+    use amethyst::renderer::rendy::mesh::MeshBuilder;
+    use amethyst::renderer::types::MeshData;
+
+    let vertices:Vec<PosNormTangTex> = Cube::new()
+        // .vertex(|v| PosTex {
+        //     position: v.pos.into(),
+        //     tex_coord: TexCoord::from([0.1, 0.1]),
+        // })
+
+        .vertex(|v| {
+            info!("normal is {:?}", v.normal);
+            // From amethyst_rendy/src/shape.rs:
+            //   let tangent1 = normal.cross(&Vector3::x());
+            //   let tangent2 = normal.cross(&Vector3::y());
+            //   let tangent = if tangent1.norm_squared() > tangent2.norm_squared() {
+            //       tangent1
+            //   } else {
+            //       tangent2
+            //   }
+            //   .cross(&normal);
+            let n:amethyst::core::math::Vector3<f32> = v.normal.into();
+            let tx = n.cross(&amethyst::core::math::Vector3::x());
+            let ty = n.cross(&amethyst::core::math::Vector3::y());
+            let t = if tx.norm_squared() > ty.norm_squared() {
+                tx
+            } else {
+                ty
+            };
+            let tangent = t.cross(&n);
+            //+ info!("got tangent {:?}", tangent);
+            let p = tangent.data;
+            let q = p.as_slice();
+            let r:[f32;4] = [q[0], q[1], q[2], 1.];
+
+            PosNormTangTex {
+                position: v.pos.into(),
+                normal: v.normal.into(),
+                tangent: r.into(),
+                tex_coord: TexCoord::from([0.1, 0.1]),
+            }
+        })
+        .triangulate()
+        .vertices()
+        .collect::<Vec<_>>();
+    // Mesh builder is expecting vectors of each element, not a combined vector
+    // so split it out.
+    let positions:Vec<Position> = vertices.iter().map(|v:&PosNormTangTex|->Position {
+        v.position
+    }).collect();
+    let normals:Vec<Normal> = vertices.iter().map(|v:&PosNormTangTex|->Normal {
+        v.normal
+    }).collect();
+    // Note: Tangents aren't necessary and don't need to be calculated.
+    let tangents:Vec<Tangent> = vertices.iter().map(|v:&PosNormTangTex|->Tangent {
+        v.tangent
+    }).collect();
+    let tex_coords:Vec<TexCoord> = vertices.iter().map(|v:&PosNormTangTex|->TexCoord {
+        v.tex_coord
+    }).collect();
+    let mesh_builder = MeshBuilder::new()
+        .with_vertices(positions)
+        .with_vertices(normals)
+        .with_vertices(tex_coords)
+        .with_vertices(tangents)
+    ;
+    let mesh_data = MeshData::from(mesh_builder);
+    world
+        .read_resource::<Loader>()
+        .load_from_data(mesh_data, (), &world.read_resource())
 }
 
 /// Creates a camera entity in the `world`.

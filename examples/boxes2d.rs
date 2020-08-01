@@ -10,8 +10,8 @@ use amethyst::prelude::{
     Application, /*Config,*/ GameData, GameDataBuilder, SimpleState, SimpleTrans, StateData,
     StateEvent, Trans,
 };
-use amethyst::renderer::{Camera, Material, MaterialDefaults, Mesh, RenderingBundle, RenderToWindow, RenderFlat2D};
-use amethyst::renderer::rendy::mesh::{PosTex, TexCoord, MeshBuilder};
+use amethyst::renderer::{Camera, Material, MaterialDefaults, Mesh, RenderingBundle, RenderToWindow, RenderFlat3D};
+use amethyst::renderer::rendy::mesh::{PosTex, Position, TexCoord, MeshBuilder};
 use amethyst::renderer::types::DefaultBackend;
 // use amethyst::ui::{DrawUi, UiBundle};
 use amethyst::utils::fps_counter::FpsCounterBundle;
@@ -51,15 +51,17 @@ impl SimpleState for Emitting {
         let g = Graphics {
             mesh: initialise_mesh(world),
         };
+
         let (num_display, fps_display, collisions_display) = create_ui(world);
         self.num = Some(num_display);
         self.fps = Some(fps_display);
         self.collision = Some(collisions_display);
 
         world.insert(g);
+        let sd = (*world.read_resource::<ScreenDimensions>()).clone();
         setup_2d_arena(
-            Point2::new(-1., -1.),
-            Point2::new(1., 1.),
+            Point2::new(0., 0.),
+            Point2::new(sd.width(), sd.height()),
             (
                 ObjectType::Wall,
                 ObjectType::Wall,
@@ -97,24 +99,36 @@ impl SimpleState for Emitting {
 
 fn initialise_camera(world: &mut World) {
     let screen_dimensions = (*world.read_resource::<ScreenDimensions>()).clone();
+    let midpoint_x = screen_dimensions.width() / 2.;
+    let midpoint_y = screen_dimensions.height() / 2.;
     world
         .create_entity()
         .with(Camera::standard_2d(screen_dimensions.width(), screen_dimensions.height()))
-        .with(Transform::from(na::Vector3::new(0., 0., 5.)))
+        .with(Transform::from(na::Vector3::new(midpoint_x, midpoint_y, 100.)))
         .build();
 }
 
 fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
     use genmesh::generators::Cube;
     use genmesh::{MapToVertices, Triangulate, Vertices};
-    let vertices = Cube::new()
+    let vertices:Vec<PosTex> = Cube::new()
         .vertex(|v| PosTex {
             position: v.pos.into(),
             tex_coord: TexCoord::from([0.1, 0.1]),
         }).triangulate()
         .vertices()
         .collect::<Vec<_>>();
-    let mesh_builder = MeshBuilder::from(vertices);
+    // Our mesh builder is expecting the different components each in their own
+    // vector.
+    let positions:Vec<Position> = vertices.iter().map(|v:&PosTex| -> Position {
+        v.position
+    }).collect();
+    let tex_coords:Vec<TexCoord> = vertices.iter().map(|v:&PosTex| -> TexCoord {
+        v.tex_coord
+    }).collect();
+    let mesh_builder = MeshBuilder::new()
+        .with_vertices(positions)
+        .with_vertices(tex_coords);
     let mesh_data = MeshData::from(mesh_builder);
     world
         .read_resource::<Loader>()
@@ -151,10 +165,18 @@ fn emitter(p: Point2<f32>, d: Duration, material: Handle<Material>) -> Emitter<P
 
 fn initialise_emitters(world: &mut World) {
     let mat = initialise_material(world, 0.3, 1.0, 0.3);
+    let screen_size = (*world.read_resource::<ScreenDimensions>()).clone();
+    // converts (-1,-1)..(1,1) into (0,0)..(screen_size.width(),screen_size.height())
+    let sx = |x:f32| -> f32 {
+        ((x + 1.) / 2.) * screen_size.width()
+    };
+    let sy = |y:f32| -> f32 {
+        ((y + 1.) / 2.)*screen_size.height()
+    };
     world
         .create_entity()
         .with(emitter(
-            Point2::new(-0.4, 0.),
+            Point2::new(sx(-0.4), sy(0.)),
             Duration::new(0, 50_000_000),
             mat,
         )).build();
@@ -163,7 +185,7 @@ fn initialise_emitters(world: &mut World) {
     world
         .create_entity()
         .with(emitter(
-            Point2::new(0.4, 0.),
+            Point2::new(sx(0.4), sy(0.)),
             Duration::new(0, 75_000_000),
             mat,
         )).build();
@@ -172,7 +194,7 @@ fn initialise_emitters(world: &mut World) {
     world
         .create_entity()
         .with(emitter(
-            Point2::new(0., -0.4),
+            Point2::new(sx(0.), sy(-0.4)),
             Duration::new(0, 100_000_000),
             mat,
         )).build();
@@ -181,7 +203,7 @@ fn initialise_emitters(world: &mut World) {
     world
         .create_entity()
         .with(emitter(
-            Point2::new(0., 0.4),
+            Point2::new(sx(0.), sy(0.4)),
             Duration::new(1, 25_000_000),
             mat,
         )).build();
@@ -213,7 +235,7 @@ fn run() -> Result<(), amethyst::Error> {
     let game_data = GameDataBuilder::default()
         .with_bundle(FpsCounterBundle::default())?
         .with_bundle(DefaultPhysicsBundle2::<ObjectType>::new().with_spatial())?
-        .with_bundle(BoxSimulationBundle2::new(Rectangle::new(0.1, 0.1).into()))?
+        .with_bundle(BoxSimulationBundle2::new(Rectangle::new(5., 5.).into()))?
         .with_bundle(TransformBundle::new())?
         .with_bundle(InputBundle::<StringBindings>::new())?
         .with_bundle(UiBundle::<StringBindings>::new())?
@@ -223,7 +245,7 @@ fn run() -> Result<(), amethyst::Error> {
                     RenderToWindow::from_config_path(display_config)?
                         .with_clear([0.34, 0.36, 0.52, 1.0]),
                 )
-                .with_plugin(RenderFlat2D::default()),
+                .with_plugin(RenderFlat3D::default()),
         )?;
 
     let mut game = Application::new(
