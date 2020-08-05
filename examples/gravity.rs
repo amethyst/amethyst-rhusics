@@ -229,6 +229,71 @@ fn initialise_mesh(world: &mut World) -> amethyst::assets::Handle<Mesh> {
         .load_from_data(mesh_data, (), &world.read_resource())
 }
 
+/// Creates a cube with size (0.5, 0.5, 0.1) and colour (1., 1., 0.7, 1.)
+/// in the centre of the screen.
+fn add_static_rectangle(world: &mut World, dimensions: &ScreenDimensions) {
+    let scale = Vector3::new(30., 30., 1.);
+    let scale_triplet = (scale.x, scale.y, scale.z);
+    let x = dimensions.width() * 0.65;
+    let y = dimensions.height() * 0.5;
+    let mut transform = Transform::default();
+    transform.set_translation_xyz(x, y, 0.);
+    // Scale is needed if you generate the mesh using genmesh (initialize_mesh())
+    // transform.set_scale([scale.x, scale.y, scale.z].into());
+
+    // This code from amethyst/examples/rendy/main.rs
+    let (mesh, albedo) = {
+        let mesh = world.exec(|loader: AssetLoaderSystemData<'_, Mesh>| {
+            loader.load_from_data(
+                Shape::Cube
+                    .generate::<(Vec<Position>, Vec<Normal>, Vec<Tangent>, Vec<TexCoord>)>(Some(scale_triplet))
+                    .into(),
+                (),
+            )
+        });
+        // If you want to check out generating messages using genmesh,
+        // comment out the above lines, and uncomment the following:
+        // let mesh = initialise_mesh(world);
+        let albedo = world.exec(|loader: AssetLoaderSystemData<'_, Texture>| {
+            loader.load_from_data(
+                load_from_linear_rgba(LinSrgba::new(0.7, 1., 1., 1.))
+                    .into(),
+                (),
+            )
+        });
+        (mesh, albedo)
+    };
+    let material_defaults = world.read_resource::<MaterialDefaults>().0.clone();
+    let material = world.exec(|mtl_loader: AssetLoaderSystemData<'_, Material>| {
+        mtl_loader.load_from_data(
+            Material {
+                albedo: albedo.clone(),
+                ..material_defaults
+            },
+            ()
+        )
+    });
+    world
+        .create_entity()
+        .with(transform)
+        .with(mesh)
+        .with(material)
+        .with_static_physical_entity(
+            CollisionShape2::<f32, BodyPose2<f32>, ObjectType>::new_simple(
+                CollisionStrategy::FullResolution,
+                CollisionMode::Discrete,
+                Rectangle::new(scale[0]*2., scale[1]*2.).into(),
+            ),
+            BodyPose2::<f32>::new(
+                Point2::new(x, y),
+                Basis2::one(),
+            ),
+            PhysicalEntity::default(),
+            Mass2::new(1.),
+        )
+        .build();
+}
+
 /// Creates a camera entity in the `world`.
 ///
 /// The `dimensions` are used to center the camera in the middle
@@ -254,7 +319,7 @@ fn add_camera(world: &mut World, dimensions: &ScreenDimensions) {
 fn add_entities(world: &mut World, dimensions: &ScreenDimensions) {
     add_camera(world, dimensions);
     add_rectangle(world, dimensions);
-    //add_static_rectangle(world);
+    add_static_rectangle(world, dimensions);
 }
 
 // =================================================================================================
