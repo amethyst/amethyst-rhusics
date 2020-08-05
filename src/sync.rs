@@ -22,21 +22,21 @@ pub trait Convert {
     /// Output type of conversion
     type Output;
     /// Convert
-    fn convert(&self) -> Self::Output;
+    fn convert(&self, original: Self::Output) -> Self::Output;
 }
 
 impl Convert for Point2<f32> {
     type Output = na::Vector3<f32>;
 
-    fn convert(&self) -> Self::Output {
-        na::Vector3::new(self.x, self.y, 0.)
+    fn convert(&self, original: Self::Output) -> Self::Output {
+        na::Vector3::new(self.x, self.y, original.z)
     }
 }
 
 impl Convert for Point3<f32> {
     type Output = na::Vector3<f32>;
 
-    fn convert(&self) -> Self::Output {
+    fn convert(&self, _original: Self::Output) -> Self::Output {
         na::Vector3::new(self.x, self.y, self.z)
     }
 }
@@ -44,7 +44,7 @@ impl Convert for Point3<f32> {
 impl Convert for Basis2<f32> {
     type Output = na::UnitQuaternion<f32>;
 
-    fn convert(&self) -> Self::Output {
+    fn convert(&self, _original: Self::Output) -> Self::Output {
         let matrix = na::Matrix3::new(
             self.as_ref()[0][0],
             self.as_ref()[0][1],
@@ -63,7 +63,7 @@ impl Convert for Basis2<f32> {
 impl Convert for Quaternion<f32> {
     type Output = na::UnitQuaternion<f32>;
 
-    fn convert(&self) -> Self::Output {
+    fn convert(&self, _original: Self::Output) -> Self::Output {
         na::Unit::new_normalize(na::Quaternion::new(self.s, self.v.x, self.v.y, self.v.z))
     }
 }
@@ -75,8 +75,10 @@ where
 {
     fn as_transform(&self) -> Transform {
         let mut t = Transform::default();
-        t.set_translation(self.position().convert());
-        t.set_rotation(self.rotation().convert());
+        let original_translation = (*t.translation()).clone().into();
+        let original_rotation = (*t.rotation()).clone();
+        t.set_translation(self.position().convert(original_translation));
+        t.set_rotation(self.rotation().convert(original_rotation));
         t
     }
 }
@@ -143,10 +145,12 @@ where
         let (poses, mut transforms) = data;
         for (pose, transform) in (&poses, &mut transforms).join() {
             if self.translation {
-                transform.set_translation(pose.position().convert());
+                let original_translation = (*transform.translation()).into();
+                transform.set_translation(pose.position().convert(original_translation));
             }
             if self.rotation {
-                transform.set_rotation(pose.rotation().convert());
+                let original_rotation = *transform.rotation();
+                transform.set_rotation(pose.rotation().convert(original_rotation));
             }
             //println!("T: {:?}", transform);
             //println!("P: {:?}", pose);

@@ -112,8 +112,12 @@ fn emit_box<P, B, R, A, I>(
     // Determine the size of the box based on the size of our
     // primitive (which we set when we bundled the box simulation bundle).
     let primitive_bound = primitive.compute_bound();
-    let bound_min:na::Vector3<f32> = primitive_bound.min_extent().convert();
-    let bound_max:na::Vector3<f32> = primitive_bound.max_extent().convert();
+    // conversion no longer converts the z component, since we
+    // use that in 2D for ordering and hiding. We have to supply
+    // a default z value (even in 3D)
+    let base_vector = na::Vector3::<f32>::zero();
+    let bound_min:na::Vector3<f32> = primitive_bound.min_extent().convert(base_vector);
+    let bound_max:na::Vector3<f32> = primitive_bound.max_extent().convert( base_vector);
     let size = bound_max - bound_min;
 
     let offset:<P::Point as EuclideanSpace>::Diff =

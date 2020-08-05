@@ -1,6 +1,6 @@
 [package]
 name = "amethyst-rhusics"
-version = "0.5.0"
+version = "0.5.1"
 authors = [
     "Simon Rönnberg <seamonr@gmail.com>",
     "Thomas O'Dell <thomas_odell@trsolutions.biz>"
