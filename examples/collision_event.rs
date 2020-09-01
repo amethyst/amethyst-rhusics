@@ -59,6 +59,8 @@ use amethyst::winit::Event;
 use amethyst::ui::UiEvent;
 use std::fmt::Debug;
 use crate::RacquetType::RogerFederer;
+use amethyst::core::ecs::Join;
+use rhusics_core::physics2d::ForceAccumulator2;
 
 
 /// Shape type for collision and positioning.
@@ -146,10 +148,10 @@ fn register_components(world: &mut World) {
 //                    Game Resources
 //
 // =================================================================================================
-/// The default World Parameters has no gravity. Add some.
+/// The default World Parameters has no gravity. Keep it that way.
 /// This also sets damping to 1.0 to turn it off.
 fn add_resources(world: &mut World) {
-    world.insert(MyWorldParameters::new(Vector2::new(0.0, -9.8)).with_damping(1.0));
+    world.insert(MyWorldParameters::new(Vector2::new(0.0, 0.0)).with_damping(1.0));
 }
 
 // =================================================================================================
@@ -157,8 +159,8 @@ fn add_resources(world: &mut World) {
 //                    Game Entities
 //
 // =================================================================================================
-/// Creates a cube with size (0.5, 0.5, 0.1) and colour (1., 1., 0.7, 1.)
-/// in the centre of the screen.
+/// Creates a cube with size (50, 5, 0.1) and colour (1., 1., 0.7, 1.)
+/// in the centre bottom of the screen.
 fn add_racquet(world: &mut World, dimensions: &ScreenDimensions, racquet_type: RacquetType) {
     let scale = Vector3::new(50., 5., 1.);
     let scale_triplet = (scale.x, scale.y, scale.z);
@@ -219,7 +221,7 @@ fn add_racquet(world: &mut World, dimensions: &ScreenDimensions, racquet_type: R
         .build();
 }
 
-/// Creates a ball with size (0.5, 0.5, 0.1) and colour (1., 1., 0.1, 1.)
+/// Creates a ball with size (20, 20, 20 ) and colour (1., 1., 0.1, 1.) (yellow)
 /// in the centre of the screen.
 fn add_ball(world: &mut World, dimensions: &ScreenDimensions) {
     //let scale = Vector3::new(30., 30., 1.);
@@ -279,7 +281,8 @@ fn add_ball(world: &mut World, dimensions: &ScreenDimensions) {
             ),
             Velocity2::<f32>::default(),
             PhysicalEntity::default(),
-            Mass2::new(1.),
+            // Mass has to have inertia defined or it won't be affected by force.
+            Mass2::new_with_inertia(1., 1.),
         )
         .build();
 }
@@ -379,9 +382,7 @@ pub type RhusicsApplication<'a, T> = CoreApplication<'a, T, RhusicsStateEvent, R
 
 /// The game state: includes a reader to read the collision events.
 #[derive(Default)]
-struct GameState{
-    reader: Option<ReaderId<ContactEvent2<f32>>>,
-}
+struct GameState;
 
 //impl SimpleState for GameState {
 impl<'a, 'b> State<GameData<'a, 'b>, RhusicsStateEvent> for GameState {
@@ -408,13 +409,6 @@ impl<'a, 'b> State<GameData<'a, 'b>, RhusicsStateEvent> for GameState {
         add_resources(world);
         add_entities(world, &dimensions);
 
-
-        self.reader = Some(world.write_resource::<EventChannel<ContactEvent2<f32>>>().register_reader());
-
-        // let min_x = 0. - dimensions.width() / 0.5;
-        // let max_x = dimensions.width() / 0.5;
-        // let min_y = 0. - dimensions.height() / 0.5;
-        // let max_y = dimensions.height() / 0.5;
         let min_x = 0.;
         let min_y = 0.;
         let max_x = dimensions.width();
@@ -430,6 +424,16 @@ impl<'a, 'b> State<GameData<'a, 'b>, RhusicsStateEvent> for GameState {
             ),
             world,
         );
+
+        // Give the ball a push using something like a system (but one that's run just once):
+        let balls = world.read_storage::<BallObjectType>();
+        let mut velocities = world.write_storage::<Velocity2<f32>>();
+        let mut forces = world.write_storage::<ForceAccumulator2<f32>>();
+        for (_ball, _velocity, force) in (&balls, &mut velocities, &mut forces).join() {
+            info!("Setting velocity");
+            force.add_force(Vector2::new(1000.0,0.0));
+            //velocity.set_linear(Vector2::new(10., 0.));
+        }
     }
 
     /// The following events are handled:
@@ -509,8 +513,25 @@ impl<'a, 'b> State<GameData<'a, 'b>, RhusicsStateEvent> for GameState {
     /// Note the call to time_sync() to keep Rhusics' time component
     /// in sync with Amethyst's.
     fn update(&mut self, data: StateData<'_, GameData<'a, 'b>>) -> Trans<GameData<'a, 'b>, RhusicsStateEvent> {
+        //use rhusics_core::next_frame_integration;
+        {
+            let balls = data.world.read_storage::<BallObjectType>();
+            let velocities = data.world.read_storage::<Velocity2<f32>>();
+            let forces = data.world.read_storage::<ForceAccumulator2<f32>>();
+            for (_ball, velocity, force) in (&balls, &velocities, &forces).join() {
+               info!("Before update: velocity = {:?}, force = {:?}", velocity, force);
+            }
+        }
         time_sync(data.world);
         data.data.update(data.world);
+        {
+            let balls = data.world.read_storage::<BallObjectType>();
+            let velocities = data.world.read_storage::<Velocity2<f32>>();
+            let forces = data.world.read_storage::<ForceAccumulator2<f32>>();
+            for (_ball, velocity, force) in (&balls, &velocities, &forces).join() {
+                info!("After update:  velocity = {:?}, force = {:?}", velocity, force);
+            }
+        }
         Trans::None
     }
 

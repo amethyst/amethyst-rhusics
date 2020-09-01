@@ -2,7 +2,7 @@ use super::{Collisions, Emitter};
 use amethyst::assets::Loader;
 use amethyst::core::{Parent, Time};
 use amethyst::ecs::prelude::{Builder, Entity, Join, World, WorldExt};
-use amethyst::ui::{Anchor, TtfFormat, UiText, UiTransform};
+use amethyst::ui::{Anchor, TtfFormat, UiText, UiTransform, LineMode};
 use amethyst::utils::fps_counter::FpsCounter;
 
 #[allow(unused)]
@@ -29,6 +29,8 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             "N/A".to_string(),
             [1.0, 1.0, 1.0, 1.0],
             25.,
+        LineMode::Single,
+        Anchor::TopLeft,
         )).build();
 
     let fps_display = world
@@ -47,6 +49,8 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             "N/A".to_string(),
             [1.0, 1.0, 1.0, 1.0],
             25.,
+            LineMode::Single,
+            Anchor::TopLeft,
         )).with(Parent {
             entity: num_display,
         }).build();
@@ -67,6 +71,8 @@ pub fn create_ui(world: &mut World) -> (Entity, Entity, Entity) {
             "N/A".to_string(),
             [1.0, 1.0, 1.0, 1.0],
             25.,
+            LineMode::Single,
+            Anchor::TopLeft,
         )).with(Parent {
             entity: fps_display,
         }).build();
