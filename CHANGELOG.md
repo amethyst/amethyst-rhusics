@@ -1,5 +1,11 @@
 ## Changelog
 
+### v0.5.1
+- Updated to Amethyst 0.15.3
+- Added an example showing the system reporting
+   collision events through Amethyst's collision
+   system.
+
 ### v0.5.0
 - Updated to latest Rhusics (0.8)
     - for now, linked to my fork (trsoluti).

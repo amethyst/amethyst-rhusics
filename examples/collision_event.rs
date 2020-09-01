@@ -58,7 +58,7 @@ use amethyst::input::{StringBindings, BindingTypes, InputEvent};
 use amethyst::winit::Event;
 use amethyst::ui::UiEvent;
 use std::fmt::Debug;
-use crate::RacquetType::RogerFederer;
+use crate::RacquetType::{RogerFederer, SerenaWilliams};
 use amethyst::core::ecs::Join;
 use rhusics_core::physics2d::ForceAccumulator2;
 
@@ -151,7 +151,7 @@ fn register_components(world: &mut World) {
 /// The default World Parameters has no gravity. Keep it that way.
 /// This also sets damping to 1.0 to turn it off.
 fn add_resources(world: &mut World) {
-    world.insert(MyWorldParameters::new(Vector2::new(0.0, 0.0)).with_damping(1.0));
+    world.insert(MyWorldParameters::new(Vector2::new(0.0, -0.095)).with_damping(1.0));
 }
 
 // =================================================================================================
@@ -161,11 +161,11 @@ fn add_resources(world: &mut World) {
 // =================================================================================================
 /// Creates a cube with size (50, 5, 0.1) and colour (1., 1., 0.7, 1.)
 /// in the centre bottom of the screen.
-fn add_racquet(world: &mut World, dimensions: &ScreenDimensions, racquet_type: RacquetType) {
-    let scale = Vector3::new(50., 5., 1.);
+fn add_racquet(world: &mut World, dimensions: &ScreenDimensions, racquet_type: RacquetType, y_pos: f32) {
+    let scale = Vector3::new(5., 50., 1.);
     let scale_triplet = (scale.x, scale.y, scale.z);
-    let x = dimensions.width() * 0.5;
-    let y = dimensions.height() * 0.1;
+    let x = dimensions.width() * y_pos;
+    let y = dimensions.height() * 0.5;
     let mut transform = Transform::default();
     transform.set_translation_xyz(x, y, 0.);
 
@@ -311,7 +311,8 @@ fn add_camera(world: &mut World, dimensions: &ScreenDimensions) {
 /// Adds all the entities this world needs.
 fn add_entities(world: &mut World, dimensions: &ScreenDimensions) {
     add_camera(world, dimensions);
-    add_racquet(world, dimensions, RogerFederer);
+    add_racquet(world, dimensions, RogerFederer, 0.95);
+    add_racquet(world, dimensions, SerenaWilliams, 0.05);
     add_ball(world, dimensions);
     //add_static_rectangle(world);
 }
@@ -431,7 +432,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, RhusicsStateEvent> for GameState {
         let mut forces = world.write_storage::<ForceAccumulator2<f32>>();
         for (_ball, _velocity, force) in (&balls, &mut velocities, &mut forces).join() {
             info!("Setting velocity");
-            force.add_force(Vector2::new(1000.0,0.0));
+            force.add_force(Vector2::new(5000.0,0.0));
             //velocity.set_linear(Vector2::new(10., 0.));
         }
     }
@@ -439,6 +440,7 @@ impl<'a, 'b> State<GameData<'a, 'b>, RhusicsStateEvent> for GameState {
     /// The following events are handled:
     /// - The game state is quit when either the close button is clicked or when the escape key is pressed.
     /// - Any other keypress is simply logged to the console.
+    /// - The physics system generates a collision event.
     fn handle_event(
         &mut self,
         // mut _data: StateData<'_, GameData<'_, '_>>,
@@ -513,23 +515,41 @@ impl<'a, 'b> State<GameData<'a, 'b>, RhusicsStateEvent> for GameState {
     /// Note the call to time_sync() to keep Rhusics' time component
     /// in sync with Amethyst's.
     fn update(&mut self, data: StateData<'_, GameData<'a, 'b>>) -> Trans<GameData<'a, 'b>, RhusicsStateEvent> {
-        //use rhusics_core::next_frame_integration;
-        {
-            let balls = data.world.read_storage::<BallObjectType>();
-            let velocities = data.world.read_storage::<Velocity2<f32>>();
-            let forces = data.world.read_storage::<ForceAccumulator2<f32>>();
-            for (_ball, velocity, force) in (&balls, &velocities, &forces).join() {
-               info!("Before update: velocity = {:?}, force = {:?}", velocity, force);
-            }
-        }
+        // Next line part of the kludge below
+        use rhusics_core::PhysicsTime;
+
         time_sync(data.world);
-        data.data.update(data.world);
-        {
+
+        // Kludge to get over a bug in rhusics, that force is consumed even
+        // when DT is 0. Save the force value, and, re-instate it after, if DT is 0.
+        // Note this code assumes there is only one ball object.
+        let time = (*data.world.read_resource::<rhusics_ecs::DeltaTime<f32>>()).delta_seconds();
+        //+info!("GameState::Update: Time is: {:?}", time);
+        let saved_force = if time == 0. {
+            let mut saved_force = None;
             let balls = data.world.read_storage::<BallObjectType>();
             let velocities = data.world.read_storage::<Velocity2<f32>>();
-            let forces = data.world.read_storage::<ForceAccumulator2<f32>>();
-            for (_ball, velocity, force) in (&balls, &velocities, &forces).join() {
-                info!("After update:  velocity = {:?}, force = {:?}", velocity, force);
+            let mut forces = data.world.write_storage::<ForceAccumulator2<f32>>();
+            for (_ball, velocity, force) in (&balls, &velocities, &mut forces).join() {
+                info!("Before update: velocity = {:?}, force = {:?}", velocity, force);
+                saved_force = Some(force.consume_force()) // unfortunately, there's no non-destructive read
+            }
+            saved_force
+        } else { None };
+
+        data.data.update(data.world);
+
+        // Re-instate the force saved above if dt is still 0.
+        let time = (*data.world.read_resource::<rhusics_ecs::DeltaTime<f32>>()).delta_seconds();
+        if time == 0. {
+            if let Some(force_vector) = saved_force {
+                let balls = data.world.read_storage::<BallObjectType>();
+                let velocities = data.world.read_storage::<Velocity2<f32>>();
+                let mut forces = data.world.write_storage::<ForceAccumulator2<f32>>();
+                for (_ball, velocity, force) in (&balls, &velocities, &mut forces).join() {
+                    force.add_force(force_vector);
+                    info!("After update:  velocity = {:?}, force = {:?}", velocity, force);
+                }
             }
         }
         Trans::None
