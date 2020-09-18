@@ -20,8 +20,8 @@ keywords = ["gamedev", "amethyst", "physics"]
 [dependencies]
 amethyst_error = "0.15.3"
 amethyst_core = "0.15.3"
-rhusics-ecs = { version = "0.9", git = "https://github.com/trsoluti/rhusics", features = ["serializable"] }
-rhusics-core = { version = "0.9", git = "https://github.com/trsoluti/rhusics", features = ["specs", "serializable"] }
+rhusics-ecs = { version = "0.9", git = "https://github.com/rustgd/rhusics", features = ["serializable"] }
+rhusics-core = { version = "0.9", git = "https://github.com/rustgd/rhusics", features = ["specs", "serializable"] }
 shrev = "1.1"
 collision = { version = "0.20", features = ["serde"] }
 nalgebra = "0.21"

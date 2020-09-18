@@ -1,5 +1,12 @@
 ## Changelog
 
+### v0.5.2
+- Now linked to rustgd/rhusics instead of
+   trsoluti/rhusics.
+   
+   Note: rhusics crate is still out-of-date in
+   crates.io, so have to use GitHub source.
+   
 ### v0.5.1
 - Updated to Amethyst 0.15.3
 - Added an example showing the system reporting
