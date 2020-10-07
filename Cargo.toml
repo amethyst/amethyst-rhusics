@@ -1,7 +1,11 @@
 [package]
 name = "amethyst-rhusics"
-version = "0.4.0"
-authors = ["Simon Rönnberg <seamonr@gmail.com>"]
+version = "0.5.1"
+authors = [
+    "Simon Rönnberg <seamonr@gmail.com>",
+    "Thomas O'Dell <thomas_odell@trsolutions.biz>"
+]
+edition = "2018"
 
 repository = "https://github.com/amethyst/amethyst-rhusics.git"
 homepage = "https://github.com/amethyst/amethyst-rhusics.git"
@@ -14,17 +18,25 @@ description = "Integration of `amethyst` and `rhusics`"
 keywords = ["gamedev", "amethyst", "physics"]
 
 [dependencies]
-amethyst_core = { version = "0.5" }
-amethyst_renderer = { version = "0.10.1" }
-rhusics-ecs = { version = "0.7", features = ["serde"] }
-rhusics-core = { version = "0.7", features = ["specs", "serde"] }
-shrev = "1.0"
-collision = { version = "0.18", features = ["serde"]}
-cgmath = "0.16.1"
+amethyst_error = "0.15.3"
+amethyst_core = "0.15.3"
+rhusics-ecs = { version = "0.9", git = "https://github.com/rustgd/rhusics", features = ["serializable"] }
+rhusics-core = { version = "0.9", git = "https://github.com/rustgd/rhusics", features = ["specs", "serializable"] }
+shrev = "1.1"
+collision = { version = "0.20", features = ["serde"] }
+nalgebra = "0.21"
+cgmath = "0.17"
 
 [dev-dependencies]
-amethyst = { version = "0.10" }
-genmesh = "0.5"
-rand = "0.3"
-shred = "0.7"
-shred-derive = "0.5"
+# Note: cargo currently does not allow you to set features that affect dev dependencies
+# if you do you get an error:
+# the package <your package> depends on `amethyst-rhusics`, with features: `amethyst`
+# but `amethyst-rhusics` does not have these features.
+# (Bug #6915)
+# You'll have to hand-modify this configuration file for your own environment.
+amethyst = { version = "0.15", features = ["metal"] }
+log = { version = "0.4.8", features = ["serde"] }
+genmesh = "0.6"
+rand = "0.6.5" # same version of rand used by cgmath
+shred = { version = "0.10", features = ["shred-derive"] }
+shred-derive = "0.6"

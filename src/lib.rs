@@ -7,7 +7,7 @@ pub extern crate rhusics_core;
 pub extern crate rhusics_ecs;
 
 extern crate amethyst_core;
-extern crate amethyst_renderer;
+// extern crate amethyst_renderer;
 extern crate cgmath;
 
 pub use self::arena::{setup_2d_arena, setup_3d_arena};

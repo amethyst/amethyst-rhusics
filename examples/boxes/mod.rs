@@ -1,14 +1,16 @@
-pub use self::bundle::BoxSimulationBundle;
-pub use self::default::{BoxSimulationBundle2, BoxSimulationBundle3};
-pub use self::deletion::BoxDeletionSystem;
-pub use self::emission::EmissionSystem;
-pub use self::ui::*;
-
+//! Boxes module, Rust 2018 style
 mod bundle;
 mod default;
 mod deletion;
 mod emission;
 mod ui;
+
+pub use self::bundle::BoxSimulationBundle;
+pub use self::default::{BoxSimulationBundle2, BoxSimulationBundle3};
+pub use self::deletion::BoxDeletionSystem;
+pub use self::emission::EmissionSystem;
+
+pub use self::ui::*;
 
 use std::time::{Duration, Instant};
 
@@ -54,13 +56,13 @@ pub struct Emitter<P> {
     pub location: P,
     pub last_emit: Instant,
     pub emission_interval: Duration,
-    pub material: Material,
+    pub material: Handle<Material>,
     pub emitted: u64,
 }
 
 impl<P> Component for Emitter<P>
-where
-    P: Send + Sync + 'static,
+    where
+        P: Send + Sync + 'static,
 {
     type Storage = DenseVecStorage<Self>;
 }

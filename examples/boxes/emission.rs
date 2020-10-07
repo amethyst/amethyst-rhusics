@@ -2,14 +2,19 @@ use std::marker;
 use std::time::Instant;
 
 use amethyst::assets::Handle;
-use amethyst::core::nalgebra as na;
-use amethyst::core::{GlobalTransform, Transform};
+use amethyst::core::math as na;
+use amethyst::core::{/*GlobalTransform,*/ Transform};
 use amethyst::ecs::prelude::{Entities, Entity, Join, ReadExpect, System, WriteStorage};
 use amethyst::renderer::{Material, Mesh};
 use amethyst_rhusics::{AsTransform, Convert};
+//use shred_derive::SystemData;
+use shred::SystemData;
+use shred::World;
+use shred::ResourceId;
 use cgmath::{Array, EuclideanSpace, InnerSpace, Rotation, Zero};
 use collision::{Bound, ComputeBound, Primitive, Union};
-use rand::Rand;
+//use rand::Rand;
+use rand::prelude::*;
 use rhusics_core::{
     BodyPose, CollisionMode, CollisionShape, CollisionStrategy, Inertia, Mass, PhysicalEntity,
     Pose, Velocity,
@@ -17,6 +22,7 @@ use rhusics_core::{
 use rhusics_ecs::PhysicalEntityParts;
 
 use super::{Emitter, Graphics, ObjectType};
+use rand::distributions::Standard;
 
 /// Primitive emission system.
 ///
@@ -51,10 +57,11 @@ where
     P: Primitive + ComputeBound<B> + Clone + Send + Sync + 'static,
     P::Point:
         EuclideanSpace<Scalar = f32> + Convert<Output = na::Vector3<f32>> + Send + Sync + 'static,
-    <P::Point as EuclideanSpace>::Diff: Rand + InnerSpace + Array + Send + Sync + 'static,
+    <P::Point as EuclideanSpace>::Diff: /*Distribution<<P::Point as EuclideanSpace>::Diff> +*/ InnerSpace + Array + Send + Sync + 'static,
     R: Rotation<P::Point> + Convert<Output = na::UnitQuaternion<f32>> + Send + Sync + 'static,
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,
+    Standard: Distribution<<P::Point as EuclideanSpace>::Diff>,
 {
     type SystemData = (
         Entities<'a>,
@@ -92,33 +99,47 @@ fn emit_box<P, B, R, A, I>(
     P: Primitive + ComputeBound<B> + Clone + Send + Sync + 'static,
     P::Point:
         EuclideanSpace<Scalar = f32> + Convert<Output = na::Vector3<f32>> + Send + Sync + 'static,
-    <P::Point as EuclideanSpace>::Diff: Rand + InnerSpace + Array + Send + Sync + 'static,
+    <P::Point as EuclideanSpace>::Diff: /*Distribution<<P::Point as EuclideanSpace>::Diff> +*/ InnerSpace + Array + Send + Sync + 'static,
     R: Rotation<P::Point> + Convert<Output = na::UnitQuaternion<f32>> + Send + Sync + 'static,
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,
+    Standard: Distribution<<P::Point as EuclideanSpace>::Diff>,
 {
-    use rand;
-    use rand::Rng;
+    /*use rand;*/
+    /*use rand::Rng;*/
+    /*use rand::rngs::StdRng;*/
 
-    let offset =
-        <P::Point as EuclideanSpace>::Diff::rand(&mut rand::thread_rng()).normalize_to(0.1);
-    let speed: <P::Point as EuclideanSpace>::Scalar = rand::thread_rng().gen_range(-10.0, 10.0);
+    // Determine the size of the box based on the size of our
+    // primitive (which we set when we bundled the box simulation bundle).
+    let primitive_bound = primitive.compute_bound();
+    // conversion no longer converts the z component, since we
+    // use that in 2D for ordering and hiding. We have to supply
+    // a default z value (even in 3D)
+    let base_vector = na::Vector3::<f32>::zero();
+    let bound_min:na::Vector3<f32> = primitive_bound.min_extent().convert(base_vector);
+    let bound_max:na::Vector3<f32> = primitive_bound.max_extent().convert( base_vector);
+    let size = bound_max - bound_min;
+
+    let offset:<P::Point as EuclideanSpace>::Diff =
+        StdRng::from_entropy().sample(Standard);
+    let speed: <P::Point as EuclideanSpace>::Scalar =
+        rand::thread_rng().gen_range(-10.0, 10.0);
 
     let position = emitter.location + offset;
     let pose = BodyPose::new(position, R::one());
     let mut transform = pose.as_transform();
-    transform.set_scale(0.05, 0.05, 0.05);
-
+    transform.set_scale(size);
+    //+ log::info!("emitting box at {:?}", transform.translation());
     parts.object_type.insert(entity, ObjectType::Box).unwrap();
     parts.mesh.insert(entity, mesh).unwrap();
     parts
         .material
         .insert(entity, emitter.material.clone())
         .unwrap();
-    parts
-        .global
-        .insert(entity, GlobalTransform::default())
-        .unwrap();
+    // parts
+    //     .global
+    //     .insert(entity, /*Global*/Transform::default())
+    //     .unwrap();
     parts.local.insert(entity, transform).unwrap();
     parts
         .physical_entity
@@ -143,15 +164,16 @@ where
     P: Primitive + ComputeBound<B> + Clone + Send + Sync + 'static,
     P::Point:
         EuclideanSpace<Scalar = f32> + Convert<Output = na::Vector3<f32>> + Send + Sync + 'static,
-    <P::Point as EuclideanSpace>::Diff: Rand + InnerSpace + Array + Send + Sync + 'static,
+    <P::Point as EuclideanSpace>::Diff: /*Distribution<<P::Point as EuclideanSpace>::Diff> +*/ InnerSpace + Array + Send + Sync + 'static,
     R: Rotation<P::Point> + Convert<Output = na::UnitQuaternion<f32>> + Send + Sync + 'static,
     A: Clone + Copy + Zero + Send + Sync + 'static,
     I: Inertia + Send + Sync + 'static,
+    Standard: Distribution<<P::Point as EuclideanSpace>::Diff>,
 {
     pub object_type: WriteStorage<'a, ObjectType>,
     pub mesh: WriteStorage<'a, Handle<Mesh>>,
-    pub material: WriteStorage<'a, Material>,
-    pub global: WriteStorage<'a, GlobalTransform>,
+    pub material: WriteStorage<'a, Handle<Material>>,
+    /*pub global: WriteStorage<'a, GlobalTransform>,*/
     pub local: WriteStorage<'a, Transform>,
     pub physical_entity: PhysicalEntityParts<
         'a,

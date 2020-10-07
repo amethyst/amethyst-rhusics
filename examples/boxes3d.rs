@@ -7,26 +7,24 @@ extern crate rand;
 extern crate rhusics_core;
 extern crate rhusics_ecs;
 extern crate shred;
-#[macro_use]
+//#[macro_use] // TOD: in Rust 2018 you import the macros explicitly.
 extern crate shred_derive;
 
 use std::time::{Duration, Instant};
 
-use amethyst::assets::{Handle, Loader};
-use amethyst::core::nalgebra as na;
+use amethyst::assets::{Handle, Loader, AssetLoaderSystemData};
+use amethyst::core::math as na;
 use amethyst::core::{Transform, TransformBundle};
-use amethyst::ecs::prelude::{Builder, Entity, World};
-use amethyst::input::{is_close_requested, is_key_down};
+use amethyst::ecs::prelude::{Builder, Entity, World, WorldExt};
+use amethyst::input::{is_close_requested, is_key_down, VirtualKeyCode, StringBindings, InputBundle};
 use amethyst::prelude::{
-    Application, Config, GameData, GameDataBuilder, SimpleState, SimpleTrans, StateData,
+    Application, /*Config,*/ GameData, GameDataBuilder, SimpleState, SimpleTrans, StateData,
     StateEvent, Trans,
 };
-use amethyst::renderer::{
-    Camera, DisplayConfig, DrawFlat, Material, MaterialDefaults, Mesh, Pipeline, PosTex,
-    RenderBundle, Stage, VirtualKeyCode,
-};
-use amethyst::ui::{DrawUi, UiBundle};
-use amethyst::utils::fps_counter::FPSCounterBundle;
+use amethyst::renderer::{Camera, Material, MaterialDefaults, Mesh, RenderingBundle, RenderToWindow, RenderShaded3D};
+use amethyst::renderer::rendy::mesh::{TexCoord, MeshBuilder, Position, PosNormTex, Normal};
+use amethyst::ui::{/*DrawUi,*/ UiBundle};
+use amethyst::utils::fps_counter::FpsCounterBundle;
 use amethyst_rhusics::{setup_3d_arena, time_sync, DefaultPhysicsBundle3};
 use cgmath::Point3;
 use collision::primitive::{Cuboid, Primitive3};
@@ -37,6 +35,10 @@ use rhusics_ecs::physics3d::BodyPose3;
 use self::boxes::{
     create_ui, update_ui, BoxSimulationBundle3, Emitter, Graphics, KillRate, ObjectType,
 };
+use amethyst::utils::application_root_dir;
+use amethyst::renderer::types::{MeshData, DefaultBackend};
+use amethyst::renderer::rendy::texture::palette::load_from_linear_rgba;
+use amethyst::renderer::palette::LinSrgba;
 
 mod boxes;
 
@@ -50,7 +52,7 @@ pub struct Emitting {
 pub type Shape = CollisionShape<Primitive3<f32>, BodyPose3<f32>, Aabb3<f32>, ObjectType>;
 
 impl SimpleState for Emitting {
-    fn on_start(&mut self, data: StateData<GameData>) {
+    fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let StateData { world, .. } = data;
         world.write_resource::<KillRate>().0 = 0.;
         initialise_camera(world);
@@ -63,7 +65,7 @@ impl SimpleState for Emitting {
         self.fps = Some(fps_display);
         self.collision = Some(collisions_display);
 
-        world.add_resource(g);
+        world.insert(g);
         setup_3d_arena(
             Point3::new(-1., -1., -2.),
             Point3::new(1., 1., 0.),
@@ -108,38 +110,59 @@ fn initialise_camera(world: &mut World) {
     world
         .create_entity()
         .with(Camera::standard_3d(1000., 1000.))
-        .with(Transform::from(na::Vector3::new(0., 0., 1.)))
+        .with(Transform::from(na::Vector3::new(0., 0., 5.)))
         .build();
 }
 
 fn initialise_mesh(world: &mut World) -> Handle<Mesh> {
     use genmesh::generators::Cube;
     use genmesh::{MapToVertices, Triangulate, Vertices};
-    let vertices = Cube::new()
-        .vertex(|v| PosTex {
+    let vertices:Vec<PosNormTex> = Cube::new()
+        .vertex(|v| PosNormTex {
             position: v.pos.into(),
-            tex_coord: na::Vector2::new(0.1, 0.1),
+            normal: v.normal.into(),
+            tex_coord: TexCoord::from([0.1, 1.0]),
         }).triangulate()
         .vertices()
         .collect::<Vec<_>>();
+    let positions:Vec<Position> = vertices.iter().map(|v:&PosNormTex|->Position {
+        v.position
+    }).collect();
+    let normals:Vec<Normal> = vertices.iter().map(|v:&PosNormTex|->Normal {
+        v.normal
+    }).collect();
+    let tex_coords:Vec<TexCoord> = vertices.iter().map(|v:&PosNormTex|->TexCoord {
+        v.tex_coord
+    }).collect();
+    let mesh_builder = MeshBuilder::new()
+        .with_vertices(positions)
+        .with_vertices(normals)
+        .with_vertices(tex_coords);
+    let mesh_data = MeshData::from(mesh_builder);
     world
         .read_resource::<Loader>()
-        .load_from_data(vertices.into(), (), &world.read_resource())
+        .load_from_data(mesh_data, (), &world.read_resource())
 }
 
-fn initialise_material(world: &mut World, r: f32, g: f32, b: f32) -> Material {
+fn initialise_material(world: &mut World, r: f32, g: f32, b: f32) -> Handle<Material> {
     let albedo = world.read_resource::<Loader>().load_from_data(
-        [r, g, b, 1.0].into(),
+        load_from_linear_rgba(LinSrgba::new(r,g,b,1.)).into(),
         (),
         &world.read_resource(),
     );
-    Material {
-        albedo,
-        ..world.read_resource::<MaterialDefaults>().0.clone()
-    }
+    let defaults = world.read_resource::<MaterialDefaults>().0.clone();
+    world.exec(|mtl_loader: AssetLoaderSystemData<'_, Material>|{
+        mtl_loader.load_from_data(
+            Material {
+                albedo,
+                ..defaults
+            },
+            ()
+        )
+    })
 }
 
-fn emitter(p: Point3<f32>, d: Duration, material: Material) -> Emitter<Point3<f32>> {
+fn emitter(p: Point3<f32>, d: Duration, material: Handle<Material>) -> Emitter<Point3<f32>> {
     Emitter {
         location: p,
         emission_interval: d,
@@ -189,27 +212,45 @@ fn initialise_emitters(world: &mut World) {
 
 fn run() -> Result<(), amethyst::Error> {
     amethyst::start_logger(amethyst::LoggerConfig::default());
-    let path = format!(
-        "{}/../resources/display_config.ron",
-        env!("CARGO_MANIFEST_DIR")
-    );
-    let config = DisplayConfig::load(&path);
+    // let path = format!(
+    //     "{}/../resources/display_config.ron",
+    //     env!("CARGO_MANIFEST_DIR")
+    // );
+    // let config = DisplayConfig::load(&path);
+    let app_root = application_root_dir()?;
+    let resources = app_root.join("examples/resources");
+    let display_config = resources.join("display_config.ron");
 
-    let pipe = Pipeline::build().with_stage(
-        Stage::with_backbuffer()
-            .clear_target([0., 0., 0., 1.0], 1.0)
-            .with_pass(DrawFlat::<PosTex>::new())
-            .with_pass(DrawUi::new()),
-    );
+    // let pipe = Pipeline::build().with_stage(
+    //     Stage::with_backbuffer()
+    //         .clear_target([0., 0., 0., 1.0], 1.0)
+    //         .with_pass(DrawFlat::<PosTex>::new())
+    //         .with_pass(DrawUi::new()),
+    // );
 
     let game_data = GameDataBuilder::default()
-        .with_bundle(FPSCounterBundle::default())?
+        .with_bundle(FpsCounterBundle::default())?
         .with_bundle(DefaultPhysicsBundle3::<ObjectType>::new().with_spatial())?
-        .with_bundle(BoxSimulationBundle3::new(Cuboid::new(0.1, 0.1, 0.1).into()))?
+        .with_bundle(BoxSimulationBundle3::new(
+            Cuboid::new(0.05, 0.05, 0.05).into())
+        )?
         .with_bundle(TransformBundle::new().with_dep(&["sync_system", "emission_system"]))?
-        .with_bundle(UiBundle::<String, String>::new())?
-        .with_bundle(RenderBundle::new(pipe, Some(config)))?;
-    let mut game = Application::new("./", Emitting::default(), game_data)?;
+        .with_bundle(InputBundle::<StringBindings>::new())?
+        .with_bundle(UiBundle::<StringBindings>::new())?
+        .with_bundle(
+            RenderingBundle::<DefaultBackend>::new()
+                .with_plugin(
+                    RenderToWindow::from_config_path(display_config)?
+                        .with_clear([0.34, 0.36, 0.52, 1.0]),
+                )
+                .with_plugin(RenderShaded3D::default()),
+        )?;
+
+    let mut game = Application::new(
+        resources,
+        Emitting::default(),
+        game_data
+    )?;
 
     game.run();
 

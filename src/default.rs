@@ -2,8 +2,8 @@ use cgmath::{Basis2, Point2, Point3, Quaternion};
 use collision::primitive::{Primitive2, Primitive3};
 use collision::{Aabb2, Aabb3};
 
-use bundle::{PhysicsBundle2, PhysicsBundle3};
-use sync::PoseTransformSyncSystem;
+use crate::bundle::{PhysicsBundle2, PhysicsBundle3};
+use crate::sync::PoseTransformSyncSystem;
 
 /// Utility type for a 2D sync system (from `BodyPose` to `Transform`).
 pub type PoseTransformSyncSystem2 = PoseTransformSyncSystem<Point2<f32>, Basis2<f32>>;
